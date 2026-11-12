@@ -1,0 +1,1346 @@
+{
+ "site": {
+  "brand": "见山手记",
+  "brand_en": "JIANSHAN NOTES",
+  "owner": "陈屿",
+  "desc": "影像 · 摄影 · 内容 —— 从选题、拍摄到成片一个人走完。",
+  "sections": [
+   {
+    "key": "work",
+    "show": true
+   },
+   {
+    "key": "photo",
+    "show": true
+   },
+   {
+    "key": "projects",
+    "show": true
+   },
+   {
+    "key": "about",
+    "show": true
+   },
+   {
+    "key": "contact",
+    "show": true
+   }
+  ],
+  "pages": [
+   {
+    "id": "pg_work",
+    "show": true,
+    "nav": "影像",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "work",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_photo",
+    "show": true,
+    "nav": "摄影",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "photo",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_projects",
+    "show": true,
+    "nav": "图文",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "projects",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_papers",
+    "show": true,
+    "nav": "论文",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "papers",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_opeds",
+    "show": true,
+    "nav": "随笔",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "opeds",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_design",
+    "show": true,
+    "nav": "设计",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "design",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_about",
+    "show": true,
+    "nav": "关于",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "about",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_contact",
+    "show": true,
+    "nav": "联系",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "contact",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   }
+  ],
+  "theme": {
+   "mode": "time",
+   "darkAt": "19:00",
+   "lightAt": "07:00",
+   "accent": "#2f6bff"
+  }
+ },
+ "hero": {
+  "kick": "Portfolio — 2026 影像 · 摄影 · 内容",
+  "name": "陈屿",
+  "en": "CHEN YU",
+  "tagline": "做影像内容，主攻品牌短片与人文纪录。选题、拍摄、剪辑可以一个人交付全流程：三年做了 210 条成片，累计播放 86 万。习惯用数据回看选题，把跑得动的结构沉淀成下一轮的方法。",
+  "stats": [
+   [
+    "210+",
+    "条成片产出"
+   ],
+   [
+    "86万+",
+    "累计播放"
+   ],
+   [
+    "31条",
+    "破万播放"
+   ],
+   [
+    "7项",
+    "省级以上奖项"
+   ]
+  ],
+  "hm": [
+   [
+    "坐标",
+    "杭州"
+   ],
+   [
+    "方向",
+    "影像 / 内容运营"
+   ],
+   [
+    "身份",
+    "独立摄影 · 图库供稿"
+   ]
+  ],
+  "vert": "FILM — PHOTOGRAPHY — CONTENT"
+ },
+ "nav": [
+  [
+   "关于",
+   "#about"
+  ],
+  [
+   "影像",
+   "#work"
+  ],
+  [
+   "摄影",
+   "#photo"
+  ],
+  [
+   "技术",
+   "#projects"
+  ]
+ ],
+ "navcta": "联系合作",
+ "work": {
+  "sub": "这里的片子跨度比较大：品牌广告、人文纪录、系列栏目和实验短片。每张卡写了片子的来龙去脉，以及我在其中实际负责的那一部分。",
+  "groups": [
+   {
+    "name": "品牌与商业广告",
+    "en": "COMMERCIAL",
+    "type": "special",
+    "sub": "客户要的不是好看，是能用的素材。这几支都按投放场景倒推脚本。",
+    "items": [
+     {
+      "img": "assets/cover/commercial_01.jpg",
+      "title": "「海岸线以北」户外品牌秋冬形象片",
+      "kick": "品牌广告 · 门店 + 电商双版本 · 2026.09",
+      "desc": "15 秒与 60 秒双版本。投放位置在门店大屏和信息流，所以脚本按「三秒抓眼、十秒讲清材质、结尾留品牌」的节奏倒推，而不是先写故事再剪短。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "摄影",
+       "剪辑"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/coastline",
+      "big": true,
+      "series": "单支",
+      "hidden": false,
+      "subs": [
+       {
+        "img": "assets/cover/commercial_02.jpg",
+        "title": "「山雾」冲锋衣系列 · 竖版信息流",
+        "kick": "6 条 9:16 切片",
+        "duty": [
+         "剪辑",
+         "调色"
+        ],
+        "go": "系列切片",
+        "href": "https://example.com/works/mist"
+       },
+       {
+        "img": "assets/cover/commercial_03.jpg",
+        "title": "「一天的营地」品牌纪录短片",
+        "kick": "8 分钟 · 门店循环",
+        "duty": [
+         "摄影",
+         "剪辑"
+        ],
+        "go": "纪录版",
+        "href": "https://example.com/works/camp"
+       },
+       {
+        "img": "assets/cover/commercial_04.jpg",
+        "title": "门店大屏 · 无解说版",
+        "kick": "30 秒 · 无声循环",
+        "duty": [
+         "剪辑"
+        ],
+        "go": "无声版",
+        "href": "https://example.com/works/silent"
+       }
+      ]
+     },
+     {
+      "img": "assets/cover/commercial_05.jpg",
+      "title": "「巷口咖啡」开店短片",
+      "kick": "小店纪录片 · 2026.05",
+      "desc": "拍一家只有六个座位的小店。没有旁白，全靠现场声和老板自己的话。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影",
+       "剪辑",
+       "收音"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/cafe",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/commercial_06.jpg",
+      "title": "「轻舟」城市骑行系列",
+      "kick": "产品短片 · 3 条 · 2026.03",
+      "desc": "三支不同场景的产品片：通勤、夜骑、周末长距离。同一天拍完，靠光线切换区分。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "摄影",
+       "剪辑"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/cycling",
+      "big": false,
+      "series": "三支",
+      "hidden": false
+     }
+    ]
+   },
+   {
+    "name": "人文纪录",
+    "en": "DOCUMENTARY",
+    "type": "cards",
+    "sub": "都是拍身边的人和事。原则只有一条：不问「你怎么看」，只问「那天发生了什么」。",
+    "items": [
+     {
+      "img": "assets/cover/doc_01.jpg",
+      "title": "「摆渡人」老渡口的一天",
+      "kick": "人物纪录 · 12 分钟 · 2026.07",
+      "desc": "跟拍一位在江上摆渡三十年的船工。从凌晨四点半的第一班船，拍到天黑收工。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "摄影",
+       "剪辑",
+       "收音"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/ferry",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/doc_02.jpg",
+      "title": "「最后一炉」老面点铺",
+      "kick": "人物纪录 · 9 分钟 · 2026.06",
+      "desc": "开了四十年的面点铺要关门。拍的是最后一天，从和面到卖完最后一屉。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影",
+       "剪辑"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/lastoven",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/doc_03.jpg",
+      "title": "「山那边的教室」",
+      "kick": "教育纪录 · 15 分钟 · 2026.04",
+      "desc": "跟拍三位在乡镇小学教书的年轻老师。重点不在「苦」，在他们怎么把课上得有意思。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "摄影",
+       "剪辑"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/classroom",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/doc_04.jpg",
+      "title": "「修表的周师傅」",
+      "kick": "人物纪录 · 7 分钟 · 2025.11",
+      "desc": "一个不到两平米的修表摊。全片几乎都在拍手，声音只有镊子和齿轮。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影",
+       "剪辑",
+       "收音"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/watchmaker",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/doc_05.jpg",
+      "title": "「潮水退去之后」",
+      "kick": "观察纪录 · 5 分钟 · 2025.09",
+      "desc": "退潮后的滩涂上有一整套生活。没有人物采访，只有动作和环境声。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影",
+       "剪辑"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/works/tide",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     }
+    ]
+   },
+   {
+    "name": "系列栏目「一分钟」",
+    "en": "SERIES",
+    "type": "series",
+    "sub": "一期讲清一个概念，固定在 60 秒内。选题都来自评论区里重复出现的问题。",
+    "items": [
+     {
+      "img": "assets/cover/series_01.jpg",
+      "title": "一分钟 · 为什么照片会糊",
+      "kick": "第 1 期 · 2026.08",
+      "desc": "糊有四种原因，安全快门只解决其中一种。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "拍摄",
+       "剪辑"
+      ],
+      "go": "观看",
+      "href": "https://example.com/series/01",
+      "big": false,
+      "series": "一分钟",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/series_02.jpg",
+      "title": "一分钟 · 手机广角为什么显腿长",
+      "kick": "第 2 期 · 2026.08",
+      "desc": "不是镜头会拉长人，是边缘的透视变形。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "拍摄",
+       "剪辑"
+      ],
+      "go": "观看",
+      "href": "https://example.com/series/02",
+      "big": false,
+      "series": "一分钟",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/series_03.jpg",
+      "title": "一分钟 · 逆光怎么拍才不黑",
+      "kick": "第 3 期 · 2026.09",
+      "desc": "三个办法，从最省事到最讲究。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "拍摄",
+       "剪辑"
+      ],
+      "go": "观看",
+      "href": "https://example.com/series/03",
+      "big": false,
+      "series": "一分钟",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/series_04.jpg",
+      "title": "一分钟 · 一段素材怎么剪出三种情绪",
+      "kick": "第 4 期 · 2026.09",
+      "desc": "同一段素材，只改剪切点和声音。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "剪辑"
+      ],
+      "go": "观看",
+      "href": "https://example.com/series/04",
+      "big": false,
+      "series": "一分钟",
+      "hidden": false
+     }
+    ]
+   },
+   {
+    "name": "竖屏短片",
+    "en": "VERTICAL",
+    "type": "vwall",
+    "sub": "9:16 拍的片子，构图和叙事节奏都是另一套逻辑。",
+    "items": [
+     {
+      "img": "assets/cover/vert_01.jpg",
+      "title": "城市清晨的 60 秒",
+      "kick": "竖屏 · 2026.10",
+      "desc": "从五点四十到六点四十，一个路口的四种人。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影",
+       "剪辑"
+      ],
+      "go": "观看",
+      "href": "https://example.com/vert/morning",
+      "big": false,
+      "series": "竖屏",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/vert_02.jpg",
+      "title": "通勤路上的一百个瞬间",
+      "kick": "竖屏 · 2026.07",
+      "desc": "两周拍完，一百个不到两秒的片段。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影",
+       "剪辑"
+      ],
+      "go": "观看",
+      "href": "https://example.com/vert/commute",
+      "big": false,
+      "series": "竖屏",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/vert_03.jpg",
+      "title": "雨天的玻璃窗",
+      "kick": "竖屏 · 2026.06",
+      "desc": "全程固定机位，只用焦点变化推进。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影"
+      ],
+      "go": "观看",
+      "href": "https://example.com/vert/rain",
+      "big": false,
+      "series": "竖屏",
+      "hidden": false
+     }
+    ]
+   },
+   {
+    "name": "实验短片",
+    "en": "EXPERIMENT",
+    "type": "cards",
+    "sub": "不接单的时候拍的东西。形式先于内容，主要用来试手法。",
+    "items": [
+     {
+      "img": "assets/cover/exp_01.jpg",
+      "title": "「重复」定格短片",
+      "kick": "定格动画 · 3 分钟 · 2025.12",
+      "desc": "用一个动作重复四百次，做出一条从白天到黑夜的时间线。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "摄影",
+       "动画",
+       "剪辑"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/exp/repeat",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/exp_02.jpg",
+      "title": "「静音」无对白短片",
+      "kick": "实验短片 · 6 分钟 · 2025.10",
+      "desc": "全片没有一句人声，只靠环境音和字幕卡推进。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "导演",
+       "剪辑",
+       "声音"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/exp/silent",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/exp_03.jpg",
+      "title": "「三次呼吸」长镜头练习",
+      "kick": "长镜头 · 4 分钟 · 2025.08",
+      "desc": "四个机位接成一个看起来没剪过的镜头，接点藏在动作里。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "导演",
+       "摄影",
+       "剪辑"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/exp/breath",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     },
+     {
+      "img": "assets/cover/exp_04.jpg",
+      "title": "「像素之外」AI 生成 + 实拍混合",
+      "kick": "混合影像 · 2 分钟 · 2026.02",
+      "desc": "AI 出背景、实拍出人物，两张画面在同一个镜头里对齐。",
+      "badge": "",
+      "txtbig": null,
+      "txttag": null,
+      "stat": [],
+      "dutylab": "片中职务",
+      "duty": [
+       "策划",
+       "AI 生成",
+       "合成"
+      ],
+      "go": "查看成片",
+      "href": "https://example.com/exp/pixel",
+      "big": false,
+      "series": "单支",
+      "hidden": false
+     }
+    ]
+   }
+  ]
+ },
+ "photo": {
+  "sub": "随手拍的居多。分类按拍摄场景分，没有刻意凑成套。",
+  "cats": [
+   [
+    "city",
+    "城市",
+    "City",
+    8,
+    "雨后的街道、招牌，和赶路的人。"
+   ],
+   [
+    "mountain",
+    "山野",
+    "Wild",
+    4,
+    "徒步线上看到的层叠与留白。"
+   ],
+   [
+    "portrait",
+    "人像",
+    "Portrait",
+    4,
+    "朋友、同学，和路上认识的人。"
+   ],
+   [
+    "arch",
+    "建筑",
+    "Architecture",
+    4,
+    "线条、秩序，和被光切开的墙。"
+   ],
+   [
+    "night",
+    "夜色",
+    "Night",
+    4,
+    "城市睡着之前的最后一小时。"
+   ],
+   [
+    "still",
+    "静物",
+    "Still",
+    4,
+    "桌上的光，和时间的痕迹。"
+   ]
+  ]
+ },
+ "projects": {
+  "sub": "六个项目分两段：前面三个把内容生产做成工具，后面三个是数据与实验。每一条都写了技术栈和我实际动手做的部分。",
+  "groups": [
+   {
+    "name": "内容生产工具",
+    "en": "CONTENT TOOLS",
+    "sub": "自己每天在用，所以知道哪里该省一步。",
+    "items": [
+     {
+      "no": "01",
+      "kind": "单文件网站 · 可离线分发",
+      "title": "「见山手记」作品集站生成器",
+      "oneline": "内容写进一个 JSON，脚本生成整站单文件 HTML。",
+      "desc": "整站由一个 Python 生成器拼接：读一份 data.json，输出没有外部依赖的单个 index.html，图片走相对路径，压缩成 zip 发出去就能打开。配了一个本地后台，改内容不用碰代码；改完跑一次生成，一分钟内看到结果。",
+      "stack": [
+       "Python",
+       "HTML",
+       "CSS",
+       "原生 JS",
+       "Pillow"
+      ],
+      "metrics": [
+       [
+        "1",
+        "份数据源"
+       ],
+       [
+        "22",
+        "张作品卡"
+       ]
+      ],
+      "shots": [
+       [
+        "assets/projects/proj_01a.jpg",
+        "前台首屏"
+       ],
+       [
+        "assets/projects/proj_01b.jpg",
+        "内容后台"
+       ]
+      ]
+     },
+     {
+      "no": "02",
+      "kind": "选题库 · 文本 + 表格",
+      "title": "「一分钟」选题库与脚本模板",
+      "oneline": "把评论区的问题转成可拍选题，每条标好时长和镜头数。",
+      "desc": "收集了 180 条高频提问，按「能不能一分钟讲清」「有没有可视化抓手」两个维度筛，留下 46 条可拍选题。每条配一个固定脚本骨架：钩子、现象、原理、反例、一句结论。拍的时候直接填。",
+      "stack": [
+       "表格",
+       "文本模板"
+      ],
+      "metrics": [
+       [
+        "180",
+        "条原始问题"
+       ],
+       [
+        "46",
+        "条可拍选题"
+       ]
+      ],
+      "shots": [
+       [
+        "assets/projects/proj_02a.jpg",
+        "选题筛选表"
+       ]
+      ]
+     },
+     {
+      "no": "03",
+      "kind": "自动化脚本 · 命令行",
+      "title": "素材自动归档与封面批处理",
+      "oneline": "插卡即归档：按日期建目录、抽帧做封面、统一命名。",
+      "desc": "拍摄卡插上就跑：按拍摄日期建目录，从每个片段抽一帧生成缩略图，文件名统一成「日期_机位_序号」，重复文件用哈希去重。原来手工整理一次要两小时，现在十分钟。",
+      "stack": [
+       "Python",
+       "ffmpeg",
+       "Pillow"
+      ],
+      "metrics": [
+       [
+        "2h→10min",
+        "整理耗时"
+       ]
+      ],
+      "shots": [
+       [
+        "assets/projects/proj_03a.jpg",
+        "归档结果"
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "name": "数据与实验",
+    "en": "DATA & LAB",
+    "sub": "内容之外能上手数据与工程的那部分。",
+    "items": [
+     {
+      "no": "04",
+      "kind": "统计分析 · 回归",
+      "title": "短视频完播率的因素分析",
+      "oneline": "用 620 条自有数据找「前 3 秒」之外的影响项。",
+      "desc": "把 620 条视频的时长、前 3 秒信息密度、字幕密度、BGM 类型、发布时段作为自变量，完播率作为因变量做多元回归。结论是时长的影响最大，但超过两分半后边际收益迅速衰减；字幕密度存在一个反向拐点。",
+      "stack": [
+       "Python",
+       "pandas",
+       "statsmodels",
+       "matplotlib"
+      ],
+      "metrics": [
+       [
+        "620",
+        "条样本"
+       ],
+       [
+        "5",
+        "个自变量"
+       ]
+      ],
+      "shots": [
+       [
+        "assets/projects/proj_04a.jpg",
+        "回归残差图"
+       ]
+      ]
+     },
+     {
+      "no": "05",
+      "kind": "文本分类 · 中文 NLP",
+      "title": "弹幕情感倾向分类",
+      "oneline": "把两万条弹幕分成四类，看哪一段最容易被吐槽。",
+      "desc": "抓取两万条弹幕，人工标注 2000 条做训练集，用 jieba 分词 + TF-IDF + 朴素贝叶斯做四分类（认可 / 质疑 / 玩梗 / 无关）。按时间轴聚合后，能直接看出一个视频里情绪转折发生在第几秒。",
+      "stack": [
+       "Python",
+       "jieba",
+       "scikit-learn",
+       "Pillow"
+      ],
+      "metrics": [
+       [
+        "20000",
+        "条弹幕"
+       ],
+       [
+        "0.78",
+        "加权 F1"
+       ]
+      ],
+      "shots": [
+       [
+        "assets/projects/proj_05a.jpg",
+        "情绪时间轴"
+       ]
+      ]
+     },
+     {
+      "no": "06",
+      "kind": "对照实验 · A/B",
+      "title": "图文封面点击率对照实验",
+      "oneline": "同一篇内容，换六种封面，跑两周。",
+      "desc": "同一批内容做六组封面（人物特写 / 大字标题 / 纯场景 / 对比图 / 局部裁切 / 留白构图），同渠道同周期发布，记录曝光与点击。结果是大字标题在信息流里领先，但人物特写在收藏率上更好——点击和收藏要分开看。",
+      "stack": [
+       "表格",
+       "Python",
+       "matplotlib"
+      ],
+      "metrics": [
+       [
+        "6",
+        "组封面"
+       ],
+       [
+        "14",
+        "天周期"
+       ]
+      ],
+      "shots": [
+       [
+        "assets/projects/proj_06a.jpg",
+        "六组封面"
+       ]
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "awards": {
+  "「摆渡人」老渡口的一天": [
+   [
+    "省级一等奖",
+    "2026 青年纪录片推优",
+    "assets/award/award_01.jpg"
+   ]
+  ],
+  "「最后一炉」老面点铺": [
+   [
+    "入围",
+    "2025 城市影像展",
+    "assets/award/award_02.jpg"
+   ]
+  ],
+  "「巷口咖啡」开店短片": [
+   [
+    "商业组银奖",
+    "2026 广告创意奖",
+    ""
+   ]
+  ],
+  "「重复」定格短片": [
+   [
+    "实验影像入围",
+    "2025 短片节",
+    "assets/award/award_03.jpg"
+   ]
+  ],
+  "一分钟 · 逆光怎么拍才不黑": [
+   [
+    "优秀科普内容",
+    "2026 内容创作评选",
+    ""
+   ]
+  ]
+ },
+ "stars": [
+  "「摆渡人」老渡口的一天",
+  "「最后一炉」老面点铺",
+  "「海岸线以北」户外品牌秋冬形象片",
+  "「重复」定格短片",
+  "一分钟 · 逆光怎么拍才不黑",
+  "「巷口咖啡」开店短片"
+ ],
+ "about": {
+  "sub": "内容生产在一线，判断靠数据。",
+  "facts": [
+   [
+    "求职意向",
+    "影像制作 / 内容运营"
+   ],
+   [
+    "姓名",
+    "陈屿"
+   ],
+   [
+    "学校",
+    "江州传媒学院"
+   ],
+   [
+    "专业",
+    "数字媒体艺术 · 辅修数据科学"
+   ],
+   [
+    "坐标",
+    "杭州"
+   ],
+   [
+    "核心课程",
+    "影视摄影 95 · 剪辑艺术 93 · 纪录片创作 91 · 数据分析 89"
+   ],
+   [
+    "后期",
+    "达芬奇 / Premiere / After Effects"
+   ],
+   [
+    "供稿",
+    "独立摄影 · 图库签约供稿"
+   ]
+  ],
+  "blocks": [
+   {
+    "h": "求职方向",
+    "ps": [
+     "求职方向是影像制作与内容运营。内容生产上，选题、拍摄、剪辑可以一个人走完，从策划文案到成片交付不用等排期；账号运营上，习惯按周汇总播放、完播、互动三项数据做点检，把跑得动的选题结构沉淀成下一轮的方向。",
+     "日常也用脚本和数据工具处理重复劳动：素材归档、封面批处理、完播率回归，能交给机器的就不手工做，人只负责判断。"
+    ],
+    "ds": [],
+    "awards": []
+   },
+   {
+    "h": "实践经历",
+    "ps": [
+     "比起课堂作业，更习惯在真实交付里学。下面三段都完整跟过从策划到交付的流程。"
+    ],
+    "rows": [
+     {
+      "t": "2025.03 – 2026.08",
+      "org": "某文化传媒（杭州）",
+      "role": "内容制作 · 品牌短片与纪录方向",
+      "notes": [
+       "独立承接品牌短片从脚本到成片的交付，累计 38 条，其中 6 条用于客户门店与电商双渠道投放",
+       "按投放位置倒推脚本结构，把「品牌露出的位置」写进分镜表再开拍，减少后期返工",
+       "负责公司素材库的整理规范，建立按日期与机位命名的归档流程，团队交接成本明显下降"
+      ]
+     },
+     {
+      "t": "2024.09 – 2025.02",
+      "org": "江州市融媒体中心",
+      "role": "实习编辑 · 视频后期",
+      "notes": [
+       "独立完成节日主题街采视频的后期全流程，含粗剪、调色、字幕与包装",
+       "参与区级活动预热片拍摄，负责航拍素材采集与人物采访的同期收音"
+      ]
+     },
+     {
+      "t": "2023.09 – 2024.06",
+      "org": "校学生记者团",
+      "role": "摄影组负责人",
+      "notes": [
+       "带 8 人小组负责校级活动影像记录，建立拍摄排班与素材交付规范",
+       "主导校园专题片的策划与拍摄，成片在校级平台发布"
+      ]
+     }
+    ],
+    "ds": [],
+    "awards": []
+   },
+   {
+    "h": "数据能力",
+    "ps": [],
+    "ds": [],
+    "dsum": [
+     [
+      "采集与清洗",
+      "用 <b>Python + pandas</b> 整理平台导出的播放、完播、互动数据，处理缺失与重复记录"
+     ],
+     [
+      "统计与建模",
+      "用 <b>statsmodels</b> 做完播率的多元回归，用 <b>scikit-learn</b> 做文本四分类"
+     ],
+     [
+      "可视化",
+      "用 <b>matplotlib</b> 出回归残差图与情绪时间轴，直接放进汇报材料"
+     ],
+     [
+      "工具化",
+      "把重复流程写成脚本：素材归档、封面批处理、站点生成，减少手工环节"
+     ]
+    ],
+    "awards": []
+   }
+  ],
+  "contact": [
+   [
+    "chenyu@example.com",
+    "mailto:chenyu@example.com"
+   ],
+   [
+    "微信 chenyu_demo",
+    "#"
+   ]
+  ]
+ },
+ "contact": {
+  "kick": "Contact",
+  "h2": "谢谢观看",
+  "sub": "合作、约拍、写稿，邮件最快。",
+  "big": [
+   [
+    "13800000000",
+    "tel:13800000000"
+   ],
+   [
+    "chenyu@example.com ↗",
+    "mailto:chenyu@example.com"
+   ]
+  ],
+  "plinks": [
+   [
+    "作品主页 · 示例站",
+    "https://example.com/works"
+   ],
+   [
+    "影像频道 · 示例",
+    "https://example.com/channel"
+   ]
+  ]
+ },
+ "footer": "© 2026 陈屿 杭州 · 影像 / 内容运营",
+ "papers": {
+  "h2": "论文与研究",
+  "h2en": "Research",
+  "sub": "课程论文与实际做过的调研。封面是第一页，点开可以翻内页看版面。",
+  "items": [
+   {
+    "no": "01",
+    "kind": "课程论文 · 未发表",
+    "title": "短视频完播率的三个变量",
+    "cover": "assets/papers/paper_01.jpg",
+    "cover_note": "A4 · 14 页",
+    "oneline": "把 120 条同题材短片按「前三秒信息密度 / 字幕节奏 / 时长」编码，看完播率差在哪。",
+    "points": [
+     "样本：120 条同题材短片，人工编码 6 个维度",
+     "结论：前三秒出现具体数字的片子，完播率高出 23%",
+     "反例：字幕节奏越快不一定越好，超过每 2 秒一条会掉"
+    ],
+    "metrics": [
+     [
+      "120",
+      "条编码样本"
+     ],
+     [
+      "23%",
+      "完播率差值"
+     ]
+    ],
+    "pages": [
+     [
+      "assets/papers/paper_01_p2.jpg",
+      "P.2 编码表"
+     ],
+     [
+      "assets/papers/paper_01_p3.jpg",
+      "P.3 结论"
+     ]
+    ],
+    "pages_note": "内页只放关键两页，全文放附件"
+   },
+   {
+    "no": "02",
+    "kind": "调研报告 · 小组作业",
+    "title": "县城婚纱摄影的价格带",
+    "cover": "assets/papers/paper_02.jpg",
+    "cover_note": "A4 · 22 页",
+    "oneline": "跑了 9 家县城影楼，把套餐拆成「底片 / 服装 / 精修 / 场地」四项，看钱花在哪。",
+    "points": [
+     "访谈 9 家影楼 + 21 位顾客",
+     "同一套服装在不同店的差价，最大到 2.6 倍",
+     "顾客真正在意的不是张数，是「选片时不被加价」"
+    ],
+    "metrics": [
+     [
+      "9",
+      "家影楼"
+     ],
+     [
+      "2.6×",
+      "最大差价"
+     ]
+    ],
+    "pages": [
+     [
+      "assets/papers/paper_02_p2.jpg",
+      "P.2 价格拆解"
+     ]
+    ],
+    "pages_note": ""
+   }
+  ]
+ },
+ "opeds": {
+  "h2": "评论与随笔",
+  "h2en": "Op-eds",
+  "counts": "校媒专栏 · 双周更新",
+  "sub": "发在校园媒体上的评论，挑了三篇自己还愿意重读的。",
+  "items": [
+   {
+    "no": "2026",
+    "kind": "新闻评论",
+    "title": "当「刷到」代替了「想找」",
+    "cover": "assets/opeds/oped_01.jpg",
+    "oneline": "推荐算法把选择的成本降到零，代价是我们不再知道自己错过了什么。",
+    "quote": "信息越多，越需要有人替你决定先看哪一条。"
+   },
+   {
+    "no": "2025",
+    "kind": "随笔",
+    "title": "在县城拍婚礼的第七天",
+    "cover": "assets/opeds/oped_02.jpg",
+    "oneline": "机位、人情、时辰，三样东西没有一样是脚本能写好的。",
+    "quote": "婚礼摄影最好的准备，是知道什么时候把相机放下。"
+   },
+   {
+    "no": "2025",
+    "kind": "新闻评论",
+    "title": "短视频里的县城，谁来拍",
+    "cover": "assets/opeds/oped_03.jpg",
+    "oneline": "镜头往下的红利正在被消耗，真正稀缺的是长住的观察者。",
+    "quote": "拍一次叫打卡，拍三年才叫记录。"
+   }
+  ]
+ },
+ "design": {
+  "h2": "设计与物料",
+  "h2en": "Design",
+  "sub": "海报、封面、展板。一套一套排，方便看同一套物料在不同尺寸下的层级。",
+  "projects": [
+   {
+    "title": "校园影像展 · 主视觉",
+    "badge": "2026 · 主视觉",
+    "desc": "主题「留白」，用一张被裁掉一半的照片讲「没拍到的部分」。延展到海报、门票、展签、易拉宝。",
+    "foot": [
+     "印刷",
+     "四色 · 250g 哑粉"
+    ],
+    "specs": [
+     [
+      "4",
+      "类物料"
+     ],
+     [
+      "A1",
+      "最大尺寸"
+     ],
+     [
+      "7 天",
+      "从提案到开印"
+     ]
+    ],
+    "groups": [
+     {
+      "name": "主视觉",
+      "note": "同一张底图，四种裁切",
+      "cols": 4,
+      "items": [
+       [
+        "assets/design/dz_kv.jpg",
+        "主海报 A1",
+        "tall"
+       ],
+       [
+        "assets/design/dz_kv2.jpg",
+        "竖版 B2",
+        "tall"
+       ],
+       [
+        "assets/design/dz_kv3.jpg",
+        "门票 90×50",
+        "s16"
+       ],
+       [
+        "assets/design/dz_kv4.jpg",
+        "展签",
+        "s16"
+       ]
+      ],
+      "wide": [
+       "assets/design/dz_wide.jpg",
+       "一套物料 · 四种版式"
+      ]
+     }
+    ]
+   },
+   {
+    "title": "纪录片海报 · 三张一套",
+    "badge": "2025 · 平面",
+    "desc": "同一支片子的三种卖点：人物、场景、一句话。印在不同物料上互相不打架。",
+    "foot": [
+     "尺寸",
+     "A3 / 1080×1440"
+    ],
+    "specs": [
+     [
+      "3",
+      "张海报"
+     ],
+     [
+      "2",
+      "版文案"
+     ]
+    ],
+    "groups": [
+     {
+      "name": "海报",
+      "note": "",
+      "cols": 3,
+      "items": [
+       [
+        "assets/design/dz_p1.jpg",
+        "人物版",
+        "tall"
+       ],
+       [
+        "assets/design/dz_p2.jpg",
+        "场景版",
+        "tall"
+       ],
+       [
+        "assets/design/dz_p3.jpg",
+        "文案版",
+        "tall"
+       ]
+      ],
+      "note_card": {
+       "title": "印刷规格",
+       "rows": [
+        [
+         "成品尺寸",
+         "A3 · 297×420"
+        ],
+        [
+         "纸张",
+         "200g 哑粉"
+        ],
+        [
+         "工艺",
+         "局部 UV"
+        ],
+        [
+         "印量",
+         "300 张"
+        ]
+       ],
+       "foot": "同一版式换文案，出血留 3mm 不动。"
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

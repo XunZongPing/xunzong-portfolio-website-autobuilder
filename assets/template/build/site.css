@@ -1,0 +1,1178 @@
+:root{
+  --ink:#0d1117; --ink-2:#4d5766; --ink-3:#8a909c;
+  /* 主题色只是一个主色 --acc，其余全部由它推导（见 build/palette.py）。
+     生成时 build/gen_site.py 会在样式表**后面**再插一段 <style>，
+     按 data.json 里 site.theme.accent 覆盖下面这些值；这里写的是默认蓝。
+     为什么要拆出 -rgb：阴影和光晕要用半透明色，写成 rgba(var(--acc-rgb),.32) 的话
+     换了主色阴影还是蓝的 —— 只有分量能塞进 rgba()。 */
+  --acc:#2f6bff; --acc-2:#7aa2ff; --acc-3:#5b8cff;
+  --acc-rgb:47,107,255; --acc-2-rgb:122,162,255; --acc-3-rgb:91,140,255;
+  /* 背景那四团柔光（按主色相转），和两档底色 */
+  --w1:120,170,255; --w2:255,168,205; --w3:150,235,225; --w4:255,204,138;
+  --bg1:#f4f7fc; --bg2:#eaeff8; --bgD:#070a11;
+  --r-xl:34px; --r-lg:28px; --r-md:22px; --r-sm:14px;
+  --sh:0 8px 30px rgba(16,24,40,.10), 0 2px 8px rgba(16,24,40,.06);
+  --sh-hi:0 18px 50px rgba(16,24,40,.16), 0 4px 14px rgba(16,24,40,.08);
+  --blur:26px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  color:var(--ink);background:#eef2f9;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* ⚠️ 下面两条柔光规则的「几何 + 透明度」和 build/palette.py 的 _WASH_GEO /
+   _WASH_ALPHA_* 是同一份数据（那边给后台预览小样用）。改透明度记得同步两边，
+   否则后台看到的底色和实际网页差一档。颜色值不用同步 —— 那些走 --w1..--w4。 */
+body::before{content:'';position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(46% 40% at 10% 4%, rgba(var(--w1),.62), transparent 62%),
+    radial-gradient(38% 36% at 90% 10%, rgba(var(--w2),.48), transparent 60%),
+    radial-gradient(52% 44% at 80% 84%, rgba(var(--w3),.55), transparent 62%),
+    radial-gradient(42% 38% at 16% 90%, rgba(var(--w4),.45), transparent 60%),
+    linear-gradient(180deg,var(--bg1),var(--bg2))}
+body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.g{position:relative;border-radius:var(--r-lg);
+  background:linear-gradient(158deg, rgba(255,255,255,.68), rgba(255,255,255,.40) 52%, rgba(255,255,255,.55));
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(185%) brightness(1.06);
+  backdrop-filter:blur(var(--blur)) saturate(185%) brightness(1.06);
+  box-shadow:var(--sh), inset 0 1px 0 rgba(255,255,255,.92), inset 0 -1px 0 rgba(255,255,255,.32)}
+.g::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(145deg, rgba(255,255,255,.98), rgba(255,255,255,.08) 34%,
+             rgba(255,255,255,.62) 58%, rgba(255,255,255,.14) 82%, rgba(255,255,255,.8));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite:exclude}
+.g::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(115% 78% at 8% -14%, rgba(255,255,255,.55), rgba(255,255,255,0) 56%)}
+
+.wrap{width:min(1180px,92vw);margin:0 auto}
+.kick{font-size:11px;letter-spacing:.26em;color:var(--acc);font-weight:600}
+.sec-en{font-size:10.5px;letter-spacing:.24em;color:var(--ink-3)}
+
+/* ---------- 顶栏 ---------- */
+/* 首屏满幅后图片会从顶栏底下穿过 → 顶栏玻璃要够实，否则深色照片透上来吃字 */
+.nav{position:sticky;top:12px;z-index:60;width:min(1180px,92vw);margin:12px auto 0;
+  display:flex;align-items:center;gap:18px;padding:10px 14px 10px 12px;border-radius:var(--r-lg);--blur:32px;
+  background:linear-gradient(158deg,rgba(255,255,255,.86),rgba(255,255,255,.66) 52%,rgba(255,255,255,.76));
+  box-shadow:var(--sh-hi), inset 0 1px 0 rgba(255,255,255,.95)}
+/* 滚过首屏后顶栏加厚一档：既要压得住深色照片，又要留住磨砂感 */
+.nav.scrolled{--blur:40px;
+  background:linear-gradient(158deg,rgba(255,255,255,.94),rgba(255,255,255,.86) 52%,rgba(255,255,255,.90));
+  box-shadow:var(--sh-hi), inset 0 1px 0 rgba(255,255,255,.98)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0}
+/* 左上角标：头像 */
+.mark{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:50% 22%;display:block;flex:none;
+  background:linear-gradient(150deg,var(--acc-2),var(--acc));
+  box-shadow:0 4px 12px rgba(20,32,60,.28), inset 0 0 0 1px rgba(255,255,255,.9)}
+/* 自己传的 logo：按原比例整张显示。
+   圆形容器 + cover 是给头像用的；横版字标（品牌名排成一行）塞进去只会剩中间一块色块，
+   所以换成长方形、contain、去掉渐变底和描边。 */
+.mark-wm{width:auto;max-width:140px;height:34px;object-fit:contain;
+  object-position:50% 50%;border-radius:7px;background:none;box-shadow:none}
+.bid{font-size:16px;font-weight:700}
+.bid em{display:block;font-style:normal;font-size:9.5px;letter-spacing:.22em;color:var(--ink-3);font-weight:500;margin-top:-2px}
+/* 导航永远留在顶栏里，一行到底；放不下就让这一排自己横滑。
+   ⚠️ 三个关键词都不能少：
+   - `flex:1 1 auto`：吃掉品牌和右侧按钮之间的全部空间，滚动的可视宽度就等于这段空间。
+   - `min-width:66px`：显式给个下限（也顺手替代了 flex 的 `auto` 最小尺寸，让 overflow 能触发）。
+     不给的话空间紧张时会先被压成 0 宽，看着像导航丢了；给了就轮到品牌去省略。
+   ⚠️ 千万别写 flex-wrap:wrap：容器上要是还有 margin-left:auto，宽度不足时 flex 会把它压到
+   「最宽那一项」的宽度，wrap 就一个一项地竖着堆，7 个导航项在 570px 变成一根竖线。 */
+.navlinks{display:flex;align-items:center;gap:4px;flex:1 1 auto;
+  min-width:66px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+  scrollbar-width:none;-ms-overflow-style:none;--fl:0px;--fr:0px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--fl),
+    #000 calc(100% - var(--fr)),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 var(--fl),
+    #000 calc(100% - var(--fr)),transparent 100%)}
+.navlinks::-webkit-scrollbar{display:none}
+/* 宽度富余时把导航项推到右边（贴着主题按钮）；一旦挤到要滚动，auto 边距自动归零，
+   从第一项开始排 —— 这样"能滚"和"下一项被藏起来"不会同时发生。 */
+.navlinks::before{content:'';flex:0 0 0;margin-left:auto}
+.navlinks a{font-size:13px;color:var(--ink-2);text-decoration:none;padding:7px 13px;border-radius:999px;transition:.22s;white-space:nowrap;flex:none}
+.navlinks a:hover{background:rgba(255,255,255,.75);color:var(--ink)}
+.navlinks a.on{background:var(--acc);color:#fff;box-shadow:0 4px 12px rgba(var(--acc-rgb),.32)}
+
+.nav-cta{font-size:13px;font-weight:600;color:#fff;text-decoration:none;padding:8px 16px;border-radius:999px;flex:none;
+  background:linear-gradient(150deg,var(--acc-2),var(--acc));
+  box-shadow:0 5px 16px rgba(var(--acc-rgb),.34), inset 0 1px 0 rgba(255,255,255,.5)}
+
+/* 宽度一紧，先给胶囊瘦身：内距和字号各收一档，能多塞一两个再让它滚 */
+@media(max-width:1080px){
+  .nav{gap:12px}
+  .navlinks a{padding:7px 10px;font-size:12.5px}
+}
+/* 再窄一档：品牌开始让步（长名字省略），把空间让给导航 */
+@media(max-width:680px){
+  .nav{gap:9px}
+  .brand{min-width:0;flex-shrink:1}
+  .bid{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .navlinks a{padding:6px 9px;font-size:12.5px}
+}
+
+/* ≤560：品牌名让位，顶栏只留 logo。
+   算过账：390px 下如果不让，品牌名会被省略成「见…」——两头都不好看；
+   而名字在下方首屏 H1 里就有，顶栏留 logo 已经够认。让出来的空间全给导航。 */
+@media(max-width:560px){
+  .brand{gap:0}
+  .bid{display:none}
+}
+
+/* 手机（≤430）：主题 + CTA 的最小宽度已经吃掉大半，留给导航的横向空间很少。
+   继续让位：CTA 内距收到 12、logo 收到 32，能挤出约一个导航项的空间。
+   ⚠️ 这段必须写在 .nav/.bid/.nav-cta/.mark 的基础规则**之后**：
+   媒体查询不提升优先级，只是「满足条件时也算一条普通规则」——放前面就会被后面的
+   基础声明整条盖掉，改了半天不出效果，还以为是被别的样式压了。 */
+@media(max-width:430px){
+  .nav{gap:8px;padding:8px 9px 8px 7px}
+  .nav-cta{padding:7px 12px;font-size:12px}
+  .mark{width:32px;height:32px}
+}
+
+/* ---------- 首屏（航拍满幅，不再是圆角卡片） ---------- */
+.hero{position:relative;width:100%;margin:-72px 0 0;text-align:center;isolation:isolate;overflow:hidden;
+  padding:158px 0 62px;min-height:min(88vh,760px);
+  display:flex;align-items:center;justify-content:center}
+/* 底边融进浅色页面，避免一整条硬切黑边 */
+.hero::after{content:'';position:absolute;left:0;right:0;bottom:0;height:104px;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(238,242,249,0) 0%,rgba(238,242,249,.55) 58%,rgba(238,242,249,.92) 100%)}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:50% 46%}
+.hero-scrim{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,12,20,.62) 0%,rgba(8,12,20,.30) 22%,
+             rgba(8,12,20,.24) 40%,rgba(8,12,20,.56) 68%,
+             rgba(8,12,20,.86) 86%,rgba(8,12,20,.92) 100%)}
+/* 首屏数据条要压深玻璃，否则白胶囊叠在亮水面上字全糊 */
+.hero .stats{--blur:20px;
+  background:linear-gradient(158deg,rgba(14,20,32,.50),rgba(14,20,32,.34) 52%,rgba(14,20,32,.46));
+  box-shadow:0 12px 34px rgba(4,8,16,.42), inset 0 1px 0 rgba(255,255,255,.22)}
+.hero .stats::after{background:radial-gradient(115% 78% at 8% -14%, rgba(255,255,255,.16), rgba(255,255,255,0) 56%)}
+.hero .stat b{color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+.hero .stat span{color:rgba(255,255,255,.68)}
+.hero .stat + .stat::before{background:rgba(255,255,255,.22)}
+.hero-in{position:relative;z-index:2;width:100%}
+.avatar{display:block;width:88px;height:88px;border-radius:50%;object-fit:cover;margin:0 auto 20px;
+  border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 14px 34px rgba(0,0,0,.42), 0 0 0 6px rgba(255,255,255,.10)}
+.hero .kick{color:#a9c4ff;margin-bottom:16px}
+.hero h1{font-size:clamp(42px,7.4vw,90px);font-weight:800;letter-spacing:.06em;line-height:1.08;
+  background:linear-gradient(180deg,#fff 34%,#bcc8dc);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 20px rgba(0,0,0,.45))}
+.hero h1 .en{display:block;font-size:clamp(11px,1.5vw,15px);letter-spacing:.42em;font-weight:500;
+  -webkit-text-fill-color:rgba(255,255,255,.6);margin-top:14px}
+.hero .tagline{color:rgba(255,255,255,.89);text-shadow:0 2px 14px rgba(0,0,0,.55);max-width:740px}
+
+/* 首屏补的三行小信息（坐标 / 方向 / 签约 / 状态）——深色玻璃，压得住照片亮部 */
+.hmeta{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin:26px auto 0;padding:0;list-style:none}
+.hmeta li{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  font-size:12.5px;color:rgba(255,255,255,.90);
+  padding:7px 15px;border-radius:999px;background:rgba(11,17,29,.38);
+  -webkit-backdrop-filter:blur(14px) saturate(165%);backdrop-filter:blur(14px) saturate(165%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.20), 0 6px 18px rgba(4,8,16,.26)}
+.hmeta i{font-style:normal;font-size:10px;letter-spacing:.2em;font-weight:600;color:#a9c4ff}
+/* 首屏下方再给一次标签栏，别让人到了首屏就找不到路 */
+.heronav{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;
+  margin:32px auto 0;padding:6px;border-radius:999px;
+  background:rgba(9,15,26,.42);
+  -webkit-backdrop-filter:blur(20px) saturate(170%);backdrop-filter:blur(20px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 12px 36px rgba(4,8,16,.34)}
+.heronav a{font-size:12.5px;color:rgba(255,255,255,.84);text-decoration:none;
+  padding:8px 16px;border-radius:999px;transition:.22s;white-space:nowrap}
+.heronav a:hover{background:rgba(255,255,255,.16);color:#fff}
+.heronav a.hn-cta{color:#fff;font-weight:600;margin-left:4px;
+  background:linear-gradient(150deg,var(--acc-2),var(--acc));
+  box-shadow:0 5px 16px rgba(var(--acc-rgb),.42), inset 0 1px 0 rgba(255,255,255,.5)}
+.heronav a.hn-cta:hover{background:linear-gradient(150deg,var(--acc),var(--acc-2))}
+.tagline{margin:26px auto 0;max-width:660px;font-size:clamp(15px,1.7vw,19px);color:var(--ink-2);line-height:1.85}
+.stats{display:flex;justify-content:center;margin:36px auto 0;padding:8px;width:fit-content;border-radius:999px;flex-wrap:wrap}
+.stat{padding:10px 24px;text-align:center;position:relative}
+.stat + .stat::before{content:'';position:absolute;left:0;top:22%;height:56%;width:1px;background:rgba(13,17,23,.10)}
+.stat b{display:block;font-size:22px;font-weight:800}
+.stat span{font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+
+/* ---------- 区块 ---------- */
+section{padding:56px 0;scroll-margin-top:150px}
+.grp{scroll-margin-top:140px}
+/* 分组之间拉开距离，别让上一组最后一支和下一组标题粘在一起 */
+.grp + .grp{margin-top:78px}
+/* 按**文字基线**对齐，不能按盒底对齐：h2 的盒高是 34×1.6=54.4px，
+   而 .num 的 line-height:1 只有 34px，底边对齐会让序号显得低了半个行距（实测 10.4px）。 */
+.sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(24px,3vw,34px);font-weight:800}
+/* 序号与后接标题同号，只靠颜色区分——小号 + 大字母间距那套是配英文标签的，配中文标题不搭 */
+.sec-head .num{font-size:clamp(24px,3vw,34px);color:var(--acc);font-weight:800;line-height:1}
+.sec-sub{color:var(--ink-2);font-size:14px;max-width:760px;margin-bottom:26px}
+/* 一个页面挂了多块：页面头是这一屏的主角，块标题降一档，靠缩进和字重分层 */
+.pghead{padding:56px 0 0}
+.pghead .sec-sub{margin-bottom:0}
+.sec-head.blk{margin-top:54px;gap:12px}
+.sec-head.blk h2{font-size:clamp(18px,2.1vw,23px);font-weight:750}
+.sec-head.blk .num{font-size:clamp(18px,2.1vw,23px)}
+.sec-head.blk .sec-en{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------- 分类导航 ---------- */
+.catbar{position:sticky;top:74px;z-index:50;margin:0 0 30px;padding:8px;border-radius:999px;--blur:30px}
+.cat-inner{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.cat-inner::-webkit-scrollbar{display:none}
+.cat{flex:0 0 auto;font-size:13px;color:var(--ink-2);text-decoration:none;padding:9px 17px;border-radius:999px;transition:.22s;white-space:nowrap}
+.cat:hover{background:rgba(255,255,255,.8);color:var(--ink)}
+.cat.on{background:rgba(var(--acc-rgb),.14);color:var(--acc);font-weight:600;box-shadow:inset 0 0 0 1px rgba(var(--acc-rgb),.22)}
+.grp-t{display:flex;align-items:center;gap:14px;margin:46px 0 20px}
+.grp-t h3{font-size:18px;font-weight:700;white-space:nowrap}
+.grp-t .fl{flex:1;height:1px;background:linear-gradient(90deg,rgba(13,17,23,.16),transparent)}
+.grp-t .n{font-size:10px;letter-spacing:.22em;color:var(--ink-3)}
+/* 分类简介：挂在分类标题下方。空着整段不渲染，所以不会留下空档 */
+.grp-sub{margin:0 0 22px;max-width:760px;font-size:13.5px;color:var(--ink-2);line-height:1.85}
+/* 三处分类标题自带的下边距不一样（影像 20 / 摄影 14 / 实践 18），
+   这里只补差值，让「标题→简介」的视觉间距在三处都落在 12-14px。 */
+.grp-t + .grp-sub{margin-top:-6px}      /* 20-6 = 14 */
+.pcat-h + .grp-sub{margin-top:-2px}     /* 14-2 = 12 */
+.pjgroup-h + .grp-sub{margin-top:-6px}  /* 18-6 = 12 */
+
+/* ---------- 数码内容：账号简介 + 封面卡片墙 ----------
+   这一块只展示「作品量大」，卡面不放标题与正文；左上角标播放量（旧号再带年份），
+   右下角标时长。标题留给 hover 浮出与 title/aria。 */
+.dacct{display:grid;grid-template-columns:88px minmax(0,1fr);gap:24px;align-items:center;
+  margin:22px 0 8px;padding:32px 36px;border-radius:var(--r-lg)}
+.dacct .dava{width:88px;height:88px;border-radius:26px;object-fit:cover;display:block;
+  box-shadow:0 10px 26px rgba(16,24,40,.20), inset 0 0 0 3px rgba(255,255,255,.85)}
+.dacct .dan{display:flex;align-items:last baseline;gap:12px;flex-wrap:wrap}
+.dacct .dan h3{font-size:clamp(22px,2.6vw,30px);font-weight:800;letter-spacing:-.01em}
+.dacct .dan .den{font-size:10.5px;font-weight:700;letter-spacing:.24em;color:var(--ink-3)}
+.dacct .dasub{margin-top:9px;font-size:14px;color:var(--ink-2);line-height:1.85;max-width:800px}
+.dacct .dasub b{color:var(--ink);font-weight:700}
+.dacct .dchips{margin-top:15px;display:flex;gap:9px;flex-wrap:wrap}
+.dacct .dchip{font-size:12px;font-weight:600;color:var(--acc);padding:6px 13px;border-radius:999px;
+  background:rgba(var(--acc-rgb),.09);box-shadow:inset 0 0 0 1px rgba(var(--acc-rgb),.16)}
+.dacct .dlink{margin-top:17px;display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+  font-size:13.5px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;
+  background:linear-gradient(135deg,var(--acc),var(--acc-3));box-shadow:0 8px 22px rgba(var(--acc-rgb),.32);
+  transition:transform .3s cubic-bezier(.2,.7,.3,1),box-shadow .3s}
+.dacct .dlink:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(var(--acc-rgb),.40)}
+
+.hcards{display:grid;gap:14px;margin-top:4px;
+  grid-template-columns:repeat(auto-fill,minmax(212px,1fr))}
+.hc{position:relative;display:block;border-radius:var(--r-md);overflow:hidden;
+  text-decoration:none;color:inherit;background:#dfe6f2;
+  box-shadow:0 6px 18px rgba(16,24,40,.10);
+  transition:transform .45s cubic-bezier(.2,.7,.3,1),box-shadow .45s}
+.hc:hover{transform:translateY(-4px);box-shadow:0 18px 38px rgba(16,24,40,.22)}
+.hc img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
+  transition:transform .9s cubic-bezier(.2,.7,.3,1)}
+.hc:hover img{transform:scale(1.06)}
+/* 封面底部压一层渐变，让时长角标在任何封面上都读得清 */
+.hc::after{content:'';position:absolute;inset:auto 0 0 0;height:46%;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(10,16,28,.42))}
+.hc .dur{position:absolute;right:9px;bottom:9px;z-index:2;font-size:11px;font-weight:700;color:#fff;
+  padding:3px 9px;border-radius:8px;background:rgba(12,18,30,.62);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font-variant-numeric:tabular-nums;letter-spacing:.02em}
+/* 左上角：播放量 + 发布年份。两段之间用一条细竖线分隔，年份弱化一点。
+   新号不标年份（都是近两三年），只有旧号有 → 只有播放量时竖线不出现。 */
+.hc .meta-l{position:absolute;left:9px;top:9px;z-index:2;display:flex;align-items:center;
+  gap:7px;font-size:10.5px;font-weight:700;color:#fff;
+  padding:3px 10px;border-radius:999px;background:rgba(12,18,30,.60);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1.5}
+.hc .meta-l .play{white-space:nowrap}
+.hc .meta-l .yr{position:relative;padding-left:8px;font-weight:600;opacity:.78}
+.hc .meta-l .yr::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:9px;background:rgba(255,255,255,.42)}
+.hc .meta-l .yr:only-child{padding-left:0}
+.hc .meta-l .yr:only-child::before{display:none}
+/* 桌面端鼠标悬停在封面上时，浮出标题（不占版面，只作补充信息） */
+.hc .tp{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:30px 12px 12px;
+  font-size:12.5px;font-weight:700;line-height:1.45;color:#fff;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  opacity:0;transform:translateY(6px);
+  transition:opacity .35s ease,transform .35s ease;pointer-events:none}
+@media(hover:hover){
+  .hc:hover .tp{opacity:1;transform:none}
+  .hc:hover .dur{opacity:0;transition:opacity .25s}
+}
+/* 数码分区底部的「更多视频」条 */
+.dmore{margin:34px 0 6px;padding:28px 34px;display:flex;align-items:center;
+  justify-content:space-between;gap:26px;flex-wrap:wrap;border-radius:var(--r-lg)}
+.dmore .mt{font-size:16px;font-weight:800}
+.dmore .ms{font-size:13px;color:var(--ink-2);margin-top:6px}
+.dmore a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:14px;
+  font-weight:700;color:#fff;padding:13px 24px;border-radius:999px;white-space:nowrap;
+  background:linear-gradient(135deg,var(--acc),var(--acc-3));
+  box-shadow:0 8px 22px rgba(var(--acc-rgb),.30);
+  transition:transform .3s cubic-bezier(.2,.7,.3,1),box-shadow .3s}
+.dmore a:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(var(--acc-rgb),.42)}
+
+/* 「实践经历」按简历逐条搬运后的行式排版：时间 / 头衔 / 主体 / 要点。
+   节奏是「左窄右宽」，窄列放时间，宽列放单位与成果。 */
+.jrow{display:grid;grid-template-columns:118px minmax(0,1fr);gap:8px 20px;
+  align-items:baseline;padding:16px 0}
+.jrow + .jrow{border-top:1px solid rgba(13,17,23,.08)}
+.jrow .jt{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;padding-top:3px;white-space:nowrap}
+.jrow .jh{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.5}
+.jrow .jr{font-weight:600;color:var(--ink-2)}
+.jrow .jl{list-style:none;margin:9px 0 0;display:grid;gap:7px}
+.jrow .jl li{position:relative;padding-left:16px;font-size:13.5px;color:var(--ink-2);line-height:1.85}
+.jrow .jl li::before{content:'';position:absolute;left:2px;top:.72em;width:5px;height:5px;border-radius:50%;
+  background:var(--acc-2);box-shadow:0 0 0 3px rgba(var(--acc-2-rgb),.16)}
+/* 数据能力：前面项目的四字摘要表，一行一个项目 */
+.dsum{list-style:none;display:grid;gap:0;margin-top:4px}
+.dsum li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:6px 18px;align-items:baseline;
+  padding:13px 0;border-bottom:1px solid rgba(13,17,23,.08)}
+.dsum li:last-child{border-bottom:0}
+.dsum .dn{font-size:12.5px;font-weight:700;color:var(--acc);line-height:1.6}
+.dsum .dt{font-size:13.5px;color:var(--ink-2);line-height:1.8}
+.dsum .dt b{color:var(--ink);font-weight:600}
+@media(max-width:680px){
+  .jrow{grid-template-columns:1fr;gap:4px;padding:14px 0}
+  .jrow .jt{padding-top:0}
+  .dsum li{grid-template-columns:1fr;gap:3px}
+}
+
+
+/* ---------- 只看代表作 ---------- */
+.vfil{flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink-2);
+  padding:8px 15px;border:0;border-radius:999px;white-space:nowrap;
+  background:linear-gradient(158deg,rgba(255,255,255,.84),rgba(255,255,255,.56) 52%,rgba(255,255,255,.72));
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 6px 20px rgba(16,24,40,.10), inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.62);
+  transition:transform .25s, box-shadow .25s, background .25s, color .25s}
+.vfil:hover{transform:translateY(-1px);
+  box-shadow:0 10px 26px rgba(16,24,40,.15), inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255,255,255,.78)}
+.vfil .st{font-size:13.5px;line-height:1;color:#c9a227;transition:color .25s}
+.vfil .cn{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--ink-3);transition:color .25s}
+.vfil.on{color:#fff;background:linear-gradient(150deg,#f2b52c,#d68f0e);
+  box-shadow:0 9px 26px rgba(201,140,15,.42), inset 0 1px 0 rgba(255,255,255,.55)}
+.vfil.on .st,.vfil.on .cn{color:rgba(255,255,255,.94)}
+/* 筛选态：没被标的卡、空掉的分组、以及封面墙/数据条/分类条一起收起 */
+#work.star-only .grp{display:none}
+#work.star-only .grp.on{display:block}
+#work.star-only .vcard:not(.star){display:none}
+#work.star-only .subwall,
+#work.star-only .band,
+#work.star-only .catbar{display:none}
+#work.star-only .grp-t .n{display:none}   /* 该组只剩代表作，支数不准了 */
+
+/* ---------- 视频卡：一屏一张 ---------- */
+.flow{display:flex;flex-direction:column;gap:46px}
+.vcard{position:relative;border-radius:var(--r-xl);overflow:hidden;aspect-ratio:16/9;
+  box-shadow:0 14px 44px rgba(16,24,40,.18);background:#dfe6f2;transition:box-shadow .5s}
+.vcard:hover{box-shadow:0 26px 64px rgba(16,24,40,.26)}
+.vcard > img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1s cubic-bezier(.2,.7,.3,1)}
+.vcard:hover > img{transform:scale(1.045)}
+.vhit{position:absolute;inset:0;z-index:3}
+.vscrim{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    linear-gradient(to top, rgba(5,9,16,.90) 0%, rgba(5,9,16,.62) 20%, rgba(5,9,16,.26) 40%, rgba(5,9,16,0) 60%),
+    radial-gradient(118% 128% at -2% 102%, rgba(5,9,16,.86) 0%, rgba(5,9,16,.44) 38%, rgba(5,9,16,0) 68%)}
+.vgo{position:absolute;top:20px;right:20px;z-index:4;display:flex;align-items:center;gap:5px;
+  font-size:11.5px;font-weight:600;color:#fff;padding:8px 14px;border-radius:999px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  -webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);
+  box-shadow:0 3px 14px rgba(0,0,0,.18);opacity:0;transform:translateY(-6px);transition:.32s}
+.vcard:hover .vgo{opacity:1;transform:none}
+/* 代表作角标：平时挂出来让人一眼看到，切到筛选态就不再重复 */
+.vstar{position:absolute;top:20px;left:20px;z-index:4;display:flex;align-items:center;gap:5px;
+  font-size:11.5px;font-weight:600;color:#fff;padding:7px 13px;border-radius:999px;
+  background:linear-gradient(150deg,rgba(244,183,46,.94),rgba(213,142,12,.94));
+  border:1px solid rgba(255,255,255,.36);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:0 4px 16px rgba(158,104,10,.34), inset 0 1px 0 rgba(255,255,255,.4)}
+#work.star-only .vstar{display:none}
+.vinfo{position:absolute;left:38px;bottom:34px;z-index:5;width:min(62%,640px);color:#fff}
+.vkick{font-size:11px;letter-spacing:.2em;color:#a9c4ff;font-weight:600;margin-bottom:10px}
+.vtitle{font-size:clamp(21px,2.5vw,33px);font-weight:800;line-height:1.28;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+.vdesc{font-size:14px;color:rgba(255,255,255,.84);line-height:1.75;margin-top:11px;text-shadow:0 1px 8px rgba(0,0,0,.35);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vduty{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:17px;padding-top:14px;border-top:1px solid rgba(255,255,255,.22)}
+.vduty .dl{font-size:11px;color:rgba(255,255,255,.62);letter-spacing:.14em;margin-right:3px}
+.vduty .dc{font-size:11.5px;font-weight:600;color:#fff;padding:5px 13px;border-radius:999px;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34);
+  box-shadow:0 1px 6px rgba(0,0,0,.14);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+
+/* 获奖徽章：贴**卡片右下角**，底边与 .vinfo 的底边（= 职务标签行底边）齐平。
+   ⚠️ 历史坑 1：以前挂在 .vinfo 内部（right:0;bottom:0），脱离文档流后
+   .vinfo 里的 .vduty（职务标签行）不知道它占位 → 长奖项名折行时直接压在标签上。
+   改为挂 .vcard 后，与 .vinfo 分属左右两个角，不会再打架。
+   ⚠️ 历史坑 2：挂在 .vinfo 上时 max-width 会被 .vinfo 的 640px 框住，
+   奖状伸不到卡片右侧空白区。挂 .vcard 后按卡片宽度算（46% 上限），能真正贴右。
+   右下角与 .vgo（右上角「观看」）对角，也不冲突。 */
+/* stretch：让一叠奖状取最宽那张的宽度，右边不参差。column-reverse 自下往上排，
+   从对齐线向上生长。 */
+.vawards{position:absolute;right:24px;bottom:34px;width:max-content;max-width:min(300px,46%);
+  display:flex;flex-direction:column-reverse;align-items:stretch;gap:7px;z-index:6}
+/* mini：卡高不够时收缩成小圆角标（只留「奖」圆标）。底边仍与职务标签对齐。 */
+.vawards.mini{right:14px;gap:0}
+.vawards.mini .vaw{padding:5px;border-radius:50%;gap:0}
+.vawards.mini .vaw > span{display:none}
+.vawards.mini .vaw .med{flex:0 0 22px;width:22px;height:22px;font-size:10px}
+.vawards.mini .vaw + .vaw{margin-bottom:-13px}   /* 多个角标叠一点，省纵向空间 */
+.vaw{display:flex;align-items:center;gap:8px;padding:7px 13px 7px 8px;border-radius:12px;
+  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.3);
+  -webkit-backdrop-filter:blur(14px) saturate(170%);backdrop-filter:blur(14px) saturate(170%);
+  box-shadow:0 6px 18px rgba(0,0,0,.22);color:#fff;line-height:1.35}
+.vaw .med{flex:0 0 19px;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#ffe9a8,#e0ab3c);color:#4a3208;font-size:10px;font-weight:800;
+  box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.vaw .at{font-size:12px;font-weight:700;letter-spacing:.02em;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+/* 奖项名限两行，超长省略号收尾 —— 防止极端长名把奖状卡撑成三行 */
+.vaw .al{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:10.5px;color:rgba(255,255,255,.8);margin-top:1px;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.vaw[data-img]{cursor:zoom-in}
+.vaw[data-img]:hover{background:rgba(255,255,255,.21);border-color:rgba(255,255,255,.45)}
+
+/* 无封面卡（广播 / 系列化运营） */
+.vcard.nocover{aspect-ratio:16/9;background:linear-gradient(140deg,#2b3a55,#131a26 70%)}
+.vcard.nocover .vbig{position:absolute;left:38px;top:50%;transform:translateY(-58%);z-index:4;
+  font-size:clamp(34px,5vw,64px);font-weight:800;color:rgba(255,255,255,.16);letter-spacing:.02em}
+.vcard.nocover .vtag{position:absolute;left:40px;top:calc(50% + 34px);z-index:4;font-size:11px;
+  letter-spacing:.2em;color:rgba(255,255,255,.42)}
+.vcard.wide{aspect-ratio:2.35/1}
+/* 本站：视频区不贴封面，纯文字卡改用宽银幕比例，缩短整页纵向长度 */
+.vcard.nocover{aspect-ratio:2.35/1;background:linear-gradient(135deg,#22304a 0%,#161d2b 62%,#0e131d 100%)}
+.vcard.nocover .vbig{font-size:clamp(46px,6.4vw,96px);color:rgba(255,255,255,.09);top:44%}
+.vcard.nocover .vinfo{bottom:30px}
+.vcard.wide .vinfo{width:min(54%,560px)}
+.vcard.wide .vdesc{-webkit-line-clamp:3}
+
+/* ---------- 专项：首支整屏大卡 + 下方封面墙 ---------- */
+.flow.special{gap:26px}
+/* 组内块与块之间的间距：DOM 是 .flow / .flow.special / .subwall 交替出现，
+   六种相邻关系必须都给到，漏一种就会出现卡片直接粘连
+   （实测：普通 .flow 后面接 .flow.special 时没有任何间距） */
+.flow + .flow,
+.flow + .flow.special,
+.subwall + .flow,
+.subwall + .flow.special{margin-top:72px}
+/* 大卡和它自己的封面墙属于同一支作品，间距收紧，别当成两个作品断开 */
+.flow.special + .subwall{margin-top:26px}
+.subwall{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.subitem{position:relative;display:block;border-radius:var(--r-lg);overflow:hidden;
+  background:rgba(255,255,255,.5);text-decoration:none;
+  box-shadow:0 10px 30px rgba(16,24,40,.13);
+  transition:transform .45s cubic-bezier(.2,.7,.3,1),box-shadow .45s}
+.subitem:hover{transform:translateY(-4px);box-shadow:0 22px 46px rgba(16,24,40,.22)}
+.subitem img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;
+  transition:transform .9s cubic-bezier(.2,.7,.3,1)}
+.subitem:hover img{transform:scale(1.05)}
+.submeta{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 16px 15px;background:#fff}
+.subtx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.subttl{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.4;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* 封面墙里的职务也是标签，和卡片里保持同一套语言 */
+.subduty{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.subduty .dc{font-size:10px;font-weight:600;line-height:1.5;color:#3f5b8c;
+  padding:3px 9px;border-radius:999px;background:rgba(47,95,168,.09);
+  box-shadow:inset 0 0 0 1px rgba(47,95,168,.16)}
+.subgo{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;
+  color:#2f5fa8;white-space:nowrap;padding:5px 11px;border-radius:999px;
+  background:rgba(47,95,168,.09);transition:background .3s,color .3s}
+.subitem:hover .subgo{background:#2f5fa8;color:#fff}
+@media(max-width:680px){
+  /* 手机端整体等比缩小：保持三列，缩尺寸而不是堆成三行 */
+  .flow.special{gap:18px}
+  .flow + .flow,
+  .flow + .flow.special,
+  .subwall + .flow,
+  .subwall + .flow.special{margin-top:56px}
+  .flow.special + .subwall{margin-top:18px}
+  .grp + .grp{margin-top:56px}
+  .subwall{grid-template-columns:repeat(3,1fr);gap:9px}
+  .subitem{border-radius:var(--r-sm)}
+  .subitem img{aspect-ratio:1/1}
+  .submeta{flex-direction:column;align-items:flex-start;gap:6px;padding:9px 9px 10px}
+  .subttl{font-size:11px;line-height:1.35;-webkit-line-clamp:2}
+  .subduty{gap:3px}
+  .subduty .dc{font-size:9px;padding:2px 7px}
+  .subgo{font-size:9px;padding:3px 7px;gap:3px}
+}
+@media(max-width:400px){
+  .subwall{gap:7px}
+  .subttl{font-size:10.5px}
+  .subduty .dc{font-size:8.5px;padding:2px 6px}
+  .subgo{font-size:8.5px;padding:3px 6px}
+}
+
+/* ---------- 系列：每期等大横排，不设主次 ---------- */
+.serwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px}
+.sercard{position:relative;display:flex;flex-direction:column;border-radius:var(--r-lg);overflow:hidden;
+  background:rgba(255,255,255,.66);text-decoration:none;color:inherit;
+  box-shadow:0 10px 30px rgba(16,24,40,.12);
+  transition:transform .45s cubic-bezier(.2,.7,.3,1),box-shadow .45s}
+.sercard:hover{transform:translateY(-4px);box-shadow:0 22px 46px rgba(16,24,40,.22)}
+.serimg{position:relative;background:#dfe6f2}
+.serimg img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
+  transition:transform .9s cubic-bezier(.2,.7,.3,1)}
+.sercard:hover .serimg img{transform:scale(1.04)}
+.serep{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;color:#fff;
+  padding:5px 11px;border-radius:999px;background:rgba(20,28,44,.6);border:1px solid rgba(255,255,255,.32);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.serbody{padding:15px 18px 17px;display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+.serkick{font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);font-weight:600}
+.serttl{font-size:16px;font-weight:800;color:var(--ink);line-height:1.4}
+.serdesc{font-size:12.5px;color:var(--ink-2);line-height:1.7}
+
+/* ---------- 系列排版三型：首视频型 / 竖版罗列型 / 横版展示型 ---------- */
+/* 期数角标（首视频型挂在 vcard 上，竖版横版挂在 sercard 上） */
+.vep{position:absolute;top:14px;right:14px;z-index:6;font-size:11px;font-weight:700;color:#fff;
+  background:rgba(12,18,30,.48);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:5px 11px;border-radius:999px;letter-spacing:.04em;white-space:nowrap}
+/* 竖版罗列型：封面 9:16，窄列密排 */
+.vwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(198px,1fr));gap:18px}
+.vwall .serimg img{aspect-ratio:9/16}
+.vwall .serbody{padding:13px 14px 15px;gap:6px}
+.vwall .serttl{font-size:14.5px;font-weight:700;line-height:1.45}
+.vwall .serdesc{font-size:12px;line-height:1.65;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* 横版展示型：封面 16:9，宽卡一行两张 */
+.hwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(384px,1fr));gap:24px}
+.hwall .serimg img{aspect-ratio:16/9}
+.hwall .serbody{padding:18px 22px 20px}
+.hwall .serttl{font-size:17px}
+/* 只看代表作：系列卡也要能被筛掉 */
+#work.star-only .sercard:not(.star){display:none}
+
+/* ---------- 数据条 / 榜单 ---------- */
+.band{display:flex;align-items:center;justify-content:space-between;gap:40px;padding:34px 40px;flex-wrap:wrap}
+.band .bl{min-width:220px}
+.band .bk{font-size:11px;letter-spacing:.22em;color:var(--acc);font-weight:600}
+.band .bn{font-size:clamp(34px,4.4vw,56px);font-weight:800;line-height:1.1;margin-top:8px}
+.band .bn i{font-style:normal;font-size:.42em;font-weight:600;color:var(--ink-2);margin-left:6px}
+.band .bx{font-size:12px;color:var(--ink-3);margin-top:8px}
+.band .br{display:flex;gap:14px;flex-wrap:wrap}
+.band .bi{padding:14px 20px;border-radius:var(--r-sm);background:rgba(255,255,255,.5);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);min-width:104px}
+.band .bi b{display:block;font-size:19px;font-weight:800}
+.band .bi span{font-size:10.5px;color:var(--ink-3)}
+
+.plists{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.plist{padding:26px 26px 20px}
+.plist .ph{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.plist .pn{font-size:17px;font-weight:800}
+.plist .pv{font-size:11.5px;color:var(--ink-3)}
+.plist .pnote{font-size:11.5px;color:var(--ink-3);line-height:1.7;margin-bottom:14px}
+.prow{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid rgba(13,17,23,.08)}
+.prow .no{font-size:11px;color:var(--acc);font-weight:700;width:20px;flex:none}
+.prow .mt{flex:1;font-size:13px;line-height:1.5}
+.prow .mv{font-size:13px;font-weight:800;flex:none}
+.prow .mv em{display:block;font-style:normal;font-size:10px;font-weight:500;color:var(--ink-3);text-align:right}
+
+/* ---------- 摄影 ---------- */
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+.pills.g{padding:10px;border-radius:999px}
+.pill{font-size:12.5px;padding:8px 15px;border-radius:999px;border:0;cursor:pointer;
+  background:transparent;color:var(--ink-2);font-family:inherit;transition:.22s}
+.pill .c{font-size:10.5px;color:var(--ink-3);margin-left:4px}
+.pill:hover{background:rgba(255,255,255,.7)}
+.pill.on{background:var(--acc);color:#fff;box-shadow:0 4px 12px rgba(var(--acc-rgb),.3)}
+.pill.on .c{color:rgba(255,255,255,.75)}
+.pcat{margin-bottom:34px}
+.pcat.hide{display:none}
+.pcat-h{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pcat-h .pn{font-size:16px;color:var(--acc);font-weight:800;line-height:1}
+.pcat-h h3{font-size:16px;font-weight:700}
+.pcat-h .en{font-size:10px;letter-spacing:.2em;color:var(--ink-3)}
+.pcat-h .fl{flex:1;height:1px;background:linear-gradient(90deg,rgba(13,17,23,.14),transparent)}
+.pcat-h .n{font-size:11px;color:var(--ink-3)}
+/* ---------- 摄影：正片墙（每行自适应高度，整张不裁） ---------- */
+.pwall{margin-bottom:6px}
+.prowx{display:flex;gap:12px;margin-bottom:12px}
+.prowx:last-child{margin-bottom:0}
+.prowx figure{position:relative;flex:none;border-radius:var(--r-sm);overflow:hidden;cursor:zoom-in;
+  background:#e3e9f3;box-shadow:0 5px 16px rgba(16,24,40,.12);transition:box-shadow .3s}
+.prowx figure:hover{box-shadow:0 14px 34px rgba(16,24,40,.22)}
+.prowx img{width:100%;height:100%;object-fit:contain;display:block}   /* 整张展示，不裁 */
+.prowx figcaption{position:absolute;left:9px;bottom:8px;z-index:2;font-size:10px;color:#fff;
+  padding:4px 10px;border-radius:999px;background:rgba(12,16,24,.46);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);opacity:0;transition:.3s}
+.prowx figure:hover figcaption{opacity:1}
+
+#lb{position:fixed;inset:0;z-index:200;background:rgba(6,9,15,.9);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  display:none;align-items:center;justify-content:center;cursor:zoom-out}
+#lb.on{display:flex}
+#lb img{max-width:92vw;max-height:86vh;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.5);
+  transform-origin:center center;transition:transform .18s cubic-bezier(.2,.8,.3,1);
+  cursor:zoom-in;touch-action:none;-webkit-user-select:none;user-select:none}
+/* 放大后要拖动看：光标换成抓手机，并关掉过渡（否则拖起来是「跟手迟缓」） */
+#lb img.zoomed{cursor:grab;transition:none}
+#lb img.dragging{cursor:grabbing}
+#lbbar{position:fixed;left:0;right:0;bottom:0;z-index:210;display:none;justify-content:space-between;
+  align-items:center;padding:16px 26px;color:#fff;font-size:13px;
+  background:linear-gradient(to top,rgba(6,9,15,.8),transparent)}
+#lbbar.on{display:flex}
+#lbbar .lt b{color:var(--acc-2)}
+.lbacts{display:flex;align-items:center;gap:10px;flex:none}
+#lbfull{font-size:12px;color:#fff;text-decoration:none;opacity:.8;
+  border-bottom:1px solid rgba(255,255,255,.42);padding-bottom:1px}
+#lbfull:hover{opacity:1}
+#lbclose{font-family:inherit;font-size:12px;color:#fff;background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:7px 15px;cursor:pointer}
+
+/* 能点开放大的图统一给个手型 + 轻微放大反馈。
+   缺了 cursor 用户根本不会去点 —— 论文封面和内页缩略图原本看着就像静态配图，
+   所以「可点」这件事必须由鼠标形态先说一遍。 */
+.pap-cv,.pap-pi .im,.dz-t,.opd-th{cursor:zoom-in}
+.pap-cv img,.pap-pi .im img,.dz-t img,.opd-th img{
+  transition:transform .5s cubic-bezier(.2,.8,.3,1)}
+.pap-cv:hover img,.pap-pi .im:hover img,.dz-t:hover img,.opd-th:hover img{transform:scale(1.035)}
+.pap-cv.pap-empty,.pap-pi .im.ph{cursor:default}
+.pap-cv.pap-empty:hover img,.pap-pi .im.ph:hover img{transform:none}
+
+/* ---------- 关于 / 简历 ---------- */
+.resume{display:grid;grid-template-columns:320px 1fr;gap:34px;align-items:start}
+.rcard{padding:26px 24px}
+/* 简历对齐后右栏（自我介绍 / 实践经历 / 数据能力 / 荣誉）高到 1232px，
+   而左卡片只有 842px，下方会空出近 400px。桌面端让卡片吸顶跟随，
+   滚动读右栏时它一直在视野里；单列布局下卡片本身就很高，必须取消。 */
+@media(min-width:681px){.resume>.rcard{position:sticky;top:96px}}
+.rphoto{display:block;width:132px;height:132px;object-fit:cover;object-position:50% 16%;
+  border-radius:20px;margin:0 auto 18px;
+  box-shadow:0 12px 28px -10px rgba(16,24,40,.34), 0 0 0 1px rgba(13,17,23,.06)}
+.rhead{text-align:center}
+.rname{font-size:26px;font-weight:800;letter-spacing:.04em}
+.ren{font-size:10.5px;letter-spacing:.24em;color:var(--ink-3);margin-top:4px}
+.rline{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:9px 0;border-bottom:1px solid rgba(13,17,23,.08)}
+.rline:last-child{border:0}
+.rline .k{color:var(--ink-3);flex:none}
+.rline .v{text-align:right;
+  /* 中文默认逐字可断，「核心课程」那种长值会断在词中间（…新闻评论 / 学 93）。
+     keep-all 让中文只在空格、间隔号处断行；万一某段比栏宽还长，
+     交给 overflow-wrap:anywhere 兜底，不会撑破卡片。 */
+  word-break:keep-all;overflow-wrap:anywhere}
+.abt-blk{margin-bottom:38px}
+.abt-h{display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.2em;color:var(--acc);font-weight:600;margin-bottom:16px}
+.abt-h::before{content:"◆";font-size:7px;color:var(--acc-2)}
+.abt-h::after{content:'';flex:1;height:1px;background:rgba(13,17,23,.12)}
+.abt-blk p{font-size:14.5px;color:var(--ink-2);line-height:1.95;margin-bottom:12px}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.dcard{padding:20px 20px 18px}
+.dcard .no{font-size:10.5px;letter-spacing:.2em;color:var(--acc);font-weight:700}
+.dcard h5{font-size:14px;font-weight:700;margin:8px 0 8px}
+.dcard p{font-size:12.5px;color:var(--ink-2);line-height:1.75;margin:0}
+.awards li{list-style:none;display:flex;gap:14px;align-items:baseline;font-size:13.5px;padding:10px 0;
+  border-bottom:1px solid rgba(13,17,23,.08)}
+.awards li b{flex:none;color:var(--acc);font-weight:700;font-size:12.5px;min-width:88px}
+.awards li span{color:var(--ink-2)}
+
+/* ---------- 联系 / 页脚 ---------- */
+.contact-c{text-align:center;padding:64px 40px}
+.contact-c h2{font-size:clamp(26px,3.4vw,40px);font-weight:800;margin:14px 0 10px}
+.contact-c .sub{font-size:14.5px;color:var(--ink-2)}
+.big-links{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:26px}
+.big-link{font-size:clamp(15px,1.8vw,20px);font-weight:700;color:var(--ink);text-decoration:none;
+  padding:12px 24px;border-radius:999px;background:rgba(255,255,255,.6);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.85), 0 4px 14px rgba(16,24,40,.08);transition:.25s}
+.big-link:hover{background:#fff;transform:translateY(-2px)}
+.plinks{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.plink{font-size:12.5px;color:var(--ink-2);text-decoration:none;padding:9px 17px;border-radius:999px;
+  background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8);transition:.22s}
+.plink:hover{background:#fff;color:var(--acc)}
+.all-line{font-size:12.5px;color:var(--ink-3);margin-top:26px}
+footer{padding:40px 0 56px;text-align:center}
+footer .g{display:inline-block;padding:11px 24px;border-radius:999px;font-size:11.5px;color:var(--ink-3);letter-spacing:.08em}
+
+/* ---------- 项目档案 ---------- */
+.pjgroup{margin-bottom:32px}
+.pjgroup-h{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.pjgroup-h .pn{font-size:16px;color:var(--acc);font-weight:800;line-height:1}
+.pjgroup-h h3{font-size:16px;font-weight:800}
+.pjgroup-h .en{font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);font-weight:600}
+.pjgroup-h .fl{flex:1;height:1px;background:rgba(13,17,23,.12)}
+.pjgroup-h .n{font-size:11.5px;color:var(--ink-3)}
+
+.pjcards{display:grid;gap:18px}
+.pj{padding:26px 28px}
+.pjhead{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;row-gap:9px}
+.pjno{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;
+  font-size:15px;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums;
+  background:linear-gradient(158deg,rgba(255,255,255,.92),rgba(255,255,255,.55));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.9), 0 4px 12px rgba(16,24,40,.07)}
+.pjkind{font-size:11.5px;color:var(--ink-3);letter-spacing:.04em}
+.pjkind::before{content:'—';margin-right:8px;opacity:.55}
+/* 「开源项目优化改进」这类定性标签挂行尾 */
+.pjtag{margin-left:auto;font-size:11px;font-weight:600;color:var(--acc);padding:5px 13px;border-radius:999px;
+  background:linear-gradient(158deg,rgba(255,255,255,.88),rgba(255,255,255,.58));
+  box-shadow:inset 0 0 0 1px rgba(var(--acc-rgb),.28), 0 3px 10px rgba(var(--acc-rgb),.10)}
+.pjtitle{font-size:clamp(19px,2.2vw,24px);font-weight:800;letter-spacing:-.01em}
+.pjoneline{font-size:14px;color:var(--acc);font-weight:600;margin-top:9px}
+
+.pjmetrics{display:flex;flex-wrap:wrap;align-items:baseline;gap:9px 30px;
+  margin-top:22px;padding-top:15px;border-top:1px solid rgba(13,17,23,.08)}
+.pjmetric b{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.pjmetric span{font-size:12.5px;color:var(--ink-3);margin-left:6px}
+
+.pjbody{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(0,1fr);gap:34px;margin-top:20px}
+.pjdesc{font-size:14px;color:var(--ink-2);line-height:1.92}
+.pjlab{display:flex;align-items:center;gap:10px;font-size:10.5px;letter-spacing:.2em;
+  color:var(--acc);font-weight:600;margin-bottom:13px}
+.pjlab::before{content:'◆';font-size:7px;color:var(--acc-2)}
+.pjstack{display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start}
+.pjstack i{font-style:normal;font-size:11.5px;color:var(--ink-2);padding:6px 12px;border-radius:999px;
+  background:rgba(255,255,255,.58);box-shadow:inset 0 0 0 1px rgba(255,255,255,.85)}
+.pjnotes{list-style:none;margin-top:22px;display:grid;gap:11px}
+.pjblock{margin-top:24px}
+.pjnotes li{position:relative;padding-left:18px;font-size:13.5px;color:var(--ink-2);line-height:1.85}
+.pjnotes li::before{content:'';position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;
+  background:var(--acc-2);box-shadow:0 0 0 3px rgba(var(--acc-2-rgb),.18)}
+
+/* 图集：统一框高、图片整体完整显示（图表/类图不能被裁），空出来的地方用这张图自己的模糊放大版填底。
+   基准 190 是为了让三图卡在 680 断点之上始终排成一行，不会掉出「2 + 1 个孤儿图」 */
+.pjshots{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+.pjshot{position:relative;flex:1 1 190px;max-width:640px;height:196px;border-radius:var(--r-md);
+  overflow:hidden;cursor:zoom-in;background:#dde5f1;isolation:isolate;
+  box-shadow:0 6px 20px rgba(16,24,40,.12), inset 0 0 0 1px rgba(255,255,255,.7);
+  transition:box-shadow .45s, transform .45s}
+/* 模糊底：data URI 不重复存，src 由 JS 复用 img.src 写入 */
+.pjsbg{position:absolute;inset:-12%;z-index:0;background-size:cover;background-position:50% 50%;
+  filter:blur(30px) saturate(165%) brightness(1.04);transform:scale(1.06);opacity:.94}
+.pjshot img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;
+  transition:transform .8s cubic-bezier(.2,.7,.3,1)}
+.pjshot:hover{box-shadow:0 16px 38px rgba(16,24,40,.2), inset 0 0 0 1px rgba(255,255,255,.85);
+  transform:translateY(-2px)}
+.pjshot:hover img{transform:scale(1.02)}
+.pjshot figcaption{position:absolute;left:10px;bottom:10px;z-index:2;max-width:calc(100% - 20px);
+  padding:5px 12px;border-radius:999px;font-size:11px;color:#fff;letter-spacing:.02em;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;pointer-events:none;background:rgba(10,15,25,.42);
+  -webkit-backdrop-filter:blur(14px) saturate(170%);backdrop-filter:blur(14px) saturate(170%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 3px 12px rgba(4,8,16,.22)}
+
+.fade{opacity:0;transform:translateY(18px);transition:opacity .7s, transform .7s}
+.fade.in{opacity:1;transform:none}
+
+@media(max-width:960px){
+  .resume{grid-template-columns:1fr}
+  .plists{grid-template-columns:1fr}
+  .dgrid{grid-template-columns:1fr}
+  .pjbody{grid-template-columns:1fr;gap:22px}
+  /* 职务标签任何宽度都要挂出来（原来 ≤960px 直接 display:none，等于白填） */
+  .vdesc{-webkit-line-clamp:1}
+}
+/* 中间档（681–1100px）：卡片还是 16/9 绝对定位的奖状卡，但卡高已经压到
+   380–580px，一叠长奖项名的奖状往上长会顶到标题。这个区间把奖状收成小角标。 */
+@media(max-width:1100px) and (min-width:681px){
+  /* 这一档奖状贴右下角，但卡片已经变窄（≤900px 时 .vinfo 右边界会越过奖状左边界）。
+     把 .vinfo 收窄给奖状让位：留出 奖状 max-width + 间距 的空间。
+     奖状最多 min(230px,40%)，所以 .vinfo 收到 46% 即可不打架。 */
+  .vinfo{width:min(46%,520px)}
+  .vcard.wide .vinfo{width:min(46%,520px)}
+  .vawards{right:16px;bottom:34px;max-width:min(230px,40%)}
+  .vawards .vaw{padding:5px 11px 5px 6px;gap:6px}
+  .vawards .vaw .med{flex:0 0 17px;width:17px;height:17px;font-size:9px}
+  .vawards .vaw .at{font-size:11px}
+  .vawards .vaw .al{font-size:9.5px;-webkit-line-clamp:1}
+  /* 三张及以上或长名时收成角标（由生成器加 .mini 类，见 vcard()） */
+  .vawards.mini .vaw{padding:5px;border-radius:50%;gap:0}
+  .vawards.mini .vaw > span{display:none}
+  .vawards.mini .vaw .med{flex:0 0 21px;width:21px;height:21px;font-size:10px}
+  .vawards.mini .vaw + .vaw{margin-bottom:-13px}
+}
+@media(max-width:680px){
+  .nav{gap:10px;padding:8px 10px}
+  .vwall{grid-template-columns:repeat(2,1fr);gap:11px}
+  .vwall .serbody{padding:10px 11px 12px}
+  .vwall .serttl{font-size:13px}
+  .hwall{grid-template-columns:1fr;gap:15px}
+  .vep{top:9px;right:9px;font-size:10px;padding:4px 9px}
+  .nav-cta{margin-left:auto}
+  .hero{margin:-68px 0 0;padding:120px 0 46px;min-height:0}
+  .hero-in{padding:0 22px}                       /* 首屏内容别贴着屏幕边 */
+  .hero-bg img{object-position:50% 42%}
+  .hero::after{height:72px}
+  .hero .tagline{max-width:none;font-size:14px;line-height:1.82}
+  /* 分区标题 + 英文 + 筛选按钮在窄屏挤不下 → 按钮换行靠右，并收一点内边距 */
+  .sec-head{gap:10px 12px}
+  .vfil{padding:7px 13px;font-size:12px}
+  .vfil .cn{font-size:10.5px}
+  .avatar{width:70px;height:70px;margin-bottom:16px;box-shadow:0 10px 26px rgba(0,0,0,.44), 0 0 0 5px rgba(255,255,255,.10)}
+  .hmeta{gap:7px;margin-top:20px}
+  .hmeta li{font-size:11.5px;padding:6px 12px}
+  .heronav{margin-top:24px;gap:3px;padding:5px}
+  .heronav a{font-size:12px;padding:7px 12px}
+  .heronav a.hn-cta{margin-left:2px}
+  /* 4 个数字在窄屏排成 2×2，胶囊圆角会变形 → 换成网格 + 内描边分隔 */
+  .hero .stats{display:grid;grid-template-columns:1fr 1fr;width:min(100%,360px);
+    border-radius:var(--r-lg);padding:4px}
+  .hero .stat{padding:13px 6px}
+  .hero .stat + .stat::before{display:none}
+  .hero .stat:nth-child(even){box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+  .hero .stat:nth-child(3){box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+  .hero .stat:nth-child(4){box-shadow:inset 1px 0 0 rgba(255,255,255,.16), inset 0 1px 0 rgba(255,255,255,.16)}
+  .flow{gap:26px}
+  .vcard{border-radius:22px;aspect-ratio:4/3}
+  .vcard.wide{aspect-ratio:4/3}
+  .vcard.nocover .vbig{left:18px}
+  .vcard.nocover .vtag{left:20px}
+  .vinfo{left:18px;right:18px;bottom:18px;width:auto}
+  .vtitle{font-size:19px}
+  .vkick{margin-bottom:6px}
+  .vdesc{font-size:12.5px;-webkit-line-clamp:2;margin-top:7px}
+  .vduty{display:flex;margin-top:11px;padding-top:10px;gap:5px}
+  .vduty .dc{font-size:10px;padding:4px 9px}
+  /* 手机档：.vawards 现在挂在 .vcard 下（已不在 .vinfo 里），继续用绝对定位贴右下角，
+     与职务标签底边对齐即可。**不能改成 position:static** —— 它会脱离 .vinfo 跑到
+     卡片最下面，反而错位（那是它还在 .vinfo 里时的旧写法）。4/3 的卡比 16/9 高，放得下。 */
+  .vawards{right:18px;bottom:18px;max-width:min(190px,52%);gap:5px}
+  .vawards.mini{right:14px;gap:0}
+  .vaw{padding:5px 10px 5px 6px;gap:6px}
+  .vaw .med{flex:0 0 16px;width:16px;height:16px;font-size:9px}
+  .vaw .at{font-size:11px}
+  .vaw .al{font-size:9.5px;-webkit-line-clamp:1}
+  .vgo{opacity:1;transform:none;top:14px;right:14px}   /* 移动端没 hover，观看按钮常显 */
+  .vstar{top:14px;left:14px;font-size:10.5px;padding:5px 11px}
+  .band{padding:26px 24px;gap:22px}
+  .prowx{gap:8px;margin-bottom:8px}
+  .contact-c{padding:44px 22px}
+  section{scroll-margin-top:132px}
+  .grp{scroll-margin-top:134px}
+  .catbar{top:66px}
+  /* 项目档案窄屏 */
+  .pj{padding:22px 20px}
+  .pjtag{margin-left:0}
+  .pjno{width:42px;height:42px;font-size:14px}
+  .pjshots{gap:12px;margin-top:22px}
+  /* 一图一行：两图并排会把截图/词云压到读不清，三图卡还会掉出「2 + 1 个孤儿图」 */
+  .pjshot{flex:1 1 100%;max-width:none;height:200px}
+  .pjshot figcaption{left:7px;bottom:7px;padding:4px 10px;font-size:10.5px}
+  /* 数码内容窄屏 */
+  .dacct{grid-template-columns:1fr;gap:16px;padding:26px 22px;margin-top:18px}
+  .dacct .dava{width:60px;height:60px;border-radius:18px}
+  /* 手机端两列密排：块数看着更多，也省纵向空间 */
+  .hcards{grid-template-columns:repeat(2,1fr);gap:10px}
+  .hc .dur{font-size:10px;right:6px;bottom:6px;padding:2px 7px}
+  .hc .meta-l{font-size:9.5px;left:6px;top:6px;padding:2px 8px;gap:6px}
+  .hc .meta-l .yr{padding-left:7px}
+  .hc .tp{display:none}
+  .dmore{padding:24px 22px}
+}
+
+/* ================= 论文与研究（以大封面为主） ================= */
+.pap{display:grid;grid-template-columns:340px minmax(0,1fr);gap:34px;align-items:start;
+  border-radius:var(--r-lg);padding:28px 30px 24px;margin-bottom:20px}
+.pap:last-child{margin-bottom:0}
+.pap-cv{position:relative;border-radius:5px;overflow:hidden;background:#fff;
+  border:1px solid rgba(16,24,40,.07);
+  box-shadow:0 16px 38px rgba(16,24,40,.20), 0 2px 6px rgba(16,24,40,.10)}
+.pap-cv img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top center}
+/* 书脊：左沿一道暗边，纸的厚度感靠它 */
+.pap-cv::before{content:'';position:absolute;inset:0 auto 0 0;width:8px;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,rgba(16,24,40,.13),rgba(16,24,40,0))}
+.pap-cv.pap-empty{display:grid;place-items:center;aspect-ratio:3/4;box-shadow:none;
+  background:#f7f9fd;border:1px dashed rgba(16,24,40,.20)}
+.pap-empty span{font-size:12px;color:var(--ink-3);line-height:1.85;text-align:center}
+.pap-empty em{font-style:normal;font-size:10.5px}
+.pap-tag{position:absolute;right:9px;bottom:9px;z-index:3;font-size:10.5px;font-weight:700;
+  letter-spacing:.04em;padding:3px 8px;border-radius:5px;color:#fff;background:rgba(13,17,23,.66)}
+.pap-bd{min-width:0;display:flex;flex-direction:column;height:100%;padding-top:2px}
+.pap-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pap-no{font-size:12px;font-weight:800;color:var(--acc);letter-spacing:.08em}
+.pap-kind{font-size:11.5px;color:var(--ink-2);background:#f2f5fa;border-radius:6px;padding:3px 9px}
+.pap-title{font-size:22px;font-weight:800;line-height:1.4;letter-spacing:-.015em}
+.pap-one{margin-top:8px;font-size:13.5px;color:var(--ink-2);line-height:1.72}
+.pap-points{list-style:none;margin-top:15px;display:grid;gap:7px}
+.pap-points li{display:grid;grid-template-columns:16px 1fr;gap:6px;font-size:13px;
+  color:var(--ink-2);line-height:1.68}
+.pap-points li::before{content:'—';color:var(--acc);font-weight:800;line-height:1.68}
+/* margin-top:auto 让指标贴着卡片底走，跟封面对齐；
+   否则封面高、右栏矮，右下会空出一块像是没排完 */
+.pap-meta{display:flex;gap:28px;flex-wrap:wrap;margin-top:auto;padding-top:14px;
+  border-top:1px solid rgba(16,24,40,.07);align-items:flex-end}
+.pap-meta b{display:block;font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-.02em}
+.pap-meta span{font-size:11px;color:var(--ink-3)}
+.pap-read{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--acc);text-decoration:none;
+  border:1px solid rgba(var(--acc-rgb),.24);border-radius:9px;padding:8px 14px;
+  background:rgba(var(--acc-rgb),.05);white-space:nowrap}
+.pap-pages{grid-column:1/-1;margin-top:6px;padding-top:16px;border-top:1px solid rgba(16,24,40,.07)}
+.pap-ph{display:flex;align-items:baseline;gap:9px;margin-bottom:11px;flex-wrap:wrap}
+.pap-ph b{font-size:12.5px;font-weight:750}
+.pap-ph span{font-size:11px;color:var(--ink-3);letter-spacing:.02em}
+/* 内页按张数等分铺满整行：4 张就 4 列，别挤在左边留一大片白。
+   但每张要限宽居中 —— 不然 4 张摊到 1124px，单张比大封面还宽，喧宾夺主 */
+.pap-strip{display:grid;grid-template-columns:repeat(var(--pn,4),minmax(0,1fr));gap:14px}
+.pap-pi{min-width:0;width:100%;max-width:196px;justify-self:center}
+.pap-pi .im{border-radius:6px;overflow:hidden;background:#eef2f9;aspect-ratio:3/4;
+  border:1px solid rgba(16,24,40,.07);box-shadow:0 3px 10px rgba(16,24,40,.08)}
+.pap-pi img{width:100%;height:100%;object-fit:cover;display:block}
+.pap-pi .im.ph{display:grid;place-items:center;background:#f7f9fd;
+  border:1px dashed rgba(16,24,40,.20);box-shadow:none}
+.pap-pi .im.ph span{font-size:10.5px;color:var(--ink-3);text-align:center;line-height:1.6}
+.pap-pi>span{display:block;margin-top:5px;font-size:10.5px;color:var(--ink-3);text-align:center}
+
+/* ================= 评论与随笔（时间线） ================= */
+.opd-top{display:flex;align-items:baseline;gap:12px;margin:2px 0 10px;flex-wrap:wrap}
+.opd-top b{font-size:13.5px;font-weight:750}
+.opd-top span{font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
+.opd-list{position:relative;padding-left:26px}
+.opd-list::before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:1px;
+  background:linear-gradient(180deg,rgba(var(--acc-rgb),.36),rgba(16,24,40,.10))}
+.opd{position:relative;display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:22px;
+  align-items:start;padding:16px 0;border-bottom:1px solid rgba(16,24,40,.06)}
+.opd:last-child{border-bottom:0}
+.opd::before{content:'';position:absolute;left:-25px;top:25px;width:9px;height:9px;border-radius:50%;
+  background:#fff;border:2px solid var(--acc)}
+.opd-date b{display:block;font-size:15px;font-weight:800;letter-spacing:.02em}
+.opd-date span{font-size:11px;color:var(--ink-3)}
+.opd-bd h3{font-size:16.5px;font-weight:700;line-height:1.5;letter-spacing:-.005em}
+.opd-bd p{margin-top:5px;font-size:13px;color:var(--ink-2);line-height:1.65}
+.opd-q{margin:9px 0 0;padding:7px 0 7px 12px;border-left:2px solid rgba(var(--acc-rgb),.28);
+  font-size:12.5px;color:var(--ink-2);line-height:1.7}
+/* 缩略图要做成「一张纸」：3px 白边 + 双层投影，不是贴一张小图 */
+.opd-th{width:106px;aspect-ratio:3/4;border-radius:5px;overflow:hidden;background:#fff;padding:3px;
+  border:1px solid rgba(16,24,40,.09);
+  box-shadow:0 9px 22px rgba(16,24,40,.14), 0 1px 3px rgba(16,24,40,.10)}
+.opd-th img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;
+  border-radius:2px}
+.opd-th.opd-noth{background:transparent;border:0;box-shadow:none;padding:0}
+
+/* ================= 设计与物料（按形态分组） ================= */
+.dz{border-radius:var(--r-lg);padding:24px 26px 26px;margin-bottom:20px}
+.dz:last-child{margin-bottom:0}
+.dz-h{display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.dz-h>div{flex:1;min-width:280px}
+.dz-h h3{font-size:20px;font-weight:800;line-height:1.4;letter-spacing:-.012em}
+.dz-h p{margin-top:6px;font-size:13.5px;color:var(--ink-2);line-height:1.72;max-width:62ch}
+.dz-spec{list-style:none;display:flex;flex-wrap:wrap;gap:8px;align-self:flex-end}
+.dz-spec li{font-size:12px;color:var(--ink-2);background:#f4f7fc;
+  border:1px solid rgba(16,24,40,.05);border-radius:8px;padding:5px 10px}
+.dz-spec li b{color:var(--ink);font-weight:750;margin-right:3px}
+.dz-grp{margin-top:22px}
+.dz-gh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dz-gh b{font-size:13px;font-weight:750;white-space:nowrap}
+.dz-gh span{font-size:11px;color:var(--ink-3);letter-spacing:.03em;white-space:nowrap}
+.dz-gh i{flex:1;height:1px;background:rgba(16,24,40,.08);min-width:20px}
+.dz-grid{display:grid;gap:12px}
+.dz-g4{grid-template-columns:repeat(4,1fr)}
+.dz-g3{grid-template-columns:repeat(3,1fr)}
+.dz-g2{grid-template-columns:repeat(2,1fr)}
+.dz-t{background:#eef2f9;border-radius:9px;overflow:hidden;position:relative;
+  box-shadow:0 4px 14px rgba(16,24,40,.10)}
+.dz-t img{width:100%;height:100%;object-fit:cover;display:block}
+.dz-t.s16{aspect-ratio:16/9}
+.dz-t.stall{aspect-ratio:1130/1600}
+.dz-t.ssq{aspect-ratio:1/1}
+.dz-t.sflag{aspect-ratio:1445/334;margin-top:12px}
+.dz-t em{position:absolute;left:7px;bottom:7px;font-style:normal;font-size:10px;font-weight:700;
+  padding:2px 7px;border-radius:4px;color:#fff;background:rgba(13,17,23,.62)}
+.dz-note{background:#f4f7fd;border:1px solid rgba(var(--acc-rgb),.13);border-radius:9px;
+  padding:14px 15px;display:grid;gap:8px;align-content:start}
+.dz-note>b{font-size:12.5px;font-weight:750;margin-bottom:2px}
+.dz-note>div{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--ink-2)}
+.dz-note>div span{color:var(--ink-3)}
+.dz-note>div i{font-style:normal;font-weight:650}
+.dz-note-foot{margin-top:4px;padding-top:9px;border-top:1px dashed rgba(16,24,40,.12);
+  font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+.dz-foot{display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:14px;
+  border-top:1px solid rgba(16,24,40,.07);font-size:12.5px;color:var(--ink-3);flex-wrap:wrap}
+.dz-foot b{color:var(--ink-2);font-weight:650}
+.dz-badge{display:inline-block;font-size:11px;font-weight:700;color:#8a5a00;background:#fff4dd;
+  border:1px solid rgba(180,120,0,.18);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+
+/* ================= 问题与方案 ================= */
+.prp{border-radius:var(--r-lg);padding:26px 28px;margin-bottom:18px}
+.prp:last-child{margin-bottom:0}
+.prp-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.prp-h h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.prp-h span{font-size:11.5px;color:var(--ink-3)}
+.prp-sub{margin-top:7px;font-size:13.5px;color:var(--ink-2);line-height:1.72;max-width:74ch}
+.prp-flow{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);
+  margin-top:20px;align-items:stretch}
+.prp-col{display:grid;gap:9px;align-content:start}
+.prp-ch{font-size:11px;letter-spacing:.16em;color:var(--ink-3);margin-bottom:1px}
+.prp-s{background:#f5f8fd;border:1px solid rgba(16,24,40,.05);border-radius:12px;padding:11px 14px}
+.prp-s b{display:block;font-size:13px;font-weight:700;margin-bottom:3px}
+.prp-s span{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.prp-ar{display:grid;place-items:center;color:rgba(var(--acc-rgb),.72);font-size:19px;font-weight:700}
+.prp-foot{margin-top:16px;padding-top:12px;border-top:1px solid rgba(16,24,40,.07);
+  font-size:12.5px;color:var(--ink-3)}
+
+@media(max-width:960px){
+  .pap{grid-template-columns:minmax(0,1fr)}
+  .pap-cv{max-width:230px}
+  .pap-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pap-meta{gap:20px}
+  .pap-meta .pap-read{margin-left:0}
+  .opd{grid-template-columns:minmax(0,1fr);gap:8px}
+  .opd-th{width:100%;height:150px;aspect-ratio:auto}
+  .opd-th.opd-noth{display:none}
+  .prp-flow{grid-template-columns:minmax(0,1fr)}
+  .prp-ar{display:none}
+  .dz-g4{grid-template-columns:repeat(2,1fr)}
+  .dz-g3{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ================= 深色（夜晚）模式 =================
+   做法和浅色完全一致：上面所有规则一个字不动，只在这里按 html[data-theme="dark"]
+   追加覆盖。两套配色各自独立，谁也不会把谁改坏，删掉这一段就回到纯浅色。
+   玻璃卡靠三样东西立起来：半透明底、内高光、外投影。深色下内高光必须压到 .12 以下，
+   否则会有「晚上还在发白光」的塑料感；外投影要加重，靠它把卡片从深底上「抬」起来。 */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --ink:#e9eef8; --ink-2:#a6b2c6; --ink-3:#78859a;
+  --acc:#6b96ff; --acc-2:#9dbaff; --acc-3:#7da3ff;
+  --acc-rgb:107,150,255; --acc-2-rgb:157,186,255; --acc-3-rgb:125,163,255;
+  --w1:44,84,166; --w2:116,50,94; --w3:22,94,90; --w4:108,66,26;
+  --bg1:#0a0f18; --bg2:#06090f; --bgD:#070a11;
+  --sh:0 10px 34px rgba(0,0,0,.50), 0 2px 8px rgba(0,0,0,.34);
+  --sh-hi:0 20px 54px rgba(0,0,0,.60), 0 4px 14px rgba(0,0,0,.40);
+}
+html[data-theme="dark"] body{background:var(--bgD)}
+/* 深底的彩色柔光：亮度和饱和度都要压下来，夜间大面积高饱和会糊成一片 */
+html[data-theme="dark"] body::before{
+  background:
+    radial-gradient(46% 40% at 10% 4%, rgba(var(--w1),.40), transparent 62%),
+    radial-gradient(38% 36% at 90% 10%, rgba(var(--w2),.30), transparent 60%),
+    radial-gradient(52% 44% at 80% 84%, rgba(var(--w3),.30), transparent 62%),
+    radial-gradient(42% 38% at 16% 90%, rgba(var(--w4),.26), transparent 60%),
+    linear-gradient(180deg,var(--bg1),var(--bg2))}
+html[data-theme="dark"] body::after{opacity:.05}
+
+/* 玻璃卡 */
+html[data-theme="dark"] .g{
+  background:linear-gradient(158deg, rgba(32,41,57,.74), rgba(19,26,37,.60) 52%, rgba(27,35,49,.70));
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%) brightness(.96);
+  backdrop-filter:blur(var(--blur)) saturate(150%) brightness(.96);
+  box-shadow:var(--sh), inset 0 1px 0 rgba(255,255,255,.09), inset 0 -1px 0 rgba(255,255,255,.03)}
+html[data-theme="dark"] .g::before{
+  background:linear-gradient(145deg, rgba(255,255,255,.26), rgba(255,255,255,.02) 34%,
+             rgba(255,255,255,.12) 58%, rgba(255,255,255,.02) 82%, rgba(255,255,255,.16))}
+html[data-theme="dark"] .g::after{
+  background:radial-gradient(115% 78% at 8% -14%, rgba(255,255,255,.10), rgba(255,255,255,0) 56%)}
+
+/* 顶栏 */
+html[data-theme="dark"] .nav{
+  background:linear-gradient(158deg,rgba(22,29,41,.92),rgba(15,20,29,.80) 52%,rgba(19,25,35,.88));
+  box-shadow:var(--sh-hi), inset 0 1px 0 rgba(255,255,255,.10)}
+html[data-theme="dark"] .nav.scrolled{
+  background:linear-gradient(158deg,rgba(19,26,37,.96),rgba(14,19,27,.92) 52%,rgba(17,22,32,.95));
+  box-shadow:var(--sh-hi), inset 0 1px 0 rgba(255,255,255,.12)}
+html[data-theme="dark"] .mark{box-shadow:0 4px 12px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.20)}
+html[data-theme="dark"] .navlinks a:hover,
+html[data-theme="dark"] .cat:hover,
+html[data-theme="dark"] .pill:hover{background:rgba(255,255,255,.10);color:var(--ink)}
+
+/* 主题切换按钮：两个图标靠 data-theme 换，不重画 DOM */
+.themebtn{width:34px;height:34px;flex:none;display:grid;place-items:center;cursor:pointer;
+  border:0;border-radius:999px;background:transparent;color:var(--ink-2);transition:.2s}
+.themebtn:hover{background:rgba(13,17,23,.07);color:var(--ink)}
+.themebtn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.themebtn svg{width:17px;height:17px;display:block}
+.themebtn .ic-sun{display:none}
+html[data-theme="dark"] .themebtn:hover{background:rgba(255,255,255,.12)}
+html[data-theme="dark"] .themebtn .ic-sun{display:block}
+html[data-theme="dark"] .themebtn .ic-moon{display:none}
+
+/* 首屏底边要融进深色页面，不能再融浅灰 */
+html[data-theme="dark"] .hero::after{
+  background:linear-gradient(180deg,rgba(7,10,17,0) 0%,rgba(7,10,17,.55) 58%,rgba(7,10,17,.94) 100%)}
+html[data-theme="dark"] .avatar{
+  border-color:rgba(255,255,255,.26);
+  box-shadow:0 14px 34px rgba(0,0,0,.55), 0 0 0 6px rgba(255,255,255,.06)}
+
+/* 各种细线 / 分隔：浅色下是「深色 8%」，深色下必须反过来变「白 10%」，否则整片看不见 */
+html[data-theme="dark"] .stat + .stat::before{background:rgba(255,255,255,.14)}
+html[data-theme="dark"] .grp-t .fl,
+html[data-theme="dark"] .pcat-h .fl,
+html[data-theme="dark"] .pjgroup-h .fl{background:linear-gradient(90deg,rgba(255,255,255,.18),transparent)}
+html[data-theme="dark"] .abt-h::after{background:rgba(255,255,255,.14)}
+html[data-theme="dark"] .dz-gh i{background:rgba(255,255,255,.12)}
+html[data-theme="dark"] .opd-list::before{
+  background:linear-gradient(180deg,rgba(107,150,255,.42),rgba(255,255,255,.10))}
+html[data-theme="dark"] .jrow + .jrow,
+html[data-theme="dark"] .dsum li,
+html[data-theme="dark"] .prow,
+html[data-theme="dark"] .rline,
+html[data-theme="dark"] .awards li,
+html[data-theme="dark"] .pjmetrics,
+html[data-theme="dark"] .prp-foot,
+html[data-theme="dark"] .dz-foot,
+html[data-theme="dark"] .pap-meta,
+html[data-theme="dark"] .pap-pages,
+html[data-theme="dark"] .dz-note-foot,
+html[data-theme="dark"] .opd{border-color:rgba(255,255,255,.10)}
+
+/* 图片容器的占位底色：亮灰在深色里会漏出白边，统一换成深灰蓝 */
+html[data-theme="dark"] .hc,
+html[data-theme="dark"] .vcard,
+html[data-theme="dark"] .serimg,
+html[data-theme="dark"] .prowx figure,
+html[data-theme="dark"] .pjshot,
+html[data-theme="dark"] .dz-t,
+html[data-theme="dark"] .pap-pi .im{background:#141a24}
+
+/* 卡片 */
+html[data-theme="dark"] .vcard{box-shadow:0 14px 44px rgba(0,0,0,.55)}
+html[data-theme="dark"] .vcard:hover{box-shadow:0 26px 64px rgba(0,0,0,.70)}
+html[data-theme="dark"] .hc{box-shadow:0 6px 18px rgba(0,0,0,.40)}
+html[data-theme="dark"] .hc:hover{box-shadow:0 18px 38px rgba(0,0,0,.60)}
+html[data-theme="dark"] .subitem{background:rgba(255,255,255,.06);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+html[data-theme="dark"] .subitem:hover{box-shadow:0 22px 46px rgba(0,0,0,.62)}
+html[data-theme="dark"] .submeta{background:#111721}
+html[data-theme="dark"] .sercard{background:rgba(255,255,255,.06);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+html[data-theme="dark"] .sercard:hover{box-shadow:0 22px 46px rgba(0,0,0,.62)}
+html[data-theme="dark"] .pjshot{box-shadow:0 6px 20px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.10)}
+html[data-theme="dark"] .pjshot:hover{box-shadow:0 16px 38px rgba(0,0,0,.60), inset 0 0 0 1px rgba(255,255,255,.18)}
+html[data-theme="dark"] .prowx figure{box-shadow:0 5px 16px rgba(0,0,0,.42)}
+html[data-theme="dark"] .prowx figure:hover{box-shadow:0 14px 34px rgba(0,0,0,.60)}
+
+/* 数据条 / 联系 / 页脚的小胶囊 */
+html[data-theme="dark"] .band .bi{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+html[data-theme="dark"] .big-link{background:rgba(255,255,255,.08);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14), 0 4px 14px rgba(0,0,0,.35)}
+html[data-theme="dark"] .big-link:hover{background:rgba(255,255,255,.14)}
+html[data-theme="dark"] .plink{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+html[data-theme="dark"] .plink:hover{background:rgba(255,255,255,.13);color:var(--acc)}
+
+/* 「只看代表作」胶囊 */
+html[data-theme="dark"] .vfil{
+  background:linear-gradient(158deg,rgba(255,255,255,.12),rgba(255,255,255,.05) 52%,rgba(255,255,255,.09));
+  box-shadow:0 6px 20px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.10)}
+html[data-theme="dark"] .vfil:hover{
+  box-shadow:0 10px 26px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.20), inset 0 0 0 1px rgba(255,255,255,.18)}
+
+/* 偏白的芯片 / 标签：底色换深、文字提亮，不然蓝字压深底读不出来 */
+html[data-theme="dark"] .subduty .dc{color:#9dbaff;background:rgba(107,150,255,.13);
+  box-shadow:inset 0 0 0 1px rgba(107,150,255,.22)}
+html[data-theme="dark"] .subgo{color:#9dbaff;background:rgba(107,150,255,.13)}
+html[data-theme="dark"] .subitem:hover .subgo{background:#3f6fd6;color:#fff}
+html[data-theme="dark"] .dacct .dchip{background:rgba(107,150,255,.14);box-shadow:inset 0 0 0 1px rgba(107,150,255,.24)}
+html[data-theme="dark"] .dacct .dava{box-shadow:0 10px 26px rgba(0,0,0,.5), inset 0 0 0 3px rgba(255,255,255,.12)}
+html[data-theme="dark"] .pjno{background:linear-gradient(158deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14), 0 4px 12px rgba(0,0,0,.30)}
+html[data-theme="dark"] .pjtag{background:linear-gradient(158deg,rgba(107,150,255,.20),rgba(107,150,255,.09));
+  box-shadow:inset 0 0 0 1px rgba(107,150,255,.32), 0 3px 10px rgba(0,0,0,.25)}
+html[data-theme="dark"] .pjstack i{background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+html[data-theme="dark"] .pap-read{background:rgba(107,150,255,.12);border-color:rgba(107,150,255,.30)}
+
+/* 论文：封面是纸，深色下别做成纯白（刺眼），压成浅灰蓝仍保留纸感 */
+html[data-theme="dark"] .pap-cv{background:#dfe5ee;border-color:rgba(255,255,255,.10);
+  box-shadow:0 16px 38px rgba(0,0,0,.60), 0 2px 6px rgba(0,0,0,.45)}
+html[data-theme="dark"] .pap-cv::before{
+  background:linear-gradient(90deg,rgba(0,0,0,.20),rgba(0,0,0,0))}
+html[data-theme="dark"] .pap-cv.pap-empty{background:#0f141c;border-color:rgba(255,255,255,.16);box-shadow:none}
+html[data-theme="dark"] .pap-kind{background:rgba(255,255,255,.09)}
+html[data-theme="dark"] .pap-pi .im{border-color:rgba(255,255,255,.10);box-shadow:0 3px 10px rgba(0,0,0,.35)}
+html[data-theme="dark"] .pap-pi .im.ph{background:#0f141c;border-color:rgba(255,255,255,.16)}
+
+/* 随笔：时间轴那个白色节点要跟着底色走，否则暗处一圈白点很扎眼 */
+html[data-theme="dark"] .opd::before{background:#0b1017;border-color:var(--acc)}
+html[data-theme="dark"] .opd-q{border-left-color:rgba(107,150,255,.38)}
+html[data-theme="dark"] .opd-th{background:#dfe5ee;border-color:rgba(255,255,255,.10);
+  box-shadow:0 9px 22px rgba(0,0,0,.50), 0 1px 3px rgba(0,0,0,.40)}
+
+/* 设计与物料 */
+html[data-theme="dark"] .dz-spec li{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.08)}
+html[data-theme="dark"] .dz-note{background:rgba(107,150,255,.09);border-color:rgba(107,150,255,.22)}
+html[data-theme="dark"] .dz-badge{color:#f0c86a;background:rgba(240,200,106,.14);
+  border-color:rgba(240,200,106,.30)}
+
+/* 问题与方案 */
+html[data-theme="dark"] .prp-s{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}
+html[data-theme="dark"] .prp-ar{color:rgba(107,150,255,.85)}
+
+/* 关于我：证书照片的细描边 */
+html[data-theme="dark"] .rphoto{box-shadow:0 12px 28px -10px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.10)}

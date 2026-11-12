@@ -1,0 +1,3665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>作品集后台</title>
+<style>
+:root{
+  --bg:#f4f6fa; --panel:#fff; --line:#e3e8f0;
+  --ink:#0d1117; --ink2:#4d5766; --ink3:#8a909c;
+  --acc:#2f6bff; --acc-s:#eaf0ff;
+  --ok:#0a8f4a; --ok-s:#e8f7ef;
+  --warn:#b7791f; --warn-s:#fdf6e7;
+  --danger:#d0363c; --danger-s:#fdecec;
+  --r:12px; --r-s:8px;
+  --sh:0 1px 3px rgba(16,24,40,.08), 0 6px 20px rgba(16,24,40,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+
+/* 顶栏（定高 60px：侧栏的 top 偏移按它对齐） */
+.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;height:60px;
+  padding:0 20px;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 4px rgba(16,24,40,.05)}
+.top h1{font-size:15px;font-weight:700;letter-spacing:.3px}
+.top .sp{flex:1}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px}
+.dot.dirty{background:var(--warn)}
+#stat{font-size:12.5px;color:var(--ink2)}
+.btn{padding:7px 14px;border-radius:var(--r-s);border:1px solid var(--line);background:#fff;
+  font-size:13px;font-weight:600;transition:.15s}
+.btn:hover{border-color:var(--acc);color:var(--acc);background:var(--acc-s)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.pri:hover{background:#2558dd;color:#fff}
+.btn.warn{color:var(--danger);border-color:#f3d2d3}
+.btn.warn:hover{background:var(--danger-s);border-color:var(--danger);color:var(--danger)}
+
+/* 一段式选项（网站配色的四档）：连成一条，选中那格实心 */
+.segx{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+.segx button{padding:7px 14px;border:0;background:transparent;font-size:12.5px;font-weight:600;
+  color:var(--ink3);border-right:1px solid var(--line);transition:.14s}
+.segx button:last-child{border-right:0}
+.segx button:hover{background:#f5f8fd;color:var(--ink)}
+.segx button.on{background:var(--acc);color:#fff}
+.themepv{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;border-radius:10px;
+  border:1px solid var(--line);font-size:12.5px;transition:.18s}
+.themepv b{font-size:12.5px}
+.themepv span{color:var(--ink3);font-size:11.5px}
+.themepv .dot{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:13px}
+
+
+/* 历史版本：一行一版，时间在左、大小居中、按钮在右。
+   行高固定，30 份也不会把卡片撑得太高 —— 列表本身限高滚动。 */
+.bklist{max-height:196px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.bkrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;
+  padding:9px 12px;font-size:12.5px;border-bottom:1px solid #f1f4f9}
+.bkrow:last-child{border-bottom:0}
+.bkrow b{font-weight:600;font-variant-numeric:tabular-nums}
+.bkrow span{color:var(--ink3);font-size:11.5px;font-variant-numeric:tabular-nums}
+.bklist .empty{padding:16px 12px;text-align:center;color:var(--ink3);font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:3px 8px;font-size:12px;border-radius:6px}
+
+/* 左侧导航栏：页面多的时候（一页一项，最多 10+ 个）竖排一屏排得下，还能按名字过滤。
+   窄窗口回退成顶部横滑页签条 —— 回退规则在文件末尾的媒体查询里，必须写在基础规则之后 */
+.tabs{position:fixed;top:60px;left:0;bottom:0;width:224px;z-index:40;
+  display:flex;flex-direction:column;gap:2px;padding:12px 10px 18px;
+  background:#fff;border-right:1px solid var(--line);overflow-y:auto;scrollbar-width:thin}
+#pgTabs{display:flex;flex-direction:column;gap:2px}
+.navgrp{font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--ink3);padding:14px 10px 6px}
+.navgrp.first{padding-top:2px}
+.navfilter{padding:0 4px 10px}
+.navfilter input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;
+  font-size:12.5px;outline:none;background:#f8fafc;transition:.15s}
+.navfilter input:focus{border-color:var(--acc);background:#fff;box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+.tabs .tab{flex:none;display:flex;align-items:center;gap:8px;width:100%;
+  padding:9px 11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink2);
+  text-align:left;white-space:nowrap;overflow:hidden;transition:.14s}
+.tabs .tab:hover{background:#f2f6fd;color:var(--ink)}
+.tab.on{background:var(--acc-s);color:var(--acc);box-shadow:inset 3px 0 0 var(--acc)}
+.tab .n{font-size:11px;font-weight:700;opacity:.75;margin-left:auto;
+  background:rgba(47,107,255,.1);border-radius:999px;padding:1px 7px;flex:none}
+
+/* 论文 / 评论 / 设计 / 方案：一个板块一张卡，卡片里再一张张作品卡 */
+.txi{border:1px solid var(--line);border-radius:var(--r-s);padding:11px 12px 3px;
+  margin-top:10px;background:#fcfdff}
+.txih{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.txih b{font-size:11px;font-weight:800;color:var(--acc);letter-spacing:.06em}
+.txih>span{font-size:12.5px;font-weight:700;color:var(--ink2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%}
+.txih .sp{flex:1}
+.txi .row2 .fld.full{grid-column:1/-1}
+
+.wrap{margin-left:224px;padding:18px 24px 60px}
+.page{display:none}.page.on{display:block}
+
+/* 三栏：前两栏是「列表 + 就地表单」，窄了「英文 / 排版」就各剩 90px、下拉长选项被截半句，
+   所以给它们 270 / 300 的下限；编辑卡吃剩下的宽度。
+   1150 以下改成两行（两张列表卡并排、编辑卡通栏），860 以下退单列 —— 中屏三栏会被压成豆腐块。 */
+.cols{display:grid;grid-template-columns:270px 300px 1fr;gap:14px;align-items:start}
+@media(max-width:1150px){
+  .cols{grid-template-columns:1fr 1fr}
+  .cols>.card:nth-child(3){grid-column:1/-1}}
+@media(max-width:860px){
+  .cols{grid-template-columns:1fr}
+  .cols>.card:nth-child(3){grid-column:auto}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.card h3{font-size:13px;font-weight:700;padding:11px 14px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;background:#fbfcfe}
+.card h3 .sp{flex:1}
+.card .bd{padding:10px}
+.card .bd.np{padding:0}
+
+/* 列表项 */
+.lst{max-height:calc(100vh - 230px);overflow:auto}
+.li{padding:9px 12px;border-bottom:1px solid #f1f4f9;cursor:pointer;display:flex;gap:9px;align-items:center}
+.li:last-child{border-bottom:0}
+.li:hover{background:#f8fafd}
+.li.on{background:var(--acc-s);box-shadow:inset 3px 0 0 var(--acc)}
+.li .tx{flex:1;min-width:0}
+.li .t1{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .t2{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .op{display:flex;gap:2px;opacity:.35;transition:.15s}
+.li:hover .op,.li.on .op{opacity:1}
+/* 「移到分组」浮层：从作品列表直接挪，不用去编辑表单里找那个下拉 */
+.mvpop{position:fixed;z-index:200;background:#fff;border:1px solid var(--line);
+  border-radius:10px;box-shadow:0 10px 34px rgba(16,24,40,.18);padding:6px;min-width:190px;
+  max-height:60vh;overflow:auto}
+.mvpop .mvt{font-size:11px;color:var(--ink3);padding:4px 8px 7px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.mvpop .mv{display:block;width:100%;text-align:left;padding:7px 9px;border-radius:7px;
+  font-size:12.5px;font-weight:600;cursor:pointer;border:0;background:none;color:var(--ink)}
+.mvpop .mv:hover{background:var(--acc-s);color:var(--acc)}
+.mvpop .mv small{display:block;font-weight:400;font-size:11px;color:var(--ink3);margin-top:1px}
+.mvpop .mv:disabled{opacity:.4;cursor:default}
+.mvpop .mv:disabled:hover{background:none;color:var(--ink)}
+.li.hid .t1{color:var(--ink3);text-decoration:line-through}
+.thumb{width:52px;height:34px;border-radius:5px;object-fit:cover;background:#eef1f6;flex:none}
+.thumb.no{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink3)}
+.badge{font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700;flex:none}
+.badge.b{background:var(--acc-s);color:var(--acc)}
+.badge.h{background:#f1f3f7;color:var(--ink3)}
+.badge.s{background:var(--ok-s);color:var(--ok)}
+
+/* 表单 */
+.f{padding:12px 14px}
+.fld{margin-bottom:13px}
+.fld:last-child{margin-bottom:0}
+.fld label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:5px}
+.fld label .hint{font-weight:400;color:var(--ink3);font-size:11px;margin-left:5px}
+.fld input[type=text],.fld input[type=url],.fld textarea,.fld select{
+  width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-s);
+  background:#fff;font-size:13.5px;outline:none;transition:.15s}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+/* 多行文本（简介这类）：默认就给出三行的高度，输入时随内容自己长高（Chrome 系支持
+   field-sizing，其它浏览器退回 min-height），长到 340px 才出滚动条 —— 别让一段简介
+   卡在 90px 的小框里、只能靠里面那根粗滚动条摸字。滚动条本身也做细，贴近白底。 */
+.fld textarea{resize:vertical;min-height:96px;line-height:1.68;
+  field-sizing:content;max-height:340px}
+textarea{scrollbar-width:thin;scrollbar-color:#d4dce8 transparent}
+textarea::-webkit-scrollbar{width:9px;height:9px}
+textarea::-webkit-scrollbar-track{background:transparent}
+textarea::-webkit-scrollbar-thumb{background:#d4dce8;border-radius:99px;border:2px solid #fff}
+textarea::-webkit-scrollbar-thumb:hover{background:#bfcbdb}
+/* 高度既然由内容决定，右下角那个拖拽手柄就没意义了（拖了也会被内容高度盖回去） */
+@supports (field-sizing:content){.fld textarea{resize:none}}
+/* 主题色：预设色块 + 自定义 + 两块预览小样。
+   色块做成胶囊（圆点 + 名字）而不是纯色圆 —— 六个纯圆点排一排，看的人分不出哪个是橙
+   哪个是红；带上名字就不用猜。选中给一圈外环，不用勾选图标（小尺寸里勾看不清）。 */
+.accgrid{display:flex;flex-wrap:wrap;gap:7px}
+.accsw{display:flex;align-items:center;gap:7px;padding:5px 11px 5px 6px;border:1px solid var(--line);
+  border-radius:999px;background:#fff;cursor:pointer;font-size:12.5px;font-weight:600;
+  color:var(--ink2);transition:.14s}
+.accsw:hover{border-color:#c7d3e6;background:#fbfcfe}
+.accsw i{width:19px;height:19px;border-radius:50%;flex:none;display:block;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.accsw.on{border-color:var(--acc);color:var(--ink);background:var(--acc-s);
+  box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+.accrow{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
+.acccus{display:inline-flex;align-items:center;gap:7px;padding:4px 11px 4px 5px;border:1px solid var(--line);
+  border-radius:999px;background:#fff;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.acccus:hover{border-color:#c7d3e6}
+/* 原生取色器在各系统长相差别很大（Chrome 是方块、macOS 是色盘），
+   压成固定尺寸 + 圆形，才和左边的预设色块是一排东西 */
+.acccus input[type=color]{width:23px;height:23px;padding:0;border:0;background:none;cursor:pointer}
+.acccus input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.acccus input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
+.acccus input[type=color]::-moz-color-swatch{border:0;border-radius:50%}
+/* ⚠️ 选择器前面必须带 .accrow：卡片里有 `.fld input[type=text]{width:100%}` 和
+   `.fld label{display:block}` 两条更"具体"的规则，光写 .acchex / .acccus 会被它们盖掉 ——
+   表现就是十六进制输入框撑满一行、把「恢复默认」挤到下一行。 */
+.accrow .acchex[type=text]{width:104px;padding:6px 9px;border:1px solid var(--line);border-radius:var(--r-s);
+  background:#fff;font:600 12.5px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.3px;outline:none}
+.accrow .acchex[type=text]:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+.accrow .acccus{margin:0;font-size:12.5px;font-weight:600;color:var(--ink2);display:inline-flex}
+/* 预览：浅 / 深各一块，24px 高的柔光 + 一颗按钮 + 一行强调字。
+   预览不抄颜色，全用接口算出来的值 —— 和生成器同一份算法。 */
+.accpv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px;max-width:620px}
+/* 限宽：卡片在宽屏下有 1200px，两块预览摊到 600px 一块就成了一条「色带」，
+   看不出柔光的层次 —— 收到 300px 一块才像网站的缩略图。 */
+.accpv>div{position:relative;height:78px;border-radius:10px;overflow:hidden;padding:10px 12px;
+  display:flex;flex-direction:column;gap:7px;justify-content:center;border:1px solid var(--line)}
+.accpv .pl{position:absolute;right:9px;top:7px;font-size:10px;letter-spacing:.14em;opacity:.55}
+.accpv .acb{align-self:flex-start;padding:3px 11px;border-radius:999px;color:#fff;
+  font-size:11.5px;font-weight:700;line-height:1.5}
+.accpv .act{font-size:11px;font-weight:700;letter-spacing:.02em}
+.accnote{margin-top:8px;font-size:11.5px;color:var(--ink3);line-height:1.65;min-height:18px}
+
+/* 内页导入条：一个按钮 + 「推荐 PDF」徽标 + 一句说明。
+   徽标不是装饰 —— Word 那条路只保文字，表格和图会丢，得在下手之前就告诉人。 */
+.docimp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+/* 卡片顶部那条：淡蓝底一小块，一眼看出「这里能把整份文件导进来」。
+   放在字段之前，是因为封面也在里面 —— 见 docBar 里的注释。 */
+.txi > .docimp{margin:0 0 12px;padding:8px 10px;border-radius:var(--r-s);background:var(--acc-s)}
+.txi > .docimp .chk{font-size:12px;padding:0;gap:6px}
+.txi > .docimp .chk input{width:14px;height:14px}
+
+/* ---------- 设计物料：分组（一组一套网格）----------
+   groups 原来是裸 JSON 文本框：两三个分组、每组四五张图，改一张图的图注要在一坨括号里
+   找那一行，还得记住 "版式" 是第 3 项。这里拆成「组 → 图」两层，图能选、能排序、版式走下拉。
+   数据结构一个字段都没改（name/note/cols/items/wide/note_card），只是换了编辑方式。 */
+.dzg-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.dzg-bar .sub{font-size:11.5px;color:var(--ink3)}
+.dzg-g{border:1px solid var(--line);border-radius:10px;padding:10px 11px;margin-bottom:10px;background:#fbfcfe}
+.dzg-h{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.dzg-h b{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.dzg-h span{font-size:13px;font-weight:600}
+.dzg-meta{display:grid;grid-template-columns:1.1fr 1.5fr 92px;gap:8px;margin-bottom:9px}
+.dzg-i{display:grid;grid-template-columns:46px 1.6fr 1.2fr 104px auto;gap:8px;
+  align-items:center;margin-bottom:6px}
+.dzg-i .dzg-th,.dzg-wide .dzg-th{width:46px;height:34px;border-radius:6px;object-fit:cover;
+  background:#eef2f9;display:block;flex:none}
+.dzg-th.no{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink3)}
+.dzg-acts{display:flex;gap:4px;justify-content:flex-end}
+.dzg-wide{display:grid;grid-template-columns:46px 1.6fr 1.2fr auto;gap:8px;align-items:center;
+  margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.dzg-nc{margin-top:8px}
+.dzg-nc > summary{cursor:pointer;font-size:11.5px;color:var(--ink3);list-style:none}
+.dzg-nc > summary::-webkit-details-marker{display:none}
+.dzg-nc > summary::before{content:'▸ ';font-size:10px}
+.dzg-nc[open] > summary::before{content:'▾ '}
+.dzg-nc .row2{margin-top:8px}
+@media(max-width:1100px){
+  .dzg-meta{grid-template-columns:1fr 1fr}
+  .dzg-meta > .fld:last-child{grid-column:1/-1}
+  .dzg-i{grid-template-columns:46px 1fr 96px}
+  .dzg-i .dzg-acts{grid-column:1/-1}
+  .dzg-wide{grid-template-columns:46px 1fr}
+}
+.docimp .rec{font-size:10px;font-weight:800;letter-spacing:.02em;padding:2px 7px;border-radius:999px;
+  background:var(--ok-s);color:var(--ok);border:1px solid rgba(24,146,124,.22)}
+.docimp .sub{font-size:11px;color:var(--ink3)}
+.docimp.busy .btn{opacity:.6;pointer-events:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* 窄列里别硬塞两列：下拉框里「专项（大卡 + 封面墙）」这种长选项会被截掉半句 */
+.row2.stack{grid-template-columns:1fr}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;padding:6px 0;cursor:pointer;user-select:none}
+.chk input{width:15px;height:15px;accent-color:var(--acc)}
+.chks{display:flex;flex-wrap:wrap;gap:14px}
+
+/* 封面 */
+.cov{display:flex;gap:12px;align-items:flex-start}
+.cov img{width:150px;height:96px;object-fit:cover;border-radius:var(--r-s);border:1px solid var(--line);background:#eef1f6}
+.cov .ph{width:150px;height:96px;border-radius:var(--r-s);border:1px dashed #cfd8e6;background:#fafbfd;
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink3)}
+.cov .rt{flex:1;min-width:0}
+.cov .rt input{margin-bottom:6px}
+
+/* 子封面墙 */
+.subs{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+.sub{display:flex;gap:9px;align-items:center;padding:7px 0;border-bottom:1px dashed #eef1f6}
+.sub:last-of-type{border-bottom:0}
+.sub img{width:44px;height:29px;object-fit:cover;border-radius:4px;background:#eef1f6}
+
+/* 摄影 */
+.cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.cat-c{padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-s);background:#fff;cursor:pointer;font-size:13px;font-weight:600}
+.cat-c.on{border-color:var(--acc);background:var(--acc-s);color:var(--acc)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.pcell{background:#fff;border:1px solid var(--line);border-radius:var(--r-s);overflow:hidden}
+.pcell img{width:100%;height:100px;object-fit:cover;display:block;background:#eef1f6;cursor:pointer}
+.pcell .pb{padding:6px 8px;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2)}
+.pcell .pb .sp{flex:1}
+
+/* 奖项 */
+.aw{display:grid;grid-template-columns:260px 1fr;gap:14px;align-items:start}
+/* 总设置用：左栏放表单（要宽），右栏放标识图（够用就行） */
+.aw2{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+@media(max-width:900px){.aw{grid-template-columns:1fr}.aw2{grid-template-columns:1fr}}
+.awi{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid #f1f4f9;align-items:start}
+.awi:last-of-type{border-bottom:0}
+.awi input{width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:13px;outline:none}
+
+/* 通用「可增删的参数行」：封面数字 / 关于我条目 / 联系方式，列数由行内 grid-template-columns 决定 */
+.prow{display:grid;gap:8px;padding:7px 0;border-bottom:1px solid #f1f4f9;align-items:center}
+.prow:last-of-type{border-bottom:0}
+.prow input{width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:13px;outline:none}
+.prow input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+.li .t2.warn{color:var(--warn)}
+
+/* 一个面板里塞了多个模块时的分隔标题（奖项、论文…都靠它分层） */
+.subhd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  margin:22px 0 10px;padding-top:16px;border-top:1px solid var(--line);
+  font-size:13px;font-weight:750;color:var(--ink)}
+.subhd span{font-size:11.5px;font-weight:400;color:var(--ink3)}
+
+/* 展示模块页顶部的操作条：新增 / 删除都从弹窗走，不裸删 */
+.modacts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.modacts b{font-size:13px;font-weight:750}
+.modacts .sp{flex:1}
+.modgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:7px}
+.modgrid button{text-align:left;line-height:1.5}
+.modgrid button.sel{border-color:var(--acc);background:#fff;box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+.modgrid button em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3);margin-top:2px}
+.modgrid button:disabled em{color:#b9c0cc}
+
+/* 新增页面 · 页面模板选择器：一张卡 = 一种页面类型，上面是版式缩略图，下面是名字和说明 */
+.tplgrp{font-size:11.5px;font-weight:750;letter-spacing:.04em;color:var(--ink3);margin:12px 0 6px}
+.tplgrp:first-child{margin-top:0}
+.tplgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.tpl{display:flex;flex-direction:column;padding:0;overflow:hidden;text-align:left;
+  background:#fff;border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:.14s}
+.tpl:hover:not(:disabled){border-color:#b9c9e6;box-shadow:0 2px 8px rgba(16,24,40,.06)}
+.tpl.sel{border-color:var(--acc);box-shadow:0 0 0 3px rgba(47,107,255,.14)}
+.tpl:disabled{opacity:.5;cursor:not-allowed;background:#fbfcfe}
+.tpl .pv{height:54px;padding:7px 9px;display:flex;flex-direction:column;gap:3px;
+  background:#f5f8fc;border-bottom:1px solid var(--line);flex:none}
+.tpl .nm{padding:6px 9px 0;font-size:13px;font-weight:700;color:var(--ink);line-height:1.3}
+.tpl .ds{padding:2px 9px 7px;font-size:10px;line-height:1.4;color:var(--ink3)}
+.tpl .ds em{display:block;font-style:normal;margin-top:2px;color:#9aa7ba}
+.tpl.sel .ds em,.tpl:hover:not(:disabled) .ds em{color:var(--acc)}
+.tpl:disabled .ds em{color:#b9c0cc}
+.tpl:disabled .nm{color:var(--ink3)}
+/* 缩略图里的灰块，只示意版式，不画真实内容 */
+.tpl .pv i{display:block;background:#cdd9ea;border-radius:2px}
+.tpl .pv .bt{height:6px;width:56%}
+.tpl .pv .bs{height:4px;width:34%;background:#e2eaf6}
+.tpl .pv .bb{flex:1}
+.tpl .pv .br{height:9px}
+.tpl .pv .bl{height:4px;width:100%;background:#e2eaf6}
+.tpl .pv .bl.w7{width:70%}
+.tpl .pv .bl.w5{width:48%}
+.tpl .pv .row{flex:1;display:grid;gap:3px}
+.tpl .pv .row.g4{grid-template-columns:1fr 1fr}
+.tpl .pv .cov{flex:1;display:flex;align-items:stretch;gap:4px;min-height:0}
+.tpl .pv .cov>.cv{width:34%;flex:none;align-self:stretch;min-height:20px;background:#c3d1e6}
+.tpl .pv .cov .txt{flex:1;display:flex;flex-direction:column;gap:3px;justify-content:center;min-width:0}
+.tpl .pv .dash{flex:1;display:flex;align-items:center;justify-content:center;
+  border:1.5px dashed #c9d4e6;border-radius:5px;background:#fbfcfe;
+  font-size:13px;color:#a9b6c9;font-weight:600}
+.dnger{background:var(--danger-s);border:1px solid #f3c9ca;border-radius:10px;
+  padding:10px 12px;margin-top:11px;font-size:12px;color:#8f2b2f;line-height:1.7}
+.dnger .chk{margin-top:7px}
+
+/* 总设置 · 页面分块：一行 = 序号 + 名字 + 显示开关 + 上下移 + 移除 */
+.srow{display:grid;grid-template-columns:26px 1fr auto auto auto auto;gap:7px;align-items:center;
+  padding:8px 0;border-bottom:1px solid #f1f4f9}
+.srow:last-of-type{border-bottom:0}
+.srow .six,.pgcard .six{width:22px;height:22px;line-height:22px;text-align:center;border-radius:6px;
+  font-size:11.5px;font-weight:700;color:var(--acc);background:var(--acc-s);flex:none}
+.srow .tx,.pgcard .tx{min-width:0}
+.srow .t1,.pgcard .t1{font-size:13px;font-weight:600;line-height:1.3}
+.srow .t2,.pgcard .t2{font-size:11.5px;color:var(--ink3);line-height:1.3;margin-top:1px}
+.srow.off,.pgcard.off{opacity:.48}
+.srow.off .t1,.pgcard.off .t1{text-decoration:line-through}
+.srow .chk,.pgcard .chk{font-size:12px;padding:0;white-space:nowrap}
+.adds{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+
+/* 页面设置 · 横向卡片流：一张卡 = 一页，从左到右就是网页上的顺序 */
+.pgflow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.pgcard{width:250px;flex:none;background:#fff;border:1px solid var(--line);
+  border-radius:var(--r);padding:11px 12px 10px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.pg-top{display:flex;align-items:flex-start;gap:9px}
+.pg-top .tx{flex:1;min-width:0}
+.pg-top .t1{font-size:13.5px;font-weight:700;line-height:1.35;word-break:break-all}
+.pg-acts{display:flex;align-items:center;gap:5px;margin-top:11px;padding-top:9px;
+  border-top:1px dashed #e4eaf3}
+.pg-acts .chk{margin-right:auto}
+.pg-acts .btn{padding:3px 8px;font-size:12px}
+/* 末尾的「＋ 新增页面」虚线卡：新页面就从这里长出来，追加在最右边 */
+.pgadd{width:250px;flex:none;min-height:92px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;cursor:pointer;
+  border:1.5px dashed #c9d4e6;border-radius:var(--r);background:#fbfcfe;
+  color:var(--ink2);font-size:13px;font-weight:700}
+.pgadd small{font-size:11px;font-weight:500;color:var(--ink3)}
+.pgadd:hover{border-color:var(--acc);color:var(--acc);background:var(--acc-s)}
+.pgadd.dis,.pgadd.dis:hover{border-color:#e2e8f2;color:#b9c0cc;background:#fafbfd;cursor:not-allowed}
+
+/* 一个页面对应一个页签：隐藏的页面页签灰一度 */
+.tab.off{opacity:.45}
+/* 每页页签容器顶栏：大标题 + 英文小标 + 板块名；点标题回「页面设置」改这一页 */
+.pgbar{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:2px 0 16px}
+.pgbar>.pgjump{background:none;border:0;padding:0;cursor:pointer;text-align:left;line-height:1.2}
+.pgbar .pgjump b{font-size:19px;font-weight:800;color:var(--ink)}
+.pgbar .pgjump i{font-style:normal;font-size:12px;color:var(--ink3);margin-left:9px}
+.pgbar .pgjump:hover b{color:var(--acc)}
+.pgbar .hint{font-size:12px;color:var(--ink3)}
+.pgbar .sp{flex:1}
+/* 编辑器停车场：节点藏在这里，由 JS 搬进各页签，一个节点只存在一份 */
+#edPark{display:none}
+
+/* 页面卡：展开后是「页面字段 + 板块列表」，板块卡里简介排第一 */
+.pgedit{background:#fbfcfe;border:1px solid var(--line);border-radius:var(--r-s);
+  padding:11px 12px;margin:2px 0 12px}
+.pgedit .row2{margin-bottom:10px}
+/* 卡只有 250px 宽，两栏字段挤成窄条，改成上下排 */
+.pgcard .pgedit .row2{grid-template-columns:1fr;gap:10px}
+.blkbox{margin-top:12px;padding-top:10px;border-top:1px dashed #e4eaf3}
+.blkbox-h{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.08em;margin-bottom:8px}
+.blkcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-s);
+  padding:10px 11px;margin-bottom:8px}
+.blkcard-h{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.blkcard-h b{font-size:12.5px;font-weight:700}
+.blkcard-h em{font-style:normal;font-size:10.5px;color:var(--ink3);
+  background:#f2f5fa;border-radius:4px;padding:2px 6px}
+.blkcard-h .sp{flex:1}
+.blkcard .fld{margin-bottom:9px}
+.blkcard .fld:last-child{margin-bottom:0}
+.blkcard .fld label{font-size:11px}
+/* 标识图预览：logo 可能是透明 PNG，用 contain + 灰底才看得清边界 */
+.mark2{width:48px;height:48px;border-radius:10px;object-fit:contain;background:#f2f5fa;
+  border:1px solid var(--line);flex:none}
+.mark2.round{border-radius:50%;object-fit:cover}
+.mark2.no{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink3)}
+.sline{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed #eef1f6}
+.sline:last-of-type{border-bottom:0}
+.sline .rt{flex:1;min-width:0}
+.sline .nm{font-size:13px;font-weight:600}
+.sline .ds{font-size:11.5px;color:var(--ink3);line-height:1.55;margin:1px 0 5px}
+
+.empty{padding:26px 14px;text-align:center;color:var(--ink3);font-size:13px}
+.tip{font-size:12px;color:var(--ink2);background:var(--acc-s);border:1px solid #d6e2ff;
+  border-radius:var(--r-s);padding:8px 11px;margin-bottom:11px;line-height:1.65}
+.tip b{font-weight:700}
+/* 卡片内的说明：别跟顶部蓝框抢注意力，纯灰字 */
+.tip.plain{background:none;border:0;padding:0;margin-bottom:9px;color:var(--ink3);font-size:12px}
+.adds-lab{display:none;font-size:11.5px;color:var(--ink3);margin-top:12px}
+.outbox{display:none;margin:0 20px 30px;padding:12px 14px;border-radius:var(--r-s);
+  font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;
+  word-break:break-all;background:#f6f8fb;border:1px solid var(--line);color:var(--ink2);
+  max-height:300px;overflow:auto}
+.outbox.ok{background:var(--ok-s);border-color:#bfe3ce;color:#0a5c30}
+.outbox.err{background:var(--danger-s);border-color:#f3c9ca;color:#8f2226}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;
+  box-shadow:0 8px 30px rgba(16,24,40,.3);opacity:0;transition:.25s;z-index:300;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--danger)}
+.toast.ok{background:var(--ok)}
+
+/* ===== 生成结果弹窗 ===== */
+.mask{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  background:rgba(13,17,23,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.mask.on{opacity:1;pointer-events:auto}
+.modal{width:452px;max-width:calc(100vw - 36px);max-height:calc(100vh - 60px);display:flex;flex-direction:column;
+  background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(16,24,40,.1), 0 26px 70px rgba(16,24,40,.3);
+  transform:translateY(16px) scale(.97);transition:transform .28s cubic-bezier(.2,.8,.3,1)}
+.mask.on .modal{transform:none}
+/* 选模板的弹窗要放得下四列卡片，比常规弹窗宽一些 */
+#mdMask .modal{width:492px}
+#mdMask.wide .modal{width:780px}
+/* 头、按钮固定，只有中间正文滚 —— 三段的 flex:none 一个都不能省，
+   否则空间不够时头部会被挤扁、文字压到滚动内容上 */
+.mk-hd{display:flex;gap:13px;align-items:flex-start;padding:20px 20px 12px;flex:none;
+  box-shadow:0 1px 0 #f0f3f8}
+.mk-ico{width:42px;height:42px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-size:21px;font-weight:700;color:#fff;background:var(--ok);box-shadow:0 6px 16px rgba(10,143,74,.28)}
+.mk-ico.bad{background:var(--danger);box-shadow:0 6px 16px rgba(208,54,60,.28)}
+.mk-tt{flex:1;min-width:0;padding-top:1px}
+.mk-tt h2{font-size:16.5px;font-weight:700;letter-spacing:.2px;line-height:1.35}
+.mk-tt p{font-size:12.5px;color:var(--ink3);margin-top:2px}
+.mk-x{width:26px;height:26px;border-radius:8px;color:var(--ink3);font-size:13px;flex:none;
+  display:flex;align-items:center;justify-content:center;transition:.15s}
+.mk-x:hover{background:#f0f2f7;color:var(--ink)}
+.mk-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:16px 20px 0}
+.mk-stats div{background:#f6f8fc;border:1px solid #eaeef6;border-radius:10px;padding:9px 10px;text-align:center}
+.mk-stats b{display:block;font-size:15px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
+.mk-stats span{display:block;font-size:11px;color:var(--ink3);margin-top:1px}
+/* 弹窗正文自己滚：头和按钮固定，中间内容长了也不会被裁掉、更不会挤没 */
+.mk-body{padding:14px 20px 8px;font-size:12.5px;color:var(--ink2);line-height:1.65;
+  flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.mk-body:empty{display:none}
+.mk-body .err-line{background:var(--danger-s);border:1px solid #f3c9ca;border-radius:9px;
+  padding:9px 11px;color:#8f2226;font-size:12.5px;word-break:break-word}
+.mk-body .env{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin-top:9px;
+  font-size:12px;color:var(--ink2)}
+.mk-body .env i{font-style:normal;color:var(--ink3)}
+.mk-body .env span{overflow-wrap:anywhere}
+/* 第一次生成的额外说明：网页已经帮你打开了、启动文件放哪儿 —— 放在正文里就够，
+   不再弹第二个窗（生成完本来就有一个结果弹窗，叠加只会更烦） */
+.mk-body .mk-note{background:var(--ok-s);border:1px solid #c7e8d5;border-radius:9px;
+  padding:9px 11px;color:#12683f;font-size:12.5px;line-height:1.7}
+.mk-body .mk-note b{font-weight:700;background:#fff;border-radius:4px;padding:0 4px}
+.mk-act{padding:12px 20px 18px;display:grid;gap:8px;flex:none;background:#fff;
+  box-shadow:0 -1px 0 #f0f3f8}
+/* 宽版弹窗里按钮别再各占一整行，并排更紧凑 */
+#mdMask.wide .mk-act{grid-template-columns:1fr 1.8fr;gap:10px}
+.mk-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mk-act .btn{padding:9px 14px;text-align:center}
+.mk-more{margin:14px 20px 15px;border-top:1px solid #f0f3f8;padding:9px 0 0}
+.mk-more summary{font-size:12px;color:var(--ink3);cursor:pointer;list-style:none;user-select:none}
+.mk-more summary::-webkit-details-marker{display:none}
+.mk-more summary:hover{color:var(--acc)}
+.mk-more pre{margin:8px 0 0;max-height:170px;overflow:auto;font-family:ui-monospace,Consolas,monospace;
+  font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-all;
+  background:#f6f8fb;border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--ink2)}
+/* 按钮内的转圈 */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;
+  border-radius:50%;vertical-align:-2px;margin-right:6px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ===== v2 布局：侧栏壳 + 分组网格 + 行式页面卡（写在最后，媒体查询才压得住基础规则） ===== */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.sgrid>.full{grid-column:1/-1}
+@media(max-width:1100px){.sgrid{grid-template-columns:1fr}}
+/* 页面设置：一行 = 一页，从上到下就是网页顺序；编辑展开在行下面，字段给足宽度 */
+.pgflow{display:flex;flex-direction:column;gap:10px}
+.pgcard{width:100%;padding:12px 14px}
+.pg-top{align-items:center;gap:12px}
+.pg-acts{margin:0;padding:0;border-top:0;flex-wrap:wrap;gap:6px}
+.pg-acts .chk{margin-right:auto}
+.pgcard .pgedit .row2{grid-template-columns:1fr 1fr;gap:10px}
+.pgadd{width:100%;min-height:60px;flex-direction:row;gap:8px}
+/* 窄窗口：侧栏退回顶部横滑页签条，内容区恢复通栏 */
+@media(max-width:960px){
+  .tabs{position:static;width:auto;flex-direction:row;gap:4px;padding:0 16px;
+    border-right:0;border-bottom:1px solid var(--line);overflow-x:auto;overflow-y:visible}
+  .navgrp,.navfilter{display:none}
+  #pgTabs{flex-direction:row;gap:4px}
+  .tabs .tab{width:auto;padding:11px 16px;border-radius:0;
+    border-bottom:2px solid transparent;background:none!important;box-shadow:none!important}
+  .tabs .tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+  .tab .n{margin-left:4px;background:none;padding:0}
+  .wrap{margin-left:0}
+}
+
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>作品集后台</h1>
+  <span id="stat"><span class="dot" id="dot"></span><span id="stxt">加载中…</span></span>
+  <span class="sp"></span>
+  <button class="btn" id="bPreview">打开预览 ↗</button>
+  <button class="btn pri" id="bBuild">生成网页</button>
+  <button class="btn" id="bThumbs" title="给已有图片补后台列表用的缩略图（老图不补的话列表会拉原图，很慢）">补缩略图</button>
+  <button class="btn" id="bSave">保存</button>
+</div>
+
+<div class="tabs">
+  <div class="navfilter"><input id="navFilter" type="text" placeholder="找页面…" autocomplete="off" spellcheck="false"></div>
+  <div class="navgrp first">站点</div>
+  <button class="tab on" data-p="site">总设置</button>
+  <button class="tab" data-p="pages">页面设置</button>
+  <button class="tab" data-p="hero">封面</button>
+  <div class="navgrp">内容页面</div>
+  <span id="pgTabs"></span>
+</div>
+
+<div class="wrap">
+
+<!-- ============ 总设置 ============ -->
+<div class="page on" id="p-site">
+  <div class="tip">全站共用的东西都在这一页：站名、标题、logo、配色、页脚。<b>改完点右上角「生成网页」，网页才会变。</b>页面的增删和排序在「页面设置」。</div>
+  <div class="sgrid">
+    <div class="card">
+      <h3>站点信息</h3>
+      <div class="bd">
+        <div class="row2">
+          <div class="fld"><label>站名<span class="hint">首屏标题</span></label>
+            <input type="text" id="sBrand" placeholder="见山手记"></div>
+          <div class="fld"><label>站名英文<span class="hint">标题下一行</span></label>
+            <input type="text" id="sBrandEn" placeholder="JIANSHAN STUDIO"></div>
+        </div>
+        <div class="fld"><label>本人姓名<span class="hint">留空用封面的中文名</span></label>
+          <input type="text" id="sOwner" placeholder="你的名字"></div>
+        <div class="fld"><label>网页标题<span class="hint">留空自动拼</span></label>
+          <input type="text" id="sTitle" placeholder="见山手记 · 你的名字作品集"></div>
+        <div class="fld" style="margin-bottom:0"><label>SEO 描述<span class="hint">留空用一句话介绍</span></label>
+          <textarea id="sDesc" rows="2" placeholder="用一句话说清你是谁、做什么"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>标识与图标</h3>
+      <div class="bd">
+        <div class="sline">
+          <img class="mark2" id="sLogoImg" alt="">
+          <div class="rt">
+            <div class="nm">顶栏 logo</div>
+            <div style="display:flex;gap:5px;margin-top:6px">
+              <button class="btn sm" id="sLogoUp">上传</button>
+              <button class="btn sm" id="sLogoClr">恢复默认</button>
+            </div>
+          </div>
+        </div>
+        <div class="sline">
+          <img class="mark2 round" id="sAvaImg" alt="">
+          <div class="rt">
+            <div class="nm">首屏头像</div>
+            <div style="display:flex;gap:5px;margin-top:6px">
+              <button class="btn sm" id="sAvaUp">上传</button>
+            </div>
+          </div>
+        </div>
+        <div class="sline">
+          <img id="sFav" src="/pf/favicon-32.png" alt=""
+               style="width:48px;height:48px;border-radius:10px;border:1px solid var(--line);background:#f2f5fa;flex:none">
+          <div class="rt">
+            <div class="nm">收藏夹图标</div>
+            <div class="ds">别人把这个站存进书签栏或手机桌面时看到的小图标，用头像自动做。</div>
+            <button class="btn sm" id="sIcons">重新生成</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card full">
+      <h3>网站配色</h3>
+      <div class="bd">
+        <div class="tip plain">决定访客打开网页时默认是浅色还是深色。网页顶栏那个太阳/月亮按钮访客还能自己切，
+          这里定的是「没切之前」的默认值。</div>
+        <div class="segx" id="thMode">
+          <button data-v="system">跟随系统</button>
+          <button data-v="light">始终浅色</button>
+          <button data-v="dark">始终深色</button>
+          <button data-v="time">按时间</button>
+        </div>
+        <div class="row2" id="thTime" style="margin-top:11px;display:none">
+          <div class="fld" style="margin:0"><label>晚上几点转深色<span class="hint">到这个点自动变黑</span></label>
+            <input type="time" id="thDark" value="19:00"></div>
+          <div class="fld" style="margin:0"><label>早上几点转浅色<span class="hint">到这个点自动变白</span></label>
+            <input type="time" id="thLight" value="07:00"></div>
+        </div>
+        <div class="themepv" id="thPv">
+          <div class="dot" id="thPvDot">☀</div>
+          <div><b id="thPvName">浅色</b><br><span id="thPvNote">现在访客打开看到的是浅色</span></div>
+        </div>
+
+        <div class="fld" style="margin:16px 0 0">
+          <label>主题色<span class="hint">按钮、标签编号、小标题的强调色；深色模式会自动提亮一档</span></label>
+          <div class="accgrid" id="accGrid"></div>
+          <div class="accrow">
+            <label class="acccus" title="自己挑一个颜色">
+              <input type="color" id="accPick" value="#2f6bff"><span>自定义</span>
+            </label>
+            <input type="text" id="accHex" class="acchex" maxlength="7" spellcheck="false"
+                   placeholder="#2f6bff" autocomplete="off">
+            <button class="btn" id="accReset">恢复默认</button>
+          </div>
+          <div class="accpv">
+            <div id="pvL"><span class="pl">浅色</span>
+              <span class="acb" data-k="btn">联系合作</span><span class="act" data-k="txt">影像作品 · 210+</span></div>
+            <div id="pvD"><span class="pl" style="color:#8b97ab">深色</span>
+              <span class="acb" data-k="btn">联系合作</span><span class="act" data-k="txt">影像作品 · 210+</span></div>
+          </div>
+          <div class="accnote" id="accNote"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>导航与页脚</h3>
+      <div class="bd">
+        <div class="tip plain">导航按钮就是网页右上角那个高亮按钮，留空就不显示。</div>
+        <div class="row2">
+          <div class="fld"><label>导航按钮<span class="hint">右上角高亮按钮</span></label>
+            <input type="text" id="sNavCta" placeholder="联系合作"></div>
+          <div class="fld"><label>页脚文字</label>
+            <input type="text" id="sFoot" placeholder="© 2026 你的名字 · 城市 · 方向"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>历史版本<span class="sp"></span>
+        <button class="btn sm" id="bkRefresh">刷新</button></h3>
+      <div class="bd">
+        <div class="tip plain">每次点「保存」都会自动留一份，最多 30 份。改坏了点「回到这版」——
+          回滚前会先把当前这版再存一份，反悔也来得及。</div>
+        <div class="bklist" id="bkList"><div class="empty">读取中…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 页面设置 ============ -->
+<div class="page" id="p-pages">
+  <div class="tip">一行就是一页，<b>从上到下就是网页上的顺序</b>，最多 10 页。点「编辑」改标题、导航短名和板块；
+    点「去内容页」改这一页的内容。新建页面时先选<b>页面类型</b>（版式模板）。
+    <b>改完点右上角「生成网页」，网页才会变。</b></div>
+  <div class="card">
+    <h3>页面<span class="hint" id="pgCnt"></span><span class="sp"></span>
+      <button class="btn sm" id="sPageAdd">+ 新建页面</button>
+      <button class="btn sm warn" id="mDel">删除页面</button>
+      <button class="btn sm" id="sSecReset">恢复默认</button></h3>
+    <div class="bd">
+      <div class="pgflow" id="sSecs"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 封面 ============ -->
+<div class="page" id="p-hero">
+  <div class="tip">改首页最上面那一屏：名字、一句话介绍、四个数字、右上角四行小字。
+    站名、logo、网页标题、页脚在「总设置」里改。</div>
+  <div class="sgrid">
+    <div class="card full">
+      <h3>首屏文字</h3>
+      <div class="bd">
+        <div class="row2">
+          <div class="fld"><label>小标签 kick</label><input type="text" id="hKick" placeholder="Portfolio — 2026 影像 · 摄影 · 内容"></div>
+          <div class="fld"><label>英文名<span class="hint">用在关于我侧栏</span></label><input type="text" id="hEn" placeholder="CHEN YU"></div>
+        </div>
+        <div class="fld"><label>中文名<span class="hint">用在关于我侧栏</span></label><input type="text" id="hName" placeholder="你的名字"></div>
+        <div class="fld" style="margin-bottom:0"><label>一句话介绍<span class="hint">首屏最大的那段说明</span></label>
+          <textarea id="hTag" rows="3"></textarea></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>四个数字<span class="sp"></span><button class="btn sm" id="addHs">+ 加一条</button></h3>
+      <div class="bd"><div id="hStats"></div></div>
+    </div>
+    <div class="card">
+      <h3>右上角四行<span class="sp"></span><button class="btn sm" id="addHm">+ 加一条</button></h3>
+      <div class="bd"><div id="hHm"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 每个页面对应一个页签：下面的容器由 renderPgTabs() 按页面设置生成 -->
+<div id="pgPages"></div>
+
+<!-- 有数据但没挂到任何页面上的模块（网页上不显示，内容不丢） -->
+<div class="page" id="p-orphan" hidden>
+  <div class="pgbar"><b>未分配的模块</b>
+    <span class="hint">这些内容有数据、但还没挂到任何页面上，网页上不显示。去「页面设置」新建页面时选对应的分类，就能把它们挂上去。</span></div>
+  <div id="orphBox"></div>
+</div>
+
+<!-- ============ 内容编辑器停车场 ============
+     一个页面对应一个页签：这些编辑器平时藏在 hidden 的 #edPark 里，
+     由 renderPgTabs() 按「页面设置」的页面顺序搬进各自页签的容器；
+     没挂到任何页面的类型搬进「未分配」。节点只搬不复制，所有 id 不变，JS 照旧。 -->
+<div id="edPark" hidden>
+
+<!-- 影像作品（work）+ 奖项小分类 -->
+<div class="blked" data-blk="work">
+  <div class="cols">
+    <div class="card">
+      <h3>分组<span class="sp"></span><button class="btn sm" id="addG">+ 新建</button></h3>
+      <div class="bd np"><div class="lst" id="glist"></div></div>
+      <div class="bd" style="border-top:1px solid var(--line)">
+        <div class="fld"><label>分组名</label><input type="text" id="gName"></div>
+        <div class="row2 stack">
+          <div class="fld"><label>英文</label><input type="text" id="gEn"></div>
+          <div class="fld"><label>排版</label><select id="gType">
+            <option value="cards">普通卡片（一屏一张）</option>
+            <option value="special">专项（大卡 + 封面墙）</option>
+            <option value="series">系列（每期等大横排）</option>
+            <option value="lead">首视频型（第一个最大 + 其余在下）</option>
+            <option value="vwall">竖版罗列型（9:16 竖条密排）</option>
+            <option value="hwall">横版展示型（16:9 宽卡）</option>
+          </select></div>
+        </div>
+        <div class="fld"><label>简介<span class="hint">显示在分类标题下方，留空就不占位</span></label>
+          <textarea id="gSub" rows="2" placeholder="这一组是做什么的"></textarea></div>
+        <div id="gTip" style="font-size:11.5px;color:var(--ink3);line-height:1.65"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>作品<span class="sp"></span><button class="btn sm" id="addI">+ 新增</button></h3>
+      <div class="bd np"><div class="lst" id="ilist"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>编辑<span class="sp"></span><span class="badge h" id="iPos"></span></h3>
+      <div class="bd" id="iform"><div class="empty">← 先选一个作品</div></div>
+    </div>
+  </div>
+
+  <div class="subhd">奖项<span>影像这一页里的小分类：奖项挂在具体片子上，网页上跟着那张卡片走</span></div>
+  <div class="aw">
+    <div class="card"><h3>挂奖作品<span class="sp"></span><button class="btn sm" id="addAW">+ 手填标题</button></h3>
+      <div class="bd" style="border-bottom:1px solid var(--line)">
+        <div class="fld" style="margin:0"><label>挂到哪个视频<span class="hint">选中即建好，已有奖项的会标出条数</span></label>
+          <select id="awPick"></select></div>
+      </div>
+      <div class="bd np"><div class="lst" id="awlist"></div></div></div>
+    <div class="card"><h3>奖项明细<span class="sp"></span><button class="btn sm" id="addAWi">+ 加一条</button></h3>
+      <div class="bd" id="awbody"><div class="empty">← 先选一个作品</div></div></div>
+  </div>
+</div>
+
+<!-- 摄影（photo） -->
+<div class="blked" data-blk="photo">
+  <div class="card">
+    <h3>摄影分类<span class="sp"></span><button class="btn sm" id="addC">+ 新建分类</button></h3>
+    <div class="bd">
+      <div class="cats" id="cats"></div>
+      <div id="cedit" class="row2" style="max-width:620px">
+        <div class="fld"><label>中文名</label><input type="text" id="cCn"></div>
+        <div class="fld"><label>英文名</label><input type="text" id="cEn"></div>
+        <div class="fld"><label>标识 key<span class="hint">图片文件名前缀，如 aerial</span></label><input type="text" id="cKey"></div>
+        <div class="fld"><label>张数<span class="hint">改完记得生成网页</span></label><input type="text" id="cN"></div>
+        <div class="fld" style="grid-column:1/-1"><label>简介<span class="hint">显示在分类标题下方，留空就不占位</span></label>
+          <textarea id="cSub" rows="2" placeholder="这一类拍了什么"></textarea></div>
+      </div>
+      <div style="margin-top:8px"><button class="btn sm" id="delC" style="color:var(--danger)">删除这个分类</button></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>图片<span class="sp"></span><span id="pInfo" style="font-weight:400;font-size:12px;color:var(--ink3)"></span></h3>
+    <div class="bd"><div class="pgrid" id="pgrid"></div></div>
+  </div>
+</div>
+
+<!-- 关于我（about） -->
+<div class="blked" data-blk="about">
+  <div class="tip">「关于我」整块：分区简介、基本信息、四个内容块（段落 / 条目 / 奖项）、联系方式，都在这里改。</div>
+  <div class="card">
+    <h3>分区简介</h3>
+    <div class="bd"><div class="fld" style="margin:0"><label>简介<span class="hint">显示在「关于我」大标题下方，留空就不占位</span></label>
+      <textarea id="aSub" rows="2" placeholder="这一段写什么"></textarea></div></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>基本信息<span class="sp"></span><button class="btn sm" id="addAf">+ 加一条</button></h3>
+    <div class="bd"><div id="aFacts"></div></div>
+  </div>
+  <div class="aw" style="margin-top:14px">
+    <div class="card"><h3>内容块<span class="sp"></span><button class="btn sm" id="addAb">+ 新建</button></h3>
+      <div class="bd np"><div class="lst" id="abList"></div></div></div>
+    <div class="card"><h3>编辑内容块<span class="sp"></span>
+      <button class="btn sm" data-abact="up" title="上移">↑</button>
+      <button class="btn sm" data-abact="dn" title="下移">↓</button>
+      <button class="btn sm warn" data-abact="del">删除</button></h3>
+      <div class="bd" id="abBody"><div class="empty">← 先选一个内容块</div></div></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>形象照 <span class="hint" style="font-weight:400">简历卡左上角的照片，网页读的是 assets/about/portrait.jpg</span></h3>
+    <div class="bd">
+      <div class="cov">
+        <img id="abPhoto" src="/pf/assets/about/portrait.jpg?t=1"
+             onerror="this.outerHTML='&lt;div class=ph&gt;还没有形象照&lt;/div&gt;'"
+             style="width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+        <div class="rt">
+          <div style="font-size:12px;color:var(--ink2);line-height:1.7">
+            换图会直接覆盖 <code>portrait.jpg</code>。建议用竖构图、脸部居中的照片。<br>
+            换完记得点「生成网页」。
+          </div>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="btn sm" id="abUp">上传形象照</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 联系方式（contact）：从「关于我」拆出来，自成一面 -->
+<div class="blked" data-blk="contact">
+  <div class="tip">联系方式显示在「欢迎交流」这一页；关于我侧栏里的联系入口读的也是这一份。</div>
+  <div class="card">
+    <h3>联系方式<span class="sp"></span><button class="btn sm" id="addAc">+ 加一条</button></h3>
+    <div class="bd"><div id="aContact"></div></div>
+  </div>
+</div>
+
+<!-- 技术内容（projects） -->
+<div class="blked" data-blk="projects">
+  <div class="tip">这是<b>技术内容</b>板块的编辑区。多行框的规矩：要点一行一条；成对的用 <b>|</b> 隔开（如 <b>3 | 段结构</b>）；内页图片路径留空就显示成「待补」虚线框。</div>
+  <div class="card">
+    <h3>分区简介</h3>
+    <div class="bd"><div class="fld" style="margin:0"><label>简介<span class="hint">显示在「AI 与编程实践」大标题下方</span></label>
+      <textarea id="tSub" rows="2"></textarea></div></div>
+  </div>
+  <div class="aw" style="margin-top:14px">
+    <div class="card"><h3>分组<span class="sp"></span><button class="btn sm" id="addTg">+ 新建</button></h3>
+      <div class="bd np"><div class="lst" id="tgList"></div></div></div>
+    <div class="card"><h3>编辑分组<span class="sp"></span>
+      <button class="btn sm" data-tgact="up" title="上移">↑</button>
+      <button class="btn sm" data-tgact="dn" title="下移">↓</button>
+      <button class="btn sm warn" data-tgact="del">删除</button></h3>
+      <div class="bd" id="tgBody"><div class="empty">← 先选一个分组</div></div></div>
+  </div>
+  <div class="aw" style="margin-top:14px">
+    <div class="card"><h3>项目<span class="sp"></span><button class="btn sm" id="addTi">+ 新建</button></h3>
+      <div class="bd np"><div class="lst" id="tiList"></div></div></div>
+    <div class="card"><h3>编辑项目<span class="sp"></span>
+      <button class="btn sm" data-tiact="up" title="上移">↑</button>
+      <button class="btn sm" data-tiact="dn" title="下移">↓</button>
+      <button class="btn sm warn" data-tiact="del">删除</button></h3>
+      <div class="bd" id="tiBody"><div class="empty">← 先选一个项目</div></div></div>
+  </div>
+</div>
+
+<!-- 数码内容：B 站视频墙，两层结构（分组 → 视频），两栏模式照技术内容。
+     数据键 D.digital 可能整个不存在（板块可整体下线）——
+     没数据时这里只显示一块空态提示，绝不悄悄把键建回来。 -->
+<div class="blked" data-blk="digital">
+  <div class="tip">这是<b>数码内容</b>板块的编辑区。视频卡面上不放标题（hover 才浮出），所以列表标题请认真填。封面图会传到 assets/digital/。</div>
+  <div id="dgEmpty" class="empty" style="padding:28px 0" hidden>
+    data.json 里还没有「数码内容」板块，网页上也不会显示这一节（不会报错）。<br><br>
+    <button class="btn" id="dgBoot">＋ 从零开始建数码板块</button>
+  </div>
+  <div id="dgWrap" hidden>
+    <div class="card">
+      <h3>板块简介</h3>
+      <div class="bd"><div class="fld" style="margin:0"><label>简介<span class="hint">显示在「数码内容」大标题下方</span></label>
+        <textarea id="dgSub" rows="2"></textarea></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>账号简介卡</h3>
+      <div class="bd">
+        <div class="fld"><label>频道头像<span class="hint">存成 assets/digital/avatar.jpg，重复上传原地替换</span></label>
+          <div class="row2"><input type="text" id="dgAva" placeholder="assets/digital/avatar.jpg">
+            <button class="btn sm" id="dgAvaUp">上传头像</button></div></div>
+        <div class="row2">
+          <div class="fld"><label>频道名</label><input type="text" id="dgAcName"></div>
+          <div class="fld"><label>英文名</label><input type="text" id="dgAcEn"></div>
+        </div>
+        <div class="fld"><label>一句话简介</label><input type="text" id="dgAcSub"></div>
+        <div class="fld"><label>标签<span class="hint">用 / 或 , 分隔，如「数码测评 / 航拍」</span></label>
+          <input type="text" id="dgAcChips"></div>
+        <div class="fld"><label>主页链接<span class="hint">「查看 B 站主页 ↗」按钮指向哪</span></label>
+          <input type="text" id="dgAcLink" placeholder="https://space.bilibili.com/…"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>「更多视频」横条<span class="hint">板块底部那一条引导卡，四个都要填</span></h3>
+      <div class="bd">
+        <div class="row2">
+          <div class="fld"><label>标题</label><input type="text" id="dgMrT"></div>
+          <div class="fld"><label>一句话</label><input type="text" id="dgMrS"></div>
+        </div>
+        <div class="row2">
+          <div class="fld"><label>链接</label><input type="text" id="dgMrHref" placeholder="https://space.bilibili.com/…/video"></div>
+          <div class="fld"><label>按钮文字</label><input type="text" id="dgMrBtn" placeholder="去 B 站看更多"></div>
+        </div>
+      </div>
+    </div>
+    <div class="aw" style="margin-top:14px">
+      <div class="card"><h3>分组<span class="sp"></span><button class="btn sm" id="addDg">+ 新建</button></h3>
+        <div class="bd np"><div class="lst" id="dgGList"></div></div></div>
+      <div class="card"><h3>编辑分组<span class="sp"></span>
+        <button class="btn sm" data-dgact="up" title="上移">↑</button>
+        <button class="btn sm" data-dgact="dn" title="下移">↓</button>
+        <button class="btn sm warn" data-dgact="del">删除</button></h3>
+        <div class="bd" id="dgGBody"><div class="empty">← 先选一个分组</div></div></div>
+    </div>
+    <div class="aw" style="margin-top:14px">
+      <div class="card"><h3>视频<span class="sp"></span><button class="btn sm" id="addDi">+ 新建</button></h3>
+        <div class="bd np"><div class="lst" id="dgIList"></div></div></div>
+      <div class="card"><h3>编辑视频<span class="sp"></span>
+        <button class="btn sm" data-diact="up" title="上移">↑</button>
+        <button class="btn sm" data-diact="dn" title="下移">↓</button>
+        <button class="btn sm warn" data-diact="del">删除</button></h3>
+        <div class="bd" id="dgIBody"><div class="empty">← 先选一个视频</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 论文 / 评论 / 设计 / 方案：四个文字模块各自一面，页签跟着页面走 -->
+<div class="blked" data-blk="papers"><div class="txsec" id="txPapers"></div></div>
+<div class="blked" data-blk="opeds"><div class="txsec" id="txOpeds"></div></div>
+<div class="blked" data-blk="design"><div class="txsec" id="txDesign"></div></div>
+<div class="blked" data-blk="proposals"><div class="txsec" id="txProposals"></div></div>
+
+</div><!-- /edPark -->
+
+<pre class="outbox" id="outbox"></pre>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- 生成结果弹窗：生成完直接在这里给「预览 / 另存为」，不用去文件夹翻 -->
+<div class="mask" id="mk">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mk-hd">
+      <div class="mk-ico" id="mkIco">✓</div>
+      <div class="mk-tt">
+        <h2 id="mkTitle">网页已生成</h2>
+        <p id="mkSub"></p>
+      </div>
+      <button class="mk-x" id="mkX" title="关闭">✕</button>
+    </div>
+    <div class="mk-stats" id="mkStats">
+      <div><b id="stSize">—</b><span>文件大小</span></div>
+      <div><b id="stRefs">—</b><span>引用资源</span></div>
+      <div><b id="stMs">—</b><span>生成耗时</span></div>
+    </div>
+    <div class="mk-body" id="mkBody"></div>
+    <div class="mk-act" id="mkAct">
+      <button class="btn pri" id="mkOpen">打开预览</button>
+      <div class="mk-row">
+        <button class="btn" id="mkHtml">存为单文件…</button>
+        <button class="btn" id="mkZip">下载压缩包</button>
+      </div>
+    </div>
+    <details class="mk-more" id="mkMore">
+      <summary>生成日志</summary>
+      <pre id="mkLog"></pre>
+    </details>
+  </div>
+</div>
+
+<input type="file" id="filePick" accept="image/*" style="display:none">
+
+<!-- 通用弹窗：新增 / 删除模块都走这里，不裸删 -->
+<div class="mask" id="mdMask">
+  <div class="modal">
+    <div class="mk-hd">
+      <div class="mk-ico" id="mdIco">＋</div>
+      <div class="mk-tt"><h2 id="mdTitle">新增页面</h2><p id="mdSub"></p></div>
+      <button class="mk-x" id="mdX" title="关闭">✕</button>
+    </div>
+    <div class="mk-body" id="mdBody"></div>
+    <div class="mk-act" id="mdAct"></div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const PF = '/pf/';
+/* 一次导几页：内页是「翻两页看看」，不是整本。
+   常量放在这么靠前，是因为卡片渲染（下面的 renderAll）在 docBar 定义之前就会跑一次，
+   写在文件末尾会撞上 TDZ —— 那不是报错停在那儿，是整个后台白屏。 */
+const DOC_MAX_PAGES = 4;
+/* 后台里的图片预览一律走缩略图 assets/<kind>/t/<name>（体积小、列表打开快）。
+   后台每次上传都会给所有类型生成缩略图（见 server.py /api/upload）。
+   万一某张图是手工拷进去的、没缩略图，onerror 会自动退回原图，不会出现裂图。 */
+function thumbOf(rel){
+  if (!rel) return '';
+  const m = /^assets\/([^/]+)\/(.+)$/.exec(rel);
+  if (!m) return PF + rel;
+  return PF + 'assets/' + m[1] + '/t/' + m[2];
+}
+function fullOf(rel){ return rel ? PF + rel : ''; }
+let D = null, dirty = false;
+let curG = 0, curI = -1, curC = 0, curAW = null;
+let pending = null;   // 上传回调
+
+/* ---------- 基础 ---------- */
+function toast(msg, kind){
+  const t = $('#toast');
+  t.textContent = msg; t.className = 'toast on ' + (kind || '');
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast', 2600);
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* 把一行文本切成固定段数，用于「经历 / 数据能力」这类多字段输入。
+   两个保护都不能少：
+   1. **分隔符优先半角 |** —— 序列化统一输出半角，但用户手敲可能用全角｜（中文输入法），
+      所以整行没有半角时才退用全角。
+   2. **段数超了不截断** —— 字段内容里可能本身含分隔符（role 里就有全角｜），
+      此时多出来的部分并回最后一格，绝不能把内容切没了。 */
+function splitRow(s, n){
+  const ch = s.indexOf('|') >= 0 ? '|' : '｜';
+  const p = s.split(ch).map(x => x.trim());
+  if (p.length > n) return p.slice(0, n - 1).concat([p.slice(n - 1).join(ch)]);
+  while (p.length < n) p.push('');
+  return p;
+}
+
+function markDirty(){
+  // 放在早退之前：不管这是第几次改动，页签上的数字都得跟着变。
+  // （renderAll 里也调了一次，双保险 —— 万一某处只调了 markDirty 没重画）
+  refreshCounts();
+  if (dirty) return;
+  dirty = true;
+  $('#dot').className = 'dot dirty';
+  $('#stxt').textContent = '有改动未保存';
+}
+function saved(){
+  dirty = false;
+  $('#dot').className = 'dot';
+  $('#stxt').textContent = '已保存 · ' + new Date().toLocaleTimeString('zh-CN');
+}
+async function api(path, body){
+  try{
+    // 带 body 的走 POST；读接口 GET；写接口（build 等）没 body 也要强制 POST，
+    // 否则 fetch 会发 GET 打到 404，前端拿回来一个数字，所有字段全 undefined
+    const opt = body !== undefined
+      ? {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
+      : (path.startsWith('/api/') && path !== '/api/data' && path !== '/api/ping'
+          && path !== '/api/backups' && !path.startsWith('/api/palette')
+          ? {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'}
+          : undefined);
+    const r = await fetch(path, opt);
+    const txt = await r.text();
+    let v;
+    try{ v = JSON.parse(txt); }
+    catch(e){ return {ok:false, err:'后台返回的不是 JSON（HTTP '+r.status+'）：'+txt.slice(0,200)}; }
+    if (v === null || typeof v !== 'object')
+      return {ok:false, err:'后台返回异常（HTTP '+r.status+'）：'+txt.slice(0,200)};
+    return v;
+  }catch(e){
+    return {ok:false, err:'连不上后台（'+e.message+'）。后台窗口是不是关了？双击 admin/start-admin.bat（macOS：start-admin.command）重新开。'};
+  }
+}
+
+/* ---------- 载入 ---------- */
+(async function init(){
+  D = await api('/api/data');
+  if (!D.awards) D.awards = {};
+  if (!D.stars) D.stars = [];
+  if (!D.hero) D.hero = {};
+  if (!D.about) D.about = { sub:'', facts:[], blocks:[], contact:[] };
+  if (!D.projects) D.projects = { sub:'', groups:[] };
+  if (!D.site) D.site = {};          // 老站点没有 site 块，总设置页要能兜住
+  ['hero','about','work','photo','contact','footer','navcta'].forEach(k => {
+    if (!D[k]) console.warn('data.json 缺少', k);
+  });
+  refreshCounts();
+  saved();
+  renderAll();
+})();
+
+/* 页签上的小数字。以前只在 init() 里算过一次，之后增删作品/奖项都不动，
+   于是「奖项」那个数字永远停在打开后台时的值 —— 必须每次重算。 */
+/* 页签上的小数字。以前只在 init() 里算过一次，之后增删作品/奖项都不动，
+   于是数字永远停在打开后台时的值 —— 必须每次重算。
+   页签是按页面生成的，徽标 id 由 TAB_N 给，这里按类型逐个刷新。 */
+function refreshCounts(){
+  const n = (sel, v) => { const el = $(sel); if (el) el.textContent = v; };
+  n('#' + TAB_N.work,      blockCount('work'));
+  n('#' + TAB_N.photo,     blockCount('photo'));
+  n('#' + TAB_N.papers,    blockCount('papers'));
+  n('#' + TAB_N.opeds,     blockCount('opeds'));
+  n('#' + TAB_N.design,    blockCount('design'));
+  n('#' + TAB_N.proposals, blockCount('proposals'));
+  n('#' + TAB_N.projects,  blockCount('projects'));
+  n('#' + TAB_N.digital,   blockCount('digital'));
+}
+
+function renderAll(){
+  refreshCounts();
+  renderSite(); renderG(); renderI(); renderForm(); renderCats(); renderAW(); loadBackups();
+  renderHero(); renderAbout(); renderTech(); renderDigital(); renderTexts();
+}
+
+/* ---------- 分组 ---------- */
+function renderG(){
+  const box = $('#glist');
+  box.innerHTML = D.work.groups.map((g,i) => `
+    <div class="li ${i===curG?'on':''}" data-i="${i}">
+      <div class="tx"><div class="t1">${esc(g.name)}</div>
+        <div class="t2">${esc(g.type)} · ${g.items.length} 条</div></div>
+      <div class="op">
+        <button class="btn sm" data-act="gup" data-i="${i}" ${i===0?'disabled':''}>↑</button>
+        <button class="btn sm" data-act="gdn" data-i="${i}" ${i===D.work.groups.length-1?'disabled':''}>↓</button>
+        <button class="btn sm" data-act="gdel" data-i="${i}">✕</button>
+      </div>
+    </div>`).join('') || '<div class="empty">还没有分组</div>';
+  const g = D.work.groups[curG];
+  if (g){ $('#gName').value = g.name; $('#gEn').value = g.en || ''; $('#gType').value = g.type;
+          $('#gSub').value = g.sub || ''; }
+  tipType();
+}
+$('#glist').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  const i = +li.dataset.i, act = e.target.dataset.act;
+  closeMv();
+  if (act === 'gup'){ [D.work.groups[i-1], D.work.groups[i]] = [D.work.groups[i], D.work.groups[i-1]]; curG = i-1; markDirty(); }
+  else if (act === 'gdn'){ [D.work.groups[i+1], D.work.groups[i]] = [D.work.groups[i], D.work.groups[i+1]]; curG = i+1; markDirty(); }
+  else if (act === 'gdel'){
+    if (!confirm('删除分组「'+D.work.groups[i].name+'」及其下所有作品？')) return;
+    D.work.groups.splice(i,1); curG = Math.max(0, curG-1); curI = -1; markDirty();
+  } else { curG = i; curI = -1; }
+  renderG(); renderI(); renderForm();
+});
+const TYPE_TIP = {
+  cards:  '一屏一张大卡，适合代表作级别的作品。',
+  special:'第一个「大卡」会放大，后面跟着它的封面墙（在该作品编辑页里挂子片）。',
+  series:  '每期一样大，封面按 16:9 排，右上角自动标「第 N 期」。',
+  lead:   '第一支放最大当主角，其余按顺序竖排在下面。期数按位置自动编号。',
+  vwall:  '封面按 9:16 竖条密排，适合竖屏短视频。没有首视频。',
+  hwall:  '封面按 16:9 宽卡一行两张，适合横屏作品。没有首视频。',
+};
+function tipType(){
+  const t = $('#gType').value;
+  let s = TYPE_TIP[t] || '';
+  if (t === 'vwall') s += '注意：封面会按 9:16 裁，横版封面两侧会被切掉。';
+  if (t === 'hwall') s += '注意：封面按 16:9 显示，竖版封面会被裁。';
+  $('#gTip').textContent = s;
+}
+['#gType'].forEach(s => $(s).addEventListener('change', tipType));
+
+$('#addG').onclick = () => {
+  D.work.groups.push({name:'新分组', en:'NEW', type:'cards', items:[]});
+  curG = D.work.groups.length-1; curI = -1; markDirty(); renderG(); renderI(); renderForm();
+};
+['#gName','#gEn','#gType','#gSub'].forEach(s => $(s).addEventListener('input', () => {
+  const g = D.work.groups[curG]; if (!g) return;
+  g.name = $('#gName').value; g.en = $('#gEn').value; g.type = $('#gType').value;
+  g.sub = $('#gSub').value;
+  markDirty(); renderG();
+}));
+$('#gType').addEventListener('change', () => { markDirty(); renderForm(); });
+
+/* ---------- 作品列表 ---------- */
+function renderI(){
+  const g = D.work.groups[curG]; const box = $('#ilist');
+  if (!g){ box.innerHTML = '<div class="empty">—</div>'; return; }
+  box.innerHTML = g.items.map((it,i) => {
+    const img = it.img ? `<img class="thumb" src="${thumbOf(it.img)}" data-full="${fullOf(it.img)}"
+        onerror="if(this.dataset.full&&this.src!==this.dataset.full){this.src=this.dataset.full}else{this.className='thumb no';this.textContent='无图'}">`
+                       : `<div class="thumb no">无图</div>`;
+    const b = [];
+    if (it.big) b.push('<span class="badge b">大卡</span>');
+    if (it.subs && it.subs.length) b.push('<span class="badge b">墙'+it.subs.length+'</span>');
+    if (D.stars.includes(it.title)) b.push('<span class="badge s">★</span>');
+    if (it.hidden) b.push('<span class="badge h">隐</span>');
+    return `<div class="li ${i===curI?'on':''} ${it.hidden?'hid':''}" data-i="${i}">
+      ${img}<div class="tx"><div class="t1">${esc(it.title)}</div>
+      <div class="t2">${b.join(' ')}${esc(it.kick||'')}</div></div>
+      <div class="op">
+        <button class="btn sm" data-act="iup" data-i="${i}" ${i===0?'disabled':''}>↑</button>
+        <button class="btn sm" data-act="idn" data-i="${i}" ${i===g.items.length-1?'disabled':''}>↓</button>
+        <button class="btn sm" data-act="imv" data-i="${i}" title="移到别的分组">⇄</button>
+        <button class="btn sm" data-act="idel" data-i="${i}">✕</button>
+      </div></div>`;
+  }).join('') || '<div class="empty">这个分组还是空的</div>';
+}
+
+/* ---------- 移到分组：浮层选目标 ---------- */
+let mvPop = null;
+function closeMv(){ if (mvPop){ mvPop.remove(); mvPop = null; document.removeEventListener('mousedown', mvAway, true); } }
+function mvAway(e){ if (mvPop && !mvPop.contains(e.target)) closeMv(); }
+
+/* 把当前分组 items[from] 里的那个作品，挪到 groups[to]，可选插到目标分组最前或最后。
+   ⚠️ from 是「第几个作品」，to 是「第几个分组」—— 两套不同坐标系，不能互相比较。
+      早先写成 if (from === to) 是错的：把组 2 的第 0 个作品「移到组 2」时 0 !== 2，
+      会漏进下面把作品摘出来再 append 回去，等于偷偷把它挪到了本组末尾。
+      同组判断必须拿 curG 比。 */
+function moveItem(from, to, atTop){
+  if (curG === to) return;
+  const gs = D.work.groups;
+  const [x] = gs[curG].items.splice(from, 1);
+  const tgt = gs[to];
+  atTop ? tgt.items.unshift(x) : tgt.items.push(x);
+  curG = to;
+  curI = atTop ? 0 : tgt.items.length - 1;
+  markDirty(); closeMv(); renderAll();
+  toast(`「${x.title}」已移到「${tgt.name}」`, 'ok');
+}
+
+function openMv(btn, i){
+  closeMv();
+  const src = D.work.groups[curG];
+  mvPop = document.createElement('div');
+  mvPop.className = 'mvpop';
+  mvPop.innerHTML = '<div class="mvt">把「' + esc(src.items[i].title) + '」移到</div>'
+    + D.work.groups.map((x,j) => j === curG
+        ? `<button class="mv" disabled>${esc(x.name)}<small>当前所在</small></button>`
+        : `<button class="mv" data-j="${j}">${esc(x.name)}<small>${x.items.length} 个作品</small></button>`
+      ).join('')
+    + '<div style="border-top:1px solid var(--line);margin:5px 0 0;padding:5px 0 0">'
+    + D.work.groups.map((x,j) => j === curG ? '' :
+        `<button class="mv" data-j="${j}" data-top="1">→ 移到「${esc(x.name)}」最前</button>`).join('')
+    + '</div>';
+  document.body.appendChild(mvPop);
+  const r = btn.getBoundingClientRect();
+  mvPop.style.left = Math.min(r.left, innerWidth - mvPop.offsetWidth - 12) + 'px';
+  mvPop.style.top  = (r.bottom + 6) + 'px';
+  if (r.bottom + mvPop.offsetHeight + 12 > innerHeight)      // 下方放不下就翻到上面
+    mvPop.style.top = Math.max(8, r.top - mvPop.offsetHeight - 6) + 'px';
+  mvPop.addEventListener('click', e => {
+    const b = e.target.closest('.mv'); if (!b || b.disabled) return;
+    moveItem(i, +b.dataset.j, b.dataset.top === '1');
+  });
+  setTimeout(() => document.addEventListener('mousedown', mvAway, true), 0);
+}
+$('#ilist').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  const g = D.work.groups[curG], i = +li.dataset.i, act = e.target.dataset.act;
+  if (act === 'iup'){ closeMv(); [g.items[i-1], g.items[i]] = [g.items[i], g.items[i-1]]; curI = i-1; markDirty(); }
+  else if (act === 'idn'){ closeMv(); [g.items[i+1], g.items[i]] = [g.items[i], g.items[i+1]]; curI = i+1; markDirty(); }
+  else if (act === 'imv'){ curI = i; renderI(); renderForm(); openMv(e.target, i); return; }
+  else if (act === 'idel'){
+    if (!confirm('删除「'+g.items[i].title+'」？')) return;
+    closeMv(); g.items.splice(i,1); curI = Math.min(curI, g.items.length-1); markDirty();
+  } else { closeMv(); curI = i; }
+  renderI(); renderForm();
+});
+$('#addI').onclick = () => {
+  const g = D.work.groups[curG]; if (!g) return toast('先建一个分组','err');
+  g.items.push({title:'新作品', img:'', txtbig:null, txttag:null, badge:'', kick:'',
+    desc:'', stat:[], dutylab:'片中职务', duty:[], go:'', href:'', big:false,
+    series:'', hidden:true});      // 默认先藏着：没封面就放出去会是空白卡
+  curI = g.items.length-1; markDirty(); renderI(); renderForm();
+  toast('已新增，填好封面后记得取消「在网页上隐藏」');
+};
+
+/* ---------- 作品表单 ---------- */
+function renderForm(){
+  const g = D.work.groups[curG], box = $('#iform');
+  if (!g || curI < 0 || !g.items[curI]){
+    box.innerHTML = '<div class="empty">← 先选一个作品</div>'; $('#iPos').textContent=''; return;
+  }
+  const it = g.items[curI];
+  $('#iPos').textContent = g.name + ' · 第 ' + (curI+1) + ' / ' + g.items.length;
+  const isSp = g.type === 'special';
+  box.innerHTML = `
+  <div class="f">
+    <div class="fld"><label>标题</label><input type="text" id="fTitle" value="${esc(it.title)}"></div>
+    <div class="fld"><label>类型行 <span class="hint">卡片左上角小字；系列里写「第 1 期 · …」会自动变成期数角标</span></label>
+      <input type="text" id="fKick" value="${esc(it.kick||'')}"></div>
+    <div class="fld"><label>简介</label><textarea id="fDesc">${esc(it.desc||'')}</textarea></div>
+    <div class="row2">
+      <div class="fld"><label>职务 <span class="hint">用 ／ 分隔</span></label>
+        <input type="text" id="fDuty" value="${esc((it.duty||[]).join('／'))}"></div>
+      <div class="fld"><label>跳转按钮文字</label><input type="text" id="fGo" value="${esc(it.go||'')}"></div>
+    </div>
+    <div class="fld"><label>链接</label><input type="url" id="fHref" value="${esc(it.href||'')}" placeholder="https://"></div>
+
+    <div class="fld"><label>封面</label>
+      <div class="cov">
+        ${it.img ? `<img src="${thumbOf(it.img)}" data-full="${fullOf(it.img)}"
+             onerror="if(this.dataset.full&&this.src!==this.dataset.full){this.src=this.dataset.full}else{this.outerHTML='&lt;div class=ph&gt;图挂了&lt;/div&gt;'}">`
+                 : `<div class="ph">还没图<br><span style="font-size:11px">无图时会用下面的大字</span></div>`}
+        <div class="rt">
+          <input type="text" id="fImg" value="${esc(it.img||'')}" placeholder="assets/cover/xxx.jpg">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn sm" id="bUp">上传新封面</button>
+            <button class="btn sm" id="bClr">清空</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>无图时的大字</label><input type="text" id="fBig" value="${esc(it.txtbig||'')}"></div>
+      <div class="fld"><label>副标</label><input type="text" id="fTag" value="${esc(it.txttag||'')}"></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>系列 <span class="hint">同名会合成一个系列</span></label>
+        <input type="text" id="fSeries" value="${esc(it.series||'')}"></div>
+      <div class="fld"><label>移到分组 <span class="hint">选一个分组就挪过去，追加到末尾</span></label><select id="fMove">
+        <option value="" selected>移到别的分组…</option>
+        ${D.work.groups.map((x,j)=>`<option value="${j}">${j===curG?'（当前）':''}${esc(x.name)}</option>`).join('')}
+      </select></div>
+    </div>
+    <div class="chks">
+      ${isSp ? `<label class="chk"><input type="checkbox" id="fIsBig" ${it.big?'checked':''}>设为大卡（可挂封面墙）</label>` : ''}
+      <label class="chk"><input type="checkbox" id="fStar" ${D.stars.includes(it.title)?'checked':''}>★ 代表作</label>
+      <label class="chk"><input type="checkbox" id="fHide" ${it.hidden?'checked':''}>在网页上隐藏</label>
+    </div>
+    ${isSp && it.big ? `<div class="subs">
+      <div style="font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:4px">
+        封面墙（挂在下面的小片）<button class="btn sm" id="addS" style="margin-left:8px">+ 加一支</button></div>
+      ${(it.subs||[]).map((s,j)=>`
+        <div class="sub">
+          ${s.img?`<img src="${thumbOf(s.img)}" data-full="${fullOf(s.img)}"
+              onerror="if(this.dataset.full&&this.src!==this.dataset.full)this.src=this.dataset.full">`:`<div class="thumb no" style="width:44px;height:29px">无</div>`}
+          <input type="text" data-s="${j}" class="sT" value="${esc(s.title)}" style="flex:1;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:12.5px">
+          <input type="text" data-s="${j}" class="sI" value="${esc(s.img||'')}" placeholder="封面路径" style="flex:1;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:12.5px">
+          <input type="text" data-s="${j}" class="sH" value="${esc(s.href||'')}" placeholder="链接" style="flex:1;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:12.5px">
+          <button class="btn sm" data-act="sdel" data-j="${j}">✕</button>
+        </div>`).join('') || '<div style="font-size:12px;color:var(--ink3);padding:6px 0">还没有</div>'}
+    </div>` : ''}
+  </div>`;
+
+  const bind = (sel, fn, ev) => $(sel).addEventListener(ev || 'input', fn);
+  bind('#fTitle', e => { it.title = e.target.value; markDirty(); renderI(); });
+  bind('#fKick',  e => { it.kick = e.target.value; markDirty(); renderI(); });
+  bind('#fDesc',  e => { it.desc = e.target.value; markDirty(); });
+  bind('#fDuty',  e => { it.duty = e.target.value.split('／').map(s=>s.trim()).filter(Boolean); markDirty(); });
+  bind('#fGo',    e => { it.go = e.target.value; markDirty(); });
+  bind('#fHref',  e => { it.href = e.target.value; markDirty(); });
+  bind('#fImg',   e => { it.img = e.target.value.trim(); markDirty(); renderI(); });
+  bind('#fBig',   e => { it.txtbig = e.target.value || null; markDirty(); });
+  bind('#fTag',   e => { it.txttag = e.target.value || null; markDirty(); });
+  bind('#fSeries',e => { it.series = e.target.value; markDirty(); });
+  bind('#fMove',  e => {
+    const j = +e.target.value; if (!j || j === curG) return;
+    moveItem(curI, j, false);
+  }, 'change');
+
+  $('#bUp').onclick = () => pickImage('cover', p => { it.img = p; markDirty(); renderForm(); renderI(); });
+  $('#bClr').onclick = () => { it.img = ''; markDirty(); renderForm(); renderI(); };
+  if ($('#fIsBig')) $('#fIsBig').addEventListener('change', e => {
+    it.big = e.target.checked; markDirty(); renderForm(); renderI();
+  });
+  $('#fStar').addEventListener('change', e => {
+    const k = D.stars.indexOf(it.title);
+    if (e.target.checked){ if (k < 0) D.stars.push(it.title); }
+    else if (k >= 0) D.stars.splice(k,1);
+    markDirty(); renderI();
+  });
+  $('#fHide').addEventListener('change', e => { it.hidden = e.target.checked; markDirty(); renderI(); });
+
+  if ($('#addS')) $('#addS').onclick = () => {
+    it.subs = it.subs || [];
+    it.subs.push({title:'新的一支', img:'', href:'', duty:[], go:'观看', kick:'', desc:''});
+    markDirty(); renderForm(); renderI();
+  };
+  box.querySelectorAll('.sT').forEach(el => el.addEventListener('input', e => {
+    it.subs[+e.target.dataset.s].title = e.target.value; markDirty();
+  }));
+  box.querySelectorAll('.sI').forEach(el => el.addEventListener('input', e => {
+    it.subs[+e.target.dataset.s].img = e.target.value.trim(); markDirty();
+  }));
+  box.querySelectorAll('.sH').forEach(el => el.addEventListener('input', e => {
+    it.subs[+e.target.dataset.s].href = e.target.value.trim(); markDirty();
+  }));
+  box.querySelectorAll('[data-act=sdel]').forEach(el => el.onclick = () => {
+    it.subs.splice(+el.dataset.j,1); markDirty(); renderForm(); renderI();
+  });
+}
+
+/* ---------- 图片上传 ---------- */
+/* fixedName 三种用法：
+   'portrait.jpg' → 存成这个名字（覆盖）
+   true           → 沿用上传文件自己的名字（仍然覆盖，logo 要用，因为 png/svg 不能硬改成 .jpg）
+   不传           → 自动避让重名 */
+function pickImage(dir, cb, fixedName){
+  pending = {dir, cb, fixedName};
+  $('#filePick').value = ''; $('#filePick').click();
+}
+$('#filePick').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f || !pending) return;
+  const {dir, cb, fixedName} = pending; pending = null;
+  // fixedName：摄影图必须按 分类_NN.jpg 覆盖原文件，不能用上传时的原始文件名
+  const name = fixedName === true ? f.name : (fixedName || f.name);
+
+  // 先在浏览器里缩一道再传，能省掉大半上传时间（后台还会再压一次保底）
+  toast(f.size > 3 * 1024 * 1024 ? '图片较大，先压缩再上传…' : '上传中…');
+  let upFile = f;
+  // logo 不缩：透明 PNG 一过 canvas 就变白底，深色顶栏上会出现一块白斑
+  try{
+    if (dir !== 'logo'){
+      const s = await shrink(f, 3000, 0.92);
+      if (s && s.blob.size < f.size) upFile = s.blob;
+    }
+  }catch(err){ /* 预压缩失败就用原图，后台还会压 */ }
+  const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result); rd.readAsDataURL(upFile); });
+  // overwrite：fixedName 场景（形象照 portrait.jpg）要原地替换同名文件，
+  // 不传的话后台会为了避免撞名存成 portrait-1.jpg，网页上就永远换不掉图
+  const r = await api('/api/upload', {dir, name, b64, overwrite: !!fixedName});
+  if (r.ok){
+    cb(r.path);
+    const kb = n => (n / 1024).toFixed(0) + ' KB';
+    toast(r.compressed
+      ? ('已压缩并上传：' + kb(r.orig) + ' → ' + kb(r.size) + '（' + r.w + '×' + r.h + '）')
+      : ('已上传：' + r.file + ' ' + kb(r.size)), 'ok');
+  }
+  else toast('上传失败：' + r.err, 'err');
+});
+
+/* 浏览器端预压缩：只缩尺寸，不控体积（体积交给后台） */
+function shrink(file, maxside, quality){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const r = Math.min(1, maxside / Math.max(img.width, img.height));
+      if (r === 1){ URL.revokeObjectURL(url); return res(null); }
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+      const cx = c.getContext('2d');
+      cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height);   // PNG 透明底 → 白底
+      cx.drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => { URL.revokeObjectURL(url); b ? res({blob: b, w: c.width}) : res(null); },
+               'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('读不了这张图')); };
+    img.src = url;
+  });
+}
+
+/* ---------- 摄影 ---------- */
+function renderCats(){
+  $('#cats').innerHTML = D.photo.cats.map((c,i) =>
+    `<div class="cat-c ${i===curC?'on':''}" data-i="${i}">${esc(c[1])} · ${c[3]}</div>`).join('');
+  const c = D.photo.cats[curC];
+  if (c){ $('#cCn').value = c[1]; $('#cEn').value = c[2]; $('#cKey').value = c[0]; $('#cN').value = c[3];
+          $('#cSub').value = c[4] || ''; }
+  renderPhotos();
+}
+$('#cats').addEventListener('click', e => {
+  const el = e.target.closest('.cat-c'); if (!el) return;
+  curC = +el.dataset.i; renderCats();
+});
+['#cCn','#cEn','#cKey'].forEach(s => $(s).addEventListener('input', () => {
+  const c = D.photo.cats[curC];
+  c[1] = $('#cCn').value; c[2] = $('#cEn').value; c[0] = $('#cKey').value;
+  markDirty(); renderCats();
+}));
+$('#cN').addEventListener('input', () => {
+  const c = D.photo.cats[curC];
+  const n = parseInt($('#cN').value, 10);
+  if (!isNaN(n) && n >= 0) c[3] = n;
+  markDirty();
+});
+/* 分类是位置数组，简介放第 5 位；老分类只有 4 位，先补齐再写 */
+$('#cSub').addEventListener('input', () => {
+  const c = D.photo.cats[curC]; if (!c) return;
+  while (c.length < 5) c.push('');
+  c[4] = $('#cSub').value;
+  markDirty();
+});
+$('#addC').onclick = () => {
+  const k = prompt('新分类的标识 key（英文，图片文件名前缀，如 aerial）');
+  if (!k) return;
+  D.photo.cats.push([k.trim(), '新分类', 'New', 0, '']);
+  curC = D.photo.cats.length-1; markDirty(); renderCats();
+};
+$('#delC').onclick = () => {
+  const c = D.photo.cats[curC];
+  if (!confirm('删除分类「'+c[1]+'」？图片文件不会删。')) return;
+  D.photo.cats.splice(curC,1); curC = 0; markDirty(); renderCats();
+};
+function pad(n){ return String(n).padStart(2,'0'); }
+function renderPhotos(){
+  const c = D.photo.cats[curC];
+  if (!c){ $('#pgrid').innerHTML = ''; return; }
+  $('#pInfo').textContent = c[1] + '（' + c[0] + '）共 ' + c[3] + ' 张 · 点图片可替换';
+  let h = '';
+  for (let j = 1; j <= c[3]; j++){
+    const f = c[0] + '_' + pad(j) + '.jpg';
+    h += `<div class="pcell">
+      <img src="${PF}assets/photo2/t/${f}" data-j="${j}" onerror="this.style.background='#f6e6e6';this.title='缺文件'">
+      <div class="pb"><span>${pad(j)}</span><span class="sp"></span>
+        <button class="btn sm" data-j="${j}">替换</button></div></div>`;
+  }
+  $('#pgrid').innerHTML = h || '<div class="empty">这个分类还没图</div>';
+  $('#pgrid').querySelectorAll('.pcell img, .pcell button').forEach(el => {
+    el.onclick = () => {
+      const j = +el.dataset.j;
+      pickImage('photo2', () => renderPhotos(), c[0] + '_' + pad(j) + '.jpg');
+    };
+  });
+}
+
+/* ---------- 奖项 ---------- */
+/* 影像作品里全部标题 —— 奖项就是按这个标题挂上去的 */
+function workTitles(){
+  const out = [];
+  (D.work.groups || []).forEach(g => (g.items || []).forEach(it => { if (it.title) out.push(it.title); }));
+  return out;
+}
+/* 下拉里的选项实时跟影像作品同步：改过标题的老奖项会掉进「找不到同名作品」分组，不会消失 */
+function renderAWpick(){
+  const ts = workTitles(), used = Object.keys(D.awards);
+  const extra = used.filter(k => ts.indexOf(k) < 0);
+  let h = '<option value="">— 选一个视频标题 —</option>'
+        + ts.map(t => `<option value="${esc(t)}">${esc(t)}${used.indexOf(t) >= 0 ? '（已有 ' + D.awards[t].length + ' 条）' : ''}</option>`).join('');
+  if (extra.length)
+    h += '<optgroup label="⚠ 影像作品里找不到同名标题（标题可能改过）">'
+       + extra.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('') + '</optgroup>';
+  const sel = $('#awPick');
+  sel.innerHTML = h;
+  sel.value = used.indexOf(curAW) >= 0 ? curAW : '';
+}
+$('#awPick').addEventListener('change', e => {
+  const v = e.target.value; if (!v) return;
+  if (!D.awards[v]) D.awards[v] = [];
+  curAW = v; markDirty(); renderAW();
+});
+function renderAW(){
+  const keys = Object.keys(D.awards), ts = workTitles();
+  renderAWpick();
+  $('#awlist').innerHTML = keys.map(k => {
+    const ok = ts.indexOf(k) >= 0;
+    return `
+    <div class="li ${k===curAW?'on':''}" data-k="${esc(k)}" ${ok ? '' : 'title="影像作品里没有同名标题，网页上挂不上去"'}>
+      <div class="tx"><div class="t1">${esc(k)}</div>
+        <div class="t2${ok ? '' : ' warn'}">${D.awards[k].length} 条${ok ? '' : ' · ⚠ 没有同名作品'}</div></div>
+      <div class="op"><button class="btn sm" data-act="awdel" data-k="${esc(k)}">✕</button></div>
+    </div>`; }).join('') || '<div class="empty">还没有</div>';
+  if (curAW && !D.awards[curAW]) curAW = null;
+  const box = $('#awbody');
+  if (!curAW || !D.awards[curAW]){ box.innerHTML = '<div class="empty">← 先选一个作品</div>'; return; }
+  box.innerHTML = D.awards[curAW].map((a,i) => `
+    <div class="awi">
+      <input type="text" data-i="${i}" class="aL" value="${esc(a[0])}" placeholder="等级，如 国家级银奖">
+      <input type="text" data-i="${i}" class="aN" value="${esc(a[1])}" placeholder="奖项全称">
+      <button class="btn sm" data-act="awidel" data-i="${i}">✕</button>
+      <div style="grid-column:1/3;display:flex;gap:6px;align-items:center">
+        ${a[2] ? `<img src="${thumbOf(a[2])}" data-full="${fullOf(a[2])}"
+             onerror="if(this.dataset.full&&this.src!==this.dataset.full)this.src=this.dataset.full"
+             style="height:38px;border-radius:4px;border:1px solid var(--line)">` : '<span style="font-size:11.5px;color:var(--ink3)">无奖状图</span>'}
+        <input type="text" data-i="${i}" class="aI" value="${esc(a[2]||'')}" placeholder="assets/award/xxx.jpg" style="flex:1;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:12.5px">
+        <button class="btn sm" data-act="awup" data-i="${i}">传图</button>
+      </div>
+    </div>`).join('') || '<div class="empty">还没有奖项</div>';
+  box.querySelectorAll('.aL').forEach(el => el.addEventListener('input', e => {
+    D.awards[curAW][+e.target.dataset.i][0] = e.target.value; markDirty();
+  }));
+  box.querySelectorAll('.aN').forEach(el => el.addEventListener('input', e => {
+    D.awards[curAW][+e.target.dataset.i][1] = e.target.value; markDirty();
+  }));
+  box.querySelectorAll('.aI').forEach(el => el.addEventListener('input', e => {
+    D.awards[curAW][+e.target.dataset.i][2] = e.target.value.trim(); markDirty();
+  }));
+  box.querySelectorAll('[data-act=awup]').forEach(el => el.onclick = () => {
+    const i = +el.dataset.i;
+    pickImage('award', p => { D.awards[curAW][i][2] = p; markDirty(); renderAW(); });
+  });
+  box.querySelectorAll('[data-act=awidel]').forEach(el => el.onclick = () => {
+    D.awards[curAW].splice(+el.dataset.i,1); markDirty(); renderAW();
+  });
+}
+$('#awlist').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  const k = li.dataset.k;
+  if (e.target.dataset.act === 'awdel'){
+    if (!confirm('删除「'+k+'」下的全部奖项？')) return;
+    delete D.awards[k]; curAW = null; markDirty(); renderAW(); return;
+  }
+  curAW = k; renderAW();
+});
+$('#addAW').onclick = () => {
+  const t = prompt('手动填一个作品标题（要和影像作品里的一字不差）');
+  if (!t) return;
+  const k = t.trim();
+  if (!D.awards[k]) D.awards[k] = [];      // 已有就别清空，免得手滑把奖项抹了
+  curAW = k; markDirty(); renderAW();
+};
+$('#addAWi').onclick = () => {
+  if (!curAW) return toast('先选一个作品','err');
+  D.awards[curAW].push(['','','']); markDirty(); renderAW();
+};
+
+/* ================= 封面 / 关于我 / 技术内容 ================= */
+
+/* 通用：按 "about.blocks.1.ds" 这种路径取到真正的数组引用（数字段当下标） */
+function ptr(p){
+  let o = D;
+  for (const k of p.split('.')) o = o[/^\d+$/.test(k) ? +k : k];
+  return o;
+}
+/* 一行「值 值 … ✕」；列数由 placeholder 的个数决定 */
+function rowN(p, i, v, ph){
+  let h = `<div class="prow" style="grid-template-columns:${Array(ph.length).fill('1fr').join(' ')} auto">`;
+  for (let c = 0; c < ph.length; c++)
+    h += `<input type="text" data-lst="${p}" data-i="${i}" data-c="${c}"` +
+         ` value="${esc(v[c] == null ? '' : v[c])}" placeholder="${esc(ph[c])}">`;
+  return h + `<button class="btn sm" data-ldel="${p}" data-i="${i}" title="删掉这条">✕</button></div>`;
+}
+function rerenderFor(p){
+  if (p.indexOf('hero.') === 0) return renderHero();
+  if (p.indexOf('about.') === 0) return renderAbout();
+  if (p.indexOf('projects.') === 0) return renderTech();
+}
+/* 参数行的输入与删除：委托一次，三个面板共用 */
+document.addEventListener('input', e => {
+  const d = e.target.dataset;
+  if (!d || !d.lst) return;
+  const arr = ptr(d.lst), i = +d.i, c = +d.c;
+  if (!arr || !arr[i]) return;
+  while (arr[i].length <= c) arr[i].push('');
+  arr[i][c] = e.target.value;
+  markDirty();
+});
+document.addEventListener('click', e => {
+  const d = e.target.dataset;
+  if (!d || !d.ldel) return;
+  const arr = ptr(d.ldel);
+  if (!arr || !arr[+d.i]) return;
+  arr.splice(+d.i, 1); markDirty(); rerenderFor(d.ldel);
+});
+
+/* ---------- 总设置 ---------- */
+function renderSite(){
+  const st = D.site || (D.site = {});
+  $('#sBrand').value = st.brand || '';
+  $('#sBrandEn').value = st.brand_en || '';
+  $('#sOwner').value = st.owner || '';
+  $('#sTitle').value = st.title || '';
+  $('#sDesc').value = st.desc || '';
+  $('#sNavCta').value = D.navcta || '';
+  $('#sFoot').value = D.footer || '';
+  renderMarks(); renderTheme(); renderAccent(); renderSecs();
+}
+
+/* ---------- 网站配色 ----------
+   四种模式：跟随系统 / 始终浅色 / 始终深色 / 按时间（晚上 darkAt 转黑、早上 lightAt 转白）。
+   这里定的是「访客第一次打开」的默认值；网页顶栏的太阳/月亮按钮访客仍可自己覆盖，
+   覆盖结果存在访客自己的 localStorage 里，不会写回 data.json。 */
+const THEME_MODES = ['system', 'light', 'dark', 'time'];
+/* 默认配色：缺 site.theme 时按「按时间」19:00→07:00。
+   ⚠️ 这个默认值和 build/gen_site.py 的 THEME_DEFAULT、assets/data_skeleton.json 三处必须一致 ——
+   以前后台/生成器都写 system、骨架写 time，同一份数据三个答案。 */
+/* accent 也放在这里：缺了它整站用默认蓝，和 gen_site.py 的 THEME_DEFAULT、
+   assets/data_skeleton.json 三处要一起改。 */
+const THEME_DEF = { mode: 'time', darkAt: '19:00', lightAt: '07:00', accent: '#2f6bff' };
+function themeCfg(){
+  if (!D) return Object.assign({}, THEME_DEF);   // init() 里 D 落地前可能被渲染路径调到
+  const st = D.site || (D.site = {});
+  if (!st.theme) st.theme = Object.assign({}, THEME_DEF);
+  if (!THEME_MODES.includes(st.theme.mode)) st.theme.mode = THEME_DEF.mode;
+  return st.theme;
+}
+/* 按时间判断此刻该不该黑。跨零点也要对：19:00→07:00 这种区间是「或」不是「与」 */
+function timeIsDark(t, now){
+  const toMin = s => {
+    const p = String(s || '').split(':');
+    return ((+p[0] || 0) * 60) + (+p[1] || 0);
+  };
+  const m = now.getHours() * 60 + now.getMinutes();
+  const a = toMin(t.darkAt || '19:00'), b = toMin(t.lightAt || '07:00');
+  return a <= b ? (m >= a && m < b) : (m >= a || m < b);
+}
+function nowDark(){
+  const t = themeCfg();
+  if (t.mode === 'dark') return true;
+  if (t.mode === 'light') return false;
+  if (t.mode === 'time') return timeIsDark(t, new Date());
+  try { return matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; }
+}
+/* 面板上给一块即时预览，别让人选完还得去开网页才知道黑成什么样 */
+function renderTheme(){
+  const t = themeCfg();
+  document.querySelectorAll('#thMode button').forEach(b => b.classList.toggle('on', b.dataset.v === t.mode));
+  $('#thDark').value = t.darkAt || '19:00';
+  $('#thLight').value = t.lightAt || '07:00';
+  $('#thTime').style.display = t.mode === 'time' ? 'grid' : 'none';
+
+  const dark = nowDark();
+  const why = t.mode === 'time' ? '按时间自动切'
+    : t.mode === 'system' ? '跟随访客的系统设置' : '固定不变';
+  $('#thPvDot').textContent = dark ? '☾' : '☀';
+  $('#thPvName').textContent = dark ? '深色' : '浅色';
+  $('#thPvNote').textContent = '现在访客打开看到的是' + (dark ? '深色' : '浅色') + ' · ' + why;
+  // 预览条自己也跟着变色，这样一眼就能看出「黑是什么黑」
+  $('#thPv').style.background = dark ? '#12161f' : '#f7f9fd';
+  $('#thPv').style.borderColor = dark ? '#202838' : '';
+  $('#thPv').style.color = dark ? '#e8edf6' : '';
+  $('#thPvDot').style.background = dark ? '#242c3b' : '#eef2f9';
+  $('#thPvNote').style.color = dark ? '#8b97ab' : '';
+}
+$('#thMode').addEventListener('click', e => {
+  const b = e.target.closest('button[data-v]');
+  if (!b) return;
+  themeCfg().mode = b.dataset.v;
+  markDirty(); renderTheme();
+});
+
+/* ---------- 主题色 ----------
+   数据里只存一个 site.theme.accent（#rrggbb）。其余颜色（深色档、渐变中值、背景柔光、
+   半透明阴影）全部由 build/palette.py 推导 —— 后台和生成器用同一份，
+   所以「这里看到什么，生成出来就是什么」。
+   预览不自己算 rgb，一律用 /api/palette 回来的值：两边各写一套算法才是迟早要出事的地方。 */
+let ACC_PRESETS = [];        // /api/palettes 回来之后才有
+let ACC_TRIED = false;       // 拉过一次了吗（没拉完之前别显示「加载失败」，会闪）
+let ACC_DEF = THEME_DEF.accent;
+let accTimer = 0;            // 拖取色器会连发几十个 input，这里做 120ms 合并
+
+function accentNow(){
+  const t = themeCfg();
+  const v = String(t.accent || '').trim().toLowerCase();
+  return /^#[0-9a-f]{6}$/.test(v) ? v : ACC_DEF;
+}
+
+/* 色块列表。预设是接口给的，不写死在前端 —— 想加一套配色只改 palette.py 一处。 */
+function renderAccGrid(){
+  const box = $('#accGrid');
+  if (!box) return;
+  const cur = accentNow();
+  if (!ACC_PRESETS.length){
+    if (!ACC_TRIED){ box.innerHTML = ''; return; }
+    box.innerHTML = '<span class="accnote" style="margin:0">配色预设没加载出来'
+      + '（后台版本旧或缺 build/palette.py），下面仍可用自定义颜色。</span>';
+    return;
+  }
+  box.innerHTML = ACC_PRESETS.map(p =>
+    `<button class="accsw${p.accent === cur ? ' on' : ''}" data-acc="${esc(p.accent)}" title="${esc(p.note || '')}">`
+    + `<i style="background:${esc(p.accent)}"></i>${esc(p.name)}</button>`
+  ).join('');
+}
+
+/* 把接口算出来的色板上到两块预览小样里 */
+function paintAccent(r){
+  if (!r || !r.ok) return;
+  const put = (sel, pal, bg) => {
+    const el = $(sel);
+    if (!el) return;
+    el.style.background = bg;
+    const b = el.querySelector('[data-k=btn]'), t = el.querySelector('[data-k=txt]');
+    if (b) b.style.background = pal.acc;
+    if (t) t.style.color = pal.acc;
+  };
+  put('#pvL', r.light, r.washLight);
+  put('#pvD', r.dark, r.washDark);
+
+  // 说了「会自动提亮一档」，就把实际用的值摊开给人看，别让人以为取色器没生效
+  const cur = accentNow();
+  const same = r.light.acc === cur;
+  const preset = ACC_PRESETS.find(p => p.accent === cur);
+  $('#accNote').innerHTML = (preset ? esc(preset.note) + ' · ' : '')
+    + `浅色 ${esc(r.light.acc)} ／ 深色 ${esc(r.dark.acc)}`
+    + (same ? '' : `　<b style="color:var(--warn)">这个色直接当底色会看不清白字，实际压深成 ${esc(r.light.acc)}</b>`);
+}
+
+async function refreshAccent(){
+  const cur = accentNow();
+  const r = await api('/api/palette?accent=' + encodeURIComponent(cur));
+  if (!r || !r.ok){
+    // 接口不可用（比如直接双击打开的静态后台）就退化成「只显示原色」，不挡住保存
+    const box = $('#accNote');
+    if (box) box.textContent = r && r.err ? r.err : '配色预览不可用，不影响保存。';
+    return;
+  }
+  paintAccent(r);
+}
+
+function renderAccent(){
+  const cur = accentNow();
+  if ($('#accPick')) $('#accPick').value = cur;
+  if ($('#accHex')) $('#accHex').value = cur;
+  renderAccGrid();
+  refreshAccent();
+}
+
+/* 改色：写进数据 → 标脏 → 只重画颜色相关的东西（整页重绘会把光标位置弄丢） */
+function setAccent(hex){
+  const t = themeCfg();
+  t.accent = /^#[0-9a-f]{6}$/.test(hex) ? hex : ACC_DEF;
+  markDirty();
+  if ($('#accPick')) $('#accPick').value = t.accent;
+  if ($('#accHex')) $('#accHex').value = t.accent;
+  renderAccGrid();
+  clearTimeout(accTimer);
+  accTimer = setTimeout(refreshAccent, 120);
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('.accsw');
+  if (!b) return;
+  setAccent(b.dataset.acc);
+});
+if ($('#accPick')) $('#accPick').addEventListener('input', e => setAccent(e.target.value));
+if ($('#accHex')){
+  $('#accHex').addEventListener('input', e => {
+    // 手打十六进制：允许先只有半截，写全 6 位才生效（不然每敲一个字符都重算一次配色）
+    let v = e.target.value.trim();
+    if (!v.startsWith('#')) v = '#' + v;
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) setAccent(v.toLowerCase());
+  });
+  $('#accHex').addEventListener('blur', e => { e.target.value = accentNow(); });
+}
+if ($('#accReset')) $('#accReset').onclick = () => setAccent(ACC_DEF);
+
+/* 预设清单只在开局拉一次 */
+(async function(){
+  const r = await api('/api/palettes');
+  ACC_TRIED = true;
+  if (r && r.ok && r.presets && r.presets.length){
+    ACC_PRESETS = r.presets;
+    if (r.default) ACC_DEF = r.default;
+  }
+  renderAccent();
+})();
+/* ---------- 历史版本 ----------
+   每次保存 server.py 都会在 portfolio/_bak 里留一份（最多 30 份），但后台此前没有入口 ——
+   误删一页只能自己去文件夹里翻。这里把清单列出来，一键回去；回滚前服务端会再备份当前版。 */
+async function loadBackups(){
+  const box = $('#bkList');
+  if (!box) return;
+  try{
+    const r = await api('/api/backups');
+    const items = (r && r.items) || [];
+    box.innerHTML = items.length
+      ? items.map(it => `<div class="bkrow"><b>${esc(it.at)}</b>
+          <span>${(it.size / 1024).toFixed(1)} KB</span>
+          <button class="btn sm" data-bk="${esc(it.name)}">回到这版</button></div>`).join('')
+      : '<div class="empty">还没有历史版本 —— 第一次点「保存」之后才会出现</div>';
+  }catch(e){
+    box.innerHTML = '<div class="empty">读不到历史版本：' + esc(String(e.message || e)) + '</div>';
+  }
+}
+if ($('#bkRefresh')) $('#bkRefresh').onclick = loadBackups;
+if ($('#bkList')) $('#bkList').addEventListener('click', async e => {
+  // 点到的往往是按钮里的文字，data 属性在外层按钮上 —— 必须 closest（见 pitfalls 39）
+  const b = e.target.closest('[data-bk]');
+  if (!b) return;
+  if (!confirm('回到 ' + b.dataset.bk + ' 这一版？\n当前内容会先自动存一份，后悔还能回来。')) return;
+  b.disabled = true; b.textContent = '回滚中…';
+  const r = await api('/api/restore', { name: b.dataset.bk });
+  if (r.ok){ toast('已回到那一版，重新载入中…', 'ok'); setTimeout(() => location.reload(), 700); }
+  else { toast('回滚失败：' + r.err, 'err'); b.disabled = false; b.textContent = '回到这版'; }
+});
+
+[['thDark', 'darkAt'], ['thLight', 'lightAt']].forEach(([id, k]) => {
+  $('#' + id).addEventListener('input', e => {
+    themeCfg()[k] = e.target.value || (k === 'darkAt' ? '19:00' : '07:00');
+    markDirty(); renderTheme();
+  });
+});
+
+/* 标识图。同名文件被覆盖后浏览器还会拿旧缓存，所以一律带时间戳。
+   缩略图缺失时退回原图 —— 但要先摘掉 onerror，否则原图也 404 会无限重试。 */
+function setMark(img, rel){
+  const bust = '?t=' + Date.now();
+  img.onerror = () => { img.onerror = null; img.src = fullOf(rel) + bust; };
+  img.src = thumbOf(rel) + bust;
+}
+function renderMarks(){
+  const st = D.site || {};
+  setMark($('#sLogoImg'), st.logo || 'assets/hero/avatar.jpg');
+  setMark($('#sAvaImg'),  st.avatar || 'assets/hero/avatar.jpg');
+}
+
+/* ---------- 页面 / 板块（面向对象） ----------
+   页面持有板块，板块指向 data.json 里的内容键。改页面标题/简介只动 site.pages，
+   内容本身还在原键里 —— 所以「加一页」不用搬数据，「删一页」也不会删内容。
+   板块类型注册表必须和 build/gen_site.py 的 BLOCK_TYPES 对齐。 */
+const BLOCK_REG = {
+  work:      { label:'影像作品',   nav:'影像', en:'Film & Video' },
+  digital:   { label:'自媒体账号展示', nav:'自媒体', en:'Tech & Review' },
+  photo:     { label:'摄影',       nav:'摄影', en:'Photography' },
+  papers:    { label:'论文与研究', nav:'论文', en:'Research' },
+  opeds:     { label:'评论与随笔', nav:'评论', en:'Op-eds' },
+  design:    { label:'设计与物料', nav:'设计', en:'Design' },
+  proposals: { label:'问题与方案', nav:'方案', en:'Proposals' },
+  projects:  { label:'技术内容',   nav:'图文', en:'Tech' },
+  about:     { label:'关于我',     nav:'关于', en:'Self-Introduction' },
+  contact:   { label:'联系',       nav:'联系', en:'Contact' },
+};
+const BLOCK_ORDER = Object.keys(BLOCK_REG);
+const CNUM = '一二三四五六七八九十';
+/* 页签上的计数小徽标：板块类型 → span 的 id（renderPgTabs 生成页签时用） */
+const TAB_N = { work:'nV', photo:'nP', papers:'nPapers', opeds:'nOpeds',
+                design:'nDesign', proposals:'nProposals', projects:'nProjects', digital:'nDigital' };
+
+class Block {
+  constructor(type, raw){
+    raw = raw || {};
+    this.type = type;
+    this.title = raw.title || '';   // 空 = 用默认（多板块页才用得上）
+    this.intro = raw.intro || '';   // 空 = 用页面简介
+  }
+  get meta(){ return BLOCK_REG[this.type] || { label:this.type, nav:this.type, en:'' }; }
+  get data(){ return D[this.type] || {}; }
+  get defaultTitle(){ return this.data.h2 || this.meta.label; }
+  get defaultIntro(){ return this.data.sub || ''; }
+  toJSON(){ return { type:this.type, title:this.title, intro:this.intro }; }
+}
+
+class Page {
+  constructor(raw){
+    raw = raw || {};
+    this.id = raw.id || ('pg_' + Math.random().toString(36).slice(2, 7));
+    /* 回写生成的 id：页签、展开态、「去内容页」跳转全靠 id 对号。
+       不回写的话 pagesNow() 每调一次就换一个随机 id（老数据/没存过盘的页面），
+       两套 id 对不上 —— 表现就是跳转点了没反应、展开的卡片自己合上。 */
+    if (!raw.id) raw.id = this.id;
+    this.show = raw.show !== false;
+    this.title = raw.title || '';
+    this.titleEn = raw.titleEn || '';
+    this.nav = raw.nav || '';
+    this.intro = raw.intro || '';
+    this.blocks = (raw.blocks || [])
+      .map(b => new Block((b && b.type) || b, b))
+      .filter(b => BLOCK_REG[b.type]);
+  }
+  get first(){ return this.blocks[0]; }
+  get multi(){ return this.blocks.length > 1; }
+  get anchor(){ return this.multi ? this.id : (this.first ? this.first.type : this.id); }
+  get titleText(){ return this.title || (this.first ? this.first.defaultTitle : '未命名页面'); }
+  get enText(){ return this.titleEn || (this.first ? this.first.meta.en : ''); }
+  get navText(){ return this.nav || (this.first ? this.first.meta.nav : this.titleText.slice(0, 4)); }
+  get introText(){ return this.intro || (this.first ? this.first.defaultIntro : ''); }
+  get label(){ return this.blocks.map(b => b.meta.label).join(' + ') || '空页面'; }
+  addBlock(type){
+    if (!BLOCK_REG[type] || this.blocks.some(b => b.type === type)) return false;
+    this.blocks.push(new Block(type));
+    return true;
+  }
+  toJSON(){
+    return { id:this.id, show:this.show, title:this.title, titleEn:this.titleEn,
+             nav:this.nav, intro:this.intro, blocks:this.blocks.map(b => b.toJSON()) };
+  }
+}
+
+/* 页面仓：读出来 / 存回去，以及老数据（site.sections）的兼容。
+   迁移规则和 build/gen_site.py 的 _legacy_pages() 必须一致，两边不能跑偏
+   （scripts/selftest.py 里有一条断言专门盯这件事）。 */
+class PageStore {
+  constructor(data){ this.D = data; }
+  get site(){ return this.D.site || (this.D.site = {}); }
+  all(){
+    const site = this.site;
+    if (!Array.isArray(site.pages) || !site.pages.length) site.pages = this.fromLegacy();
+    return site.pages.map(p => new Page(p));
+  }
+  fromLegacy(){
+    const raw = Array.isArray(this.site.sections) ? this.site.sections : null;
+    const rows = raw
+      ? raw.map(r => (typeof r === 'string' ? { key:r, show:true } : r)).filter(r => r && BLOCK_REG[r.key])
+      : BLOCK_ORDER.filter(k => k in this.D).map(k => ({ key:k, show:true }));
+    return rows.map(r => {
+      const d = this.D[r.key] || {};
+      return { id:'pg_' + r.key, show:r.show !== false, nav:BLOCK_REG[r.key].nav,
+               title:d.h2 || '', titleEn:d.h2en || '', intro:d.sub || '',
+               blocks:[{ type:r.key, title:'', intro:'' }] };
+    });
+  }
+  usedTypes(pages){ return new Set(pages.reduce((a, p) => a.concat(p.blocks.map(b => b.type)), [])); }
+  save(pages){
+    const site = this.site;
+    site.pages = pages.map(p => p.toJSON());
+    // 老键同步一份：万一回滚到旧版生成器，读到的顺序/显隐还是对的
+    site.sections = pages.filter(p => p.blocks.length).map(p => ({ key:p.first.type, show:p.show }));
+    markDirty();
+  }
+}
+const pagesNow = () => new PageStore(D).all();
+const storePages = pages => new PageStore(D).save(pages);
+
+/* 哪些页是展开的：只记 id，重画之后不会因为下标变化串行 */
+const openPages = new Set();
+/* 页面上限：一屏一页，导航塞不下更多 */
+const PAGE_MAX = 10;
+
+function renderSecs(){
+  const pages = pagesNow();
+  let n = 0;
+  const full = pages.length >= PAGE_MAX;
+  const cards = pages.map((p, i) => {
+    const off = p.show === false;
+    const num = off ? '–' : CNUM[n++];
+    const open = openPages.has(p.id);
+    /* 一行 = 一页：左边序号+名字，右边整排操作；「编辑」在行下就地展开表单。
+       「去内容页」直接点到对应的侧栏页签，改标题和改内容两头不用来回找。 */
+    return `<div class="pgcard ${off ? 'off' : ''}" data-pgid="${p.id}">
+      <div class="pg-top">
+        <span class="six">${num}</span>
+        <div class="tx"><div class="t1">${esc(p.titleText)}</div>
+          <div class="t2">${esc(p.navText)} · ${p.multi ? esc(p.label) + ' · 一页多板块' : '单板块页'}</div></div>
+        <div class="pg-acts">
+          <label class="chk"><input type="checkbox" data-pgshow="${i}" ${off ? '' : 'checked'}>显示</label>
+          <button class="btn sm" data-pgleft="${i}" ${i === 0 ? 'disabled' : ''} title="上移一位">↑</button>
+          <button class="btn sm" data-pgright="${i}" ${i === pages.length - 1 ? 'disabled' : ''} title="下移一位">↓</button>
+          <button class="btn sm" data-pggo="pg_${String(p.id).replace(/^pg_/, '')}" title="去这一页的内容页签">去内容页</button>
+          <button class="btn sm" data-pgtog="${i}">${open ? '收起' : '编辑'}</button>
+          <button class="btn sm warn" data-pgdel="${i}" title="删除这一页">✕</button>
+        </div>
+      </div>
+      ${open ? pageEditor(p, i, pages) : ''}
+    </div>`;
+  }).join('');
+  /* 末尾永远挂一张虚线「＋ 新增页面」卡：新页从这里长出来，排在最后 */
+  const add = `<button class="pgadd${full ? ' dis' : ''}" data-pgadd="1" ${full ? 'disabled' : ''}>
+      <span>＋ 新增页面</span>
+      <small>${full ? '最多 ' + PAGE_MAX + ' 个页面，先撤下或删掉一个' : '新页面排在最后'}</small>
+    </button>`;
+  $('#sSecs').innerHTML = cards + add;
+  // 「新建页面」入口跟着上限走，满了就置灰并说明原因
+  $('#sPageAdd').disabled = full;
+  $('#sPageAdd').title = full ? '最多 ' + PAGE_MAX + ' 个页面' : '';
+  $('#pgCnt').textContent = pages.length ? '共 ' + pages.length + ' / ' + PAGE_MAX + ' 页' : '';
+  renderPgTabs();   // 页面结构变了，页签和内容容器跟着重建
+}
+
+/* ---------- 一个页面对应一个页签 ----------
+   顶部页签由页面生成：总设置 / 页面设置 / 封面 之后，每个页面一个页签（用导航短名），
+   顺序与「页面设置」的卡片一致；内容编辑器从 #edPark 搬进该页的容器。
+   挂在别处都没有的类型（如没人建「技术内容」页）进「未分配」——内容不丢，网页先不显示。 */
+function renderPgTabs(){
+  const pages = pagesNow();
+  // 编辑器此刻可能在停车场、也可能已经在某个页签容器里（上次搬过去的）——
+  // 所以从全文档收集，不能只找 #edPark，否则重建时会把它们连旧容器一起丢掉
+  const eds = {};
+  document.querySelectorAll('[data-blk]').forEach(ed => eds[ed.dataset.blk] = ed);
+  const used = new Set();
+  pages.forEach(p => p.blocks.forEach(b => used.add(b.type)));
+  /* 未分配 = 有内容却没挂到任何页面上。光看 DOM 在不在不行：
+     空板块（比如压根没写的评论随笔）也会被算成「未分配」，假阳性吓人。
+     再加一道 blockCount > 0：真有内容才值得占一个页签。
+     :1953 的 free（添加板块下拉）保持 t in D —— 那里要允许「键在但还没内容」，
+     不然用户把内容清空后就没有入口再把板块加回页面了（鸡生蛋死锁）。 */
+  const orphTypes = Object.keys(eds).filter(t => !used.has(t) && blockCount(t) > 0);
+
+  // 页签按钮：页面一个，外加（有未分配模块时的）「未分配」
+  // key 统一成 pg_ + 去掉 id 自带的 pg_ 前缀，避免出现 pg_pg_xxx 这种双前缀
+  const pgKey = p => 'pg_' + String(p.id).replace(/^pg_/, '');
+  $('#pgTabs').innerHTML = pages.map(p => {
+    const cnt = p.blocks.reduce((a, b) => a + blockCount(b.type), 0);
+    // 单板块页给计数 span 一个稳定 id，refreshCounts 之后能跟着刷新。
+    // ⚠️ id 必须落在 span 上：落在 button 上的话，刷新计数会把按钮文字（导航名）一起覆盖掉
+    const nid = (p.blocks.length === 1 && TAB_N[p.blocks[0].type]) ? ' id="' + TAB_N[p.blocks[0].type] + '"' : '';
+    return `<button class="tab${p.show === false ? ' off' : ''}" data-p="${pgKey(p)}"
+      title="${esc(p.titleText)}${p.titleEn ? ' · ' + esc(p.titleEn) : ''}">${esc(p.navText)}${cnt ? '<span class="n"' + nid + '>' + cnt + '</span>' : ''}</button>`;
+  }).join('') + (orphTypes.length
+    ? `<button class="tab" data-p="orphan" title="有内容还没挂到页面上">未分配<span class="n">${orphTypes.length}</span></button>` : '');
+
+  // 每页一个容器：顶栏（大标题可点，跳回页面设置）+ 板块编辑器
+  const host = $('#pgPages');
+  host.innerHTML = '';
+  const slots = {};
+  pages.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'page'; div.id = 'p-' + pgKey(p);
+    div.innerHTML = `<div class="pgbar">
+        <button class="pgjump" data-pgjump="${p.id}" title="去「页面设置」改这一页的标题、顺序、简介">
+          <b>${esc(p.titleText)}</b>${p.titleEn ? '<i>' + esc(p.titleEn) + '</i>' : ''}</button>
+        <span class="sp"></span>
+        <span class="hint">${p.blocks.length
+          ? p.blocks.map(b => esc(b.title || BLOCK_REG[b.type].label)).join(' · ')
+          : '空页面 —— 去「页面设置」点「编辑」给它加板块'}</span>
+      </div>`;
+    host.appendChild(div);
+    slots[p.id] = div;
+  });
+
+  // 把编辑器搬进对应页面；没挂页的搬进「未分配」
+  const orph = $('#p-orphan'), orphBox = $('#orphBox');
+  orphBox.innerHTML = '';
+  Object.keys(eds).forEach(t => {
+    const pg = pages.find(p => p.blocks.some(b => b.type === t));
+    (pg ? slots[pg.id] : orphBox).appendChild(eds[t]);
+  });
+  orph.hidden = !orphTypes.length;
+
+  // 重建后保持当前所在页签，否则视图会突然空白
+  const was = document.querySelector('.tab.on');
+  const key = was && was.dataset.p;
+  if (key && document.querySelector('.tab[data-p="' + key + '"]')){
+    document.querySelector('.tab[data-p="' + key + '"]').classList.add('on');
+    const pg = $('#p-' + key); if (pg) pg.classList.add('on');
+  }
+  refreshCounts();
+}
+
+function pageEditor(p, i, pages){
+  const used = new PageStore(D).usedTypes(pages);
+  const free = BLOCK_ORDER.filter(t => t in D && !used.has(t));
+  const blks = p.blocks.map((b, j) => `
+    <div class="blkcard">
+      <div class="blkcard-h"><b>${esc(b.meta.label)}</b><em>${b.type}</em><span class="sp"></span>
+        <button class="btn sm warn" data-blkdel="${i},${j}" ${p.blocks.length < 2 ? 'disabled title="一页至少留一个板块"' : ''}>✕</button></div>
+      <div class="fld"><label>板块简介<span class="hint">留空就用下面的页面简介</span></label>
+        <textarea rows="2" data-blkintro="${i},${j}" placeholder="${esc(b.defaultIntro)}">${esc(b.intro)}</textarea></div>
+      <div class="fld"><label>板块小标题<span class="hint">一页挂多块时才需要：页面出大标题，这里填这一块自己的标题</span></label>
+        <input type="text" data-blktitle="${i},${j}" value="${esc(b.title)}" placeholder="${esc(b.defaultTitle)}"></div>
+    </div>`).join('');
+  return `<div class="pgedit">
+    <div class="row2">
+      <div class="fld"><label>页面标题</label>
+        <input type="text" data-pgtitle="${i}" value="${esc(p.title)}" placeholder="${esc(p.titleText)}"></div>
+      <div class="fld"><label>导航短名<span class="hint">顶栏那一格，两三个字最好</span></label>
+        <input type="text" data-pgnav="${i}" value="${esc(p.nav)}" placeholder="${esc(p.navText)}"></div>
+    </div>
+    <div class="fld"><label>英文小标</label>
+      <input type="text" data-pgen="${i}" value="${esc(p.titleEn)}" placeholder="${esc(p.enText)}"></div>
+    <div class="fld"><label>页面简介<span class="hint">显示在标题下面，这一页在说什么</span></label>
+      <textarea rows="2" data-pgintro="${i}" placeholder="${esc(p.introText)}">${esc(p.intro)}</textarea></div>
+    <div class="blkbox">
+      <div class="blkbox-h">这一页的板块（${p.blocks.length}）</div>
+      ${blks}
+      <div class="adds">${free.map(t =>
+        `<button class="btn sm" data-blkadd="${i},${t}">+ ${esc(BLOCK_REG[t].label)}</button>`).join('')
+        || '<span class="t2">已经有数据的板块都用上了 —— 要从别页摘一块下来，或者先给新内容准备数据</span>'}</div>
+    </div>
+  </div>`;
+}
+
+function pageIdxKey(v){ return v.split(',').map(Number); }
+
+$('#sSecs').addEventListener('input', e => {
+  const d = e.target.dataset;
+  const pages = pagesNow();
+  if (d.pgtitle !== undefined) pages[+d.pgtitle].title = e.target.value;
+  else if (d.pgnav !== undefined) pages[+d.pgnav].nav = e.target.value;
+  else if (d.pgen !== undefined) pages[+d.pgen].titleEn = e.target.value;
+  else if (d.pgintro !== undefined) pages[+d.pgintro].intro = e.target.value;
+  else if (d.blkintro !== undefined){
+    const [i, j] = pageIdxKey(d.blkintro); pages[i].blocks[j].intro = e.target.value;
+  } else if (d.blktitle !== undefined){
+    const [i, j] = pageIdxKey(d.blktitle); pages[i].blocks[j].title = e.target.value;
+  } else return;
+  storePages(pages);
+  // 标题改了，卡片头跟着变 —— 不整块重画，否则输入框会失焦
+  if (d.pgtitle !== undefined){
+    const t = e.target.closest('.pgcard')?.querySelector('.pg-top .t1');
+    if (t) t.textContent = e.target.value || pages[+d.pgtitle].titleText;
+  }
+});
+
+$('#sSecs').addEventListener('click', e => {
+  // 点到的往往不是按钮本身，而是按钮里的文字（虚线卡里的「＋ 新增页面」/ 说明小字）。
+  // dataset 长在按钮上，所以必须先往上找一层，否则点文字等于没点。
+  const el = e.target.closest('[data-pgadd],[data-pggo],[data-pgtog],[data-pgleft],[data-pgright],[data-pgdel],[data-blkdel],[data-blkadd]');
+  if (!el) return;
+  const d = el.dataset;
+  const pages = pagesNow();
+  if (d.pgadd !== undefined) return openNewPageDialog();
+  if (d.pggo !== undefined){              // 去内容页：等价于点侧栏上那一页的页签
+    const t = document.querySelector('.tab[data-p="' + d.pggo + '"]');
+    if (t) t.click();
+    return;
+  }
+  if (d.pgtog !== undefined){
+    const id = pages[+d.pgtog].id;
+    openPages.has(id) ? openPages.delete(id) : openPages.add(id);
+    renderSecs(); return;
+  }
+  if (d.pgleft !== undefined){
+    const i = +d.pgleft; if (i < 1) return;
+    [pages[i - 1], pages[i]] = [pages[i], pages[i - 1]];
+  } else if (d.pgright !== undefined){
+    const i = +d.pgright; if (i >= pages.length - 1) return;
+    [pages[i + 1], pages[i]] = [pages[i], pages[i + 1]];
+  } else if (d.pgdel !== undefined){
+    const i = +d.pgdel;
+    if (!confirm('把「' + pages[i].titleText + '」这一页从网页上去掉？\n内容不会被删，随时能加回来。')) return;
+    openPages.delete(pages[i].id);
+    pages.splice(i, 1);
+  } else if (d.blkdel !== undefined){
+    const [i, j] = pageIdxKey(d.blkdel);
+    if (pages[i].blocks.length < 2) return;
+    if (!confirm('把「' + pages[i].blocks[j].meta.label + '」从这一页摘下来？\n这一块的内容还在，可以挂到别的页。')) return;
+    pages[i].blocks.splice(j, 1);
+  } else if (d.blkadd !== undefined){
+    const [i, t] = [Number(d.blkadd.split(',')[0]), d.blkadd.split(',')[1]];
+    pages[i].addBlock(t); openPages.add(pages[i].id);
+  } else return;
+  storePages(pages); renderSecs();
+});
+
+$('#sSecs').addEventListener('change', e => {
+  const d = e.target.dataset;
+  if (d.pgshow === undefined) return;
+  const pages = pagesNow();
+  pages[+d.pgshow].show = e.target.checked;
+  storePages(pages); renderSecs();
+});
+
+/* ---------- 页面模板 ----------
+   新建页面时选的是「页面类型」，不是「内容模块」——用户脑子里想的是「我要一个视频页」，
+   而不是「work 这个数据结构」。所以模板卡上写人话的页面名，下面一行说这页会长成什么样，
+   再下面说能不能选。缩略图只是版式的示意（灰块），不画真实内容。type 为空 = 空白页。 */
+const PAGE_TPL = [
+  { grp:'作品展示' },
+  { type:'work',     name:'视频页',     prev:'hero',  desc:'分组 + 作品卡 + 奖项' },
+  { type:'photo',    name:'摄影页',     prev:'grid',  desc:'分类 + 图片墙' },
+  { type:'design',   name:'设计与物料页', prev:'grid', desc:'平面作品卡 + 分类' },
+  { type:'projects', name:'图文页',     prev:'cover', desc:'调研报告、评论、策划案、物料' },
+  { type:'digital',  name:'自媒体账号展示', prev:'grid', desc:'账号简介卡 + 视频墙（封面 + 播放量）' },
+  { grp:'文字内容' },
+  { type:'papers',   name:'文档展示页', prev:'cover', desc:'大封面 + 摘要 + 内页' },
+  { type:'opeds',    name:'随笔页',     prev:'list',  desc:'评论与随笔，一行一条' },
+  { type:'proposals',name:'方案页',     prev:'list',  desc:'问题与方案，一行一条' },
+  { grp:'个人与其他' },
+  { type:'about',    name:'关于我页',   prev:'text',  desc:'简介 + 内容块 + 形象照' },
+  { type:'contact',  name:'联系页',     prev:'text',  desc:'邮箱、电话、社交链接' },
+  { type:'',         name:'空白页',     prev:'blank', desc:'自定义标题，之后自己加模块' },
+];
+/* 版式缩略图：只摆灰块示意结构，跟真实内容无关 */
+const TPL_PREV = {
+  hero:  '<i class="bt"></i><i class="bs"></i><i class="bb"></i>',
+  grid:  '<i class="bt"></i><div class="row g4"><i></i><i></i><i></i><i></i></div>',
+  list:  '<i class="bt"></i><i class="br"></i><i class="br"></i><i class="br"></i>',
+  text:  '<i class="bt"></i><i class="bl"></i><i class="bl w7"></i><i class="bl w5"></i>',
+  cover: '<i class="bt"></i><div class="cov"><i class="cv"></i><div class="txt">'
+       + '<i class="bl"></i><i class="bl w7"></i><i class="bl w5"></i></div></div>',
+  blank: '<div class="dash">＋</div>',
+};
+
+/* 新建页面：弹窗里先选「这一页是什么类型」，再填标题。
+   一种内容只能挂在一页上 —— 模板对应那一块已经在别页时，会整块挪过来（内容一个字不删）。
+   三个入口（页面设置的「+ 新建页面」和末尾虚线卡、展示模块页的「＋ 新增页面」）共用这一个弹窗。
+   上限 PAGE_MAX 个：满了直接提示，不开弹窗。 */
+function openNewPageDialog(){
+  const pages0 = pagesNow();
+  if (pages0.length >= PAGE_MAX)
+    return toast('最多 ' + PAGE_MAX + ' 个页面：先从网页上撤下或删掉一个', 'err');
+  mdMode = 'newpage'; mdSel = null;
+  const ownerOf = {};
+  pages0.forEach(p => p.blocks.forEach(b => ownerOf[b.type] = p));
+
+  /* 每张模板卡的状态：能不能选、为什么不能、选了会发生什么 —— 全写在卡上，别让人猜灰按钮 */
+  const stat = t => {
+    if (!t) return { ok:true, note:'从零开始，不加任何模块' };
+    const by = ownerOf[t], has = t in D;
+    if (!BLOCK_EDITOR[t]) return { ok:false, note:'这类内容不在后台里改' };
+    if (by) return { ok:true, note:'现在在「' + by.navText + '」页，会挪过来' };
+    if (!has) return t === 'digital'
+      ? { ok:true, note:'还没有数据，建好后点页签里「从零开始」填内容' }
+      : { ok:false, note:'这类还没有内容，建了也是空的' };
+    const n = blockCount(t);
+    return { ok:true, note:n ? '已备好 ' + n + ' 条内容' : '可以新建' };
+  };
+
+  let html = '', open = false;
+  PAGE_TPL.forEach(it => {
+    if (it.grp){
+      if (open) html += '</div>';
+      html += `<div class="tplgrp">${esc(it.grp)}</div><div class="tplgrid">`;
+      open = true; return;
+    }
+    const s = stat(it.type);
+    html += `<button class="tpl" data-newpg="${it.type}" ${s.ok ? '' : 'disabled'}>
+        <div class="pv">${TPL_PREV[it.prev] || TPL_PREV.text}</div>
+        <div class="nm">${esc(it.name)}</div>
+        <div class="ds">${esc(it.desc)}<em>${esc(s.note)}</em></div>
+      </button>`;
+  });
+  if (open) html += '</div>';
+
+  mdOpen('＋', '新增页面',
+    '一页 = 网页上的一屏 + 导航里的一项，新页面排在最后。先选这一页是什么类型，再给它起名。',
+    `<div class="fld"><label>这一页是什么类型<span class="hint">每种类型对应一套版式</span></label>
+       ${html}</div>
+     <div class="fld"><label>页面标题<span class="hint">留空就用这类内容自己的标题，之后随时能改</span></label>
+       <input type="text" id="mdPTitle" placeholder="选一种类型后自动给默认名"></div>
+     <div class="tip plain" style="margin:2px 0 0">一种内容只能挂在一页上。模板对应的内容要是在别页，会被整块挪到新页面——内容一个字不删，原页要是空了就自动收起来。</div>`,
+    `<button class="btn" data-md="cancel">取消</button>
+     <button class="btn pri" data-md="newpage">新增页面</button>`);
+  $('#mdMask').classList.add('wide');       // 模板卡三列，窄弹窗塞不下
+}
+
+$('#sPageAdd').onclick = openNewPageDialog;
+
+$('#sSecReset').onclick = () => {
+  if (!confirm('恢复成默认：每类内容一页、全部显示、标题用数据里的默认值？')) return;
+  const st = D.site || (D.site = {});
+  delete st.pages;              // 删掉配置，下次读会按内置顺序重建
+  markDirty(); renderSecs();
+};
+
+/* ---------- 模块的新增 / 删除（弹窗 + 明确确认） ----------
+   原则：默认只从网页上撤下来，内容一个字不删；要连内容一起删，
+   必须勾一次「我确定」再弹一次系统确认 —— 三级确认，误触不了。 */
+/* 哪些类型在后台有编辑器、编辑器在哪个页签里。digital 也登记了：
+   生成端（gen_site.py）本来就支持渲染它，两端能力必须对等，
+   否则带 digital 数据的站升级后页签点开是纯空白。 */
+const BLOCK_EDITOR = {
+  work:'影像作品', digital:'自媒体账号展示', photo:'摄影', projects:'技术内容',
+  papers:'论文与研究', opeds:'评论与随笔',
+  design:'设计与物料', proposals:'问题与方案',
+  about:'关于我', contact:'联系方式',
+};
+/* 模块里有多少条内容：删除弹窗里要如实报数 */
+function blockCount(t){
+  const d = D[t];
+  if (!d) return 0;
+  if (t === 'work' || t === 'projects' || t === 'digital')
+    return (d.groups || []).reduce((a, g) => a + (g.items || []).length, 0);
+  if (t === 'photo') return (d.cats || []).reduce((a, c) => a + (+c[3] || 0), 0);
+  if (t === 'design') return (d.projects || []).length;
+  if (t === 'about') return (d.blocks || []).length;
+  return (d.items || []).length;
+}
+
+function mdOpen(ico, title, sub, body, act){
+  $('#mdIco').textContent = ico;
+  $('#mdIco').classList.toggle('bad', ico === '!');
+  $('#mdTitle').textContent = title;
+  $('#mdSub').textContent = sub || '';
+  $('#mdBody').innerHTML = body;
+  $('#mdAct').innerHTML = act;
+  $('#mdMask').classList.remove('wide');   // 默认窄版；选模板那种要三列的自己加回来
+  $('#mdBody').scrollTop = 0;
+  $('#mdMask').classList.add('on');
+}
+const mdClose = () => $('#mdMask').classList.remove('on');
+$('#mdX').onclick = mdClose;
+$('#mdMask').addEventListener('click', e => { if (e.target === $('#mdMask')) mdClose(); });
+
+let mdMode = null, mdSel = null;
+
+/* ---- 删除页面：默认只撤下，彻底删要勾选 + 再确认一次 ---- */
+$('#mDel').onclick = () => {
+  mdMode = 'delpage';
+  const pages = pagesNow();
+  if (!pages.length) return toast('现在没有页面可删', 'err');
+  const opts = pages.map((p, i) => {
+    const n = p.blocks.reduce((a, b) => a + blockCount(b.type), 0);
+    return `<option value="${i}">${esc(p.titleText)}（${esc(p.label)}${n ? '，共 ' + n + ' 条内容' : ''}）</option>`;
+  }).join('');
+  mdOpen('!', '删除页面', '默认只把这一页从网页上撤下来，内容原样保留；要连内容一起删，需要额外勾选再加一次确认。',
+    `<div class="fld"><label>删除哪一页</label><select id="dmPage">${opts}</select></div>
+     <label class="chk"><input type="radio" name="dmMode" value="hide" checked>
+       只从网页上撤下这一页<span class="hint">模块和内容全部保留，之后还能加回来</span></label>
+     <label class="chk"><input type="radio" name="dmMode" value="purge">
+       连这一页的内容一起彻底删除<span class="hint">不可恢复</span></label>
+     <div class="dnger" id="dmDanger" hidden></div>`,
+    `<button class="btn" data-md="cancel">取消</button>
+     <button class="btn warn" data-md="delpage">删除</button>`);
+  dmSyncDanger();
+};
+
+/* 危险框跟着「选中的页 + 删除方式」变，条数如实报 */
+function dmSyncDanger(){
+  const box = $('#dmDanger');
+  if (!box) return;
+  const pages = pagesNow(), i = +$('#dmPage').value;
+  const pg = pages[i];
+  if (!pg) { box.hidden = true; return; }
+  const mode = document.querySelector('input[name=dmMode]:checked').value;
+  if (mode !== 'purge'){ box.hidden = true; return; }
+  // 只算「这一页独占」的模块：挂在别处也有的一份不能算进去
+  const solo = pg.blocks.filter(b => pages.filter(q => q !== pg).every(q => !q.blocks.some(x => x.type === b.type)));
+  const n = solo.reduce((a, b) => a + blockCount(b.type), 0);
+  box.hidden = false;
+  box.innerHTML = (solo.length
+    ? `将永久删除这一页独占的 <b>${solo.map(b => esc(BLOCK_REG[b.type].label)).join('、')}</b> 下的 <b>${n}</b> 条内容，删除后无法恢复。`
+    : '这一页的模块在别处也有，页面撤掉后内容不会丢。')
+    + `<label class="chk"><input type="checkbox" id="dmAck"> 我确定要永久删除这些内容</label>`;
+}
+
+$('#mdBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-newpg]');
+  if (!b || b.disabled) return;
+  mdSel = b.dataset.newpg;
+  document.querySelectorAll('#mdBody [data-newpg]').forEach(x => x.classList.toggle('sel', x === b));
+  // 选了模板就把标题框的提示换成这一页的默认名 —— 省得用户对着空框猜该怎么写
+  const ti = $('#mdPTitle');
+  if (ti){
+    const def = mdSel ? new Page({ blocks:[{ type:mdSel }] }).titleText : '';
+    ti.placeholder = mdSel ? '留空就用「' + def + '」' : '留空就是「未命名页面」';
+    // 窗口矮的时候标题框在滚动区外面，选完顺手滚到底，别让人以为下面没东西了
+    const box = $('#mdBody');
+    if (box && box.scrollHeight > box.clientHeight + 4) box.scrollTop = box.scrollHeight;
+  }
+});
+$('#mdBody').addEventListener('change', e => {
+  if (e.target.id === 'dmPage' || e.target.name === 'dmMode') dmSyncDanger();
+});
+
+$('#mdAct').addEventListener('click', e => {
+  const a = e.target.dataset && e.target.dataset.md;
+  if (a === 'cancel' || !a) return mdClose();
+  if (a === 'newpage') return doNewPage();
+  if (a === 'delpage') return doDelPage();
+});
+
+function doNewPage(){
+  const t = mdSel;                      // '' = 空白页
+  const pages = pagesNow();
+  // 兜底：入口处拦过一次，这里再拦一次，别让并发/脚本绕过上限
+  if (pages.length >= PAGE_MAX)
+    return toast('最多 ' + PAGE_MAX + ' 个页面：先从网页上撤下或删掉一个', 'err');
+  if (t){
+    const holder = pages.find(p => p.blocks.some(b => b.type === t));
+    if (holder && !confirm(`这一块内容现在在「${holder.titleText}」页上。\n把它挪到新页面？原页要是就空了，会一起收起来（内容仍在，随时能挂回去）。`)) return;
+    if (holder){
+      holder.blocks = holder.blocks.filter(b => b.type !== t);
+      if (!holder.blocks.length){
+        openPages.delete(holder.id);
+        pages.splice(pages.indexOf(holder), 1);
+      }
+    }
+  }
+  const pg = new Page({ id:'pg_' + Date.now().toString(36), blocks: t ? [{ type:t }] : [] });
+  const title = ($('#mdPTitle').value || '').trim();
+  if (title) pg.title = title;
+  pages.push(pg);
+  openPages.add(pg.id);
+  storePages(pages); renderSecs();
+  mdClose();
+  toast(t ? `已新增「${pg.titleText}」页面，排在最后，改标题和简介就行`
+          : '已新增空白页，排在最后：点「编辑」给它加模块', 'ok');
+}
+
+function doDelPage(){
+  const pages = pagesNow(), i = +$('#dmPage').value;
+  const pg = pages[i];
+  if (!pg) return;
+  const mode = document.querySelector('input[name=dmMode]:checked').value;
+  if (mode === 'purge'){
+    if (!$('#dmAck').checked) return toast('彻底删除要先勾选「我确定」', 'err');
+    if (!confirm(`最后一次确认：彻底删除「${pg.titleText}」这一页及其独占的内容？\n这个操作无法撤销。`)) return;
+    // 只删这一页独占的模块：挂在别处也有的一份留着，别误伤
+    pg.blocks.forEach(b => {
+      const shared = pages.some(q => q !== pg && q.blocks.some(x => x.type === b.type));
+      if (!shared) delete D[b.type];
+    });
+  }
+  openPages.delete(pg.id);
+  const kept = pages.filter(p => p !== pg);
+  storePages(kept);
+  renderAll();
+  mdClose();
+  toast(mode === 'purge'
+    ? `已彻底删除「${pg.titleText}」及其独占内容`
+    : `「${pg.titleText}」已从网页撤下，内容仍保留`, 'ok');
+}
+
+/* 文本字段：site 块里的键名和生成器的 BRAND / TITLE / DESC / OWNER 一一对应。
+   留空存空串即可 —— 生成器那边全是 `SITE.get(k) or 兜底`，空串会落回默认值。 */
+[['#sBrand', 'brand'], ['#sBrandEn', 'brand_en'], ['#sOwner', 'owner'],
+ ['#sTitle', 'title'], ['#sDesc', 'desc']].forEach(a => {
+  $(a[0]).addEventListener('input', e => {
+    (D.site = D.site || {})[a[1]] = e.target.value;
+    markDirty();
+  });
+});
+$('#sNavCta').addEventListener('input', e => { D.navcta = e.target.value; markDirty(); });
+$('#sFoot').addEventListener('input', e => { D.footer = e.target.value; markDirty(); });
+
+/* logo：不写死文件名。png 保留透明，svg/ico 也原样存 —— 硬改成 .jpg 会丢掉透明底，
+   在深色顶栏上变成一块白斑。fixedName 传 true = 沿用原文件名 + 覆盖。 */
+$('#sLogoUp').onclick = () => pickImage('logo', p => {
+  (D.site = D.site || {}).logo = p;
+  markDirty(); renderMarks();
+  toast('logo 已换，点「生成网页」才会更新到网页上', 'ok');
+}, true);
+$('#sLogoClr').onclick = () => {
+  const st = D.site || (D.site = {});
+  if (!st.logo) return toast('现在就是默认的');
+  delete st.logo; markDirty(); renderMarks(); toast('已恢复成用头像当前 logo');
+};
+/* 头像：固定名 avatar.jpg，覆盖原文件（生成器按这个路径找，也拿它做收藏夹图标） */
+$('#sAvaUp').onclick = () => pickImage('hero', p => {
+  (D.site = D.site || {}).avatar = p;
+  markDirty(); renderMarks();
+}, 'avatar.jpg');
+
+$('#sIcons').onclick = async () => {
+  const b = $('#sIcons');
+  b.disabled = true; b.textContent = '生成中…';
+  try{
+    const r = await api('/api/favicon');
+    if (r.ok){
+      $('#sFav').src = '/pf/favicon-32.png?t=' + Date.now();
+      toast('图标已重做', 'ok');
+      if (r.out) setOut('图标生成完成\n' + r.out, 'ok');
+    } else {
+      toast('图标生成失败', 'err');
+      setOut('图标生成失败：' + (r.err || '未知错误') + (r.out ? '\n' + r.out : ''), 'err');
+    }
+  } finally {
+    b.disabled = false; b.textContent = '重新生成图标';
+  }
+};
+
+/* ---------- 封面 ---------- */
+function renderHero(){
+  const h = D.hero || (D.hero = {});
+  $('#hKick').value = h.kick || ''; $('#hName').value = h.name || '';
+  $('#hEn').value = h.en || '';     $('#hTag').value = h.tagline || '';
+  $('#hStats').innerHTML = (h.stats || []).map((v, i) => rowN('hero.stats', i, v, ['300+', '条作品产出'])).join('')
+    || '<div class="empty">还没有</div>';
+  $('#hHm').innerHTML = (h.hm || []).map((v, i) => rowN('hero.hm', i, v, ['坐标', '城市'])).join('')
+    || '<div class="empty">还没有</div>';
+}
+[['#hKick','kick'], ['#hName','name'], ['#hEn','en'], ['#hTag','tagline']].forEach(a => {
+  $(a[0]).addEventListener('input', e => { D.hero[a[1]] = e.target.value; markDirty(); });
+});
+$('#addHs').onclick = () => { (D.hero.stats = D.hero.stats || []).push(['', '']); markDirty(); renderHero(); };
+$('#addHm').onclick = () => { (D.hero.hm = D.hero.hm || []).push(['', '']); markDirty(); renderHero(); };
+
+/* ---------- 关于我 ---------- */
+let curAB = 0;
+function renderAbList(){
+  $('#abList').innerHTML = (D.about.blocks || []).map((b, i) => `
+    <div class="li ${i === curAB ? 'on' : ''}" data-ab="${i}">
+      <div class="tx"><div class="t1">${esc(b.h || '(未命名)')}</div>
+        <div class="t2">${[
+          '段落 ' + (b.ps||[]).length,
+          (b.rows||[]).length ? '经历 ' + (b.rows||[]).length : '',
+          (b.dsum||[]).length ? '数据 ' + (b.dsum||[]).length : '',
+          '条目 ' + (b.ds||[]).length,
+          '奖 ' + (b.awards||[]).length
+        ].filter(Boolean).join(' ｜ ')}</div></div>
+    </div>`).join('') || '<div class="empty">还没有</div>';
+}
+function renderAbout(){
+  $('#aSub').value = D.about.sub || '';
+  $('#aFacts').innerHTML = (D.about.facts || []).map((v, i) => rowN('about.facts', i, v, ['姓名', 'X'])).join('')
+    || '<div class="empty">还没有</div>';
+  $('#aContact').innerHTML = (D.about.contact || []).map((v, i) => rowN('about.contact', i, v, ['显示文本', 'tel:13800000000'])).join('')
+    || '<div class="empty">还没有</div>';
+  const bs = D.about.blocks || [];
+  if (curAB >= bs.length) curAB = Math.max(0, bs.length - 1);
+  renderAbList();
+  const b = bs[curAB], box = $('#abBody');
+  if (!b){ box.innerHTML = '<div class="empty">← 先选一个内容块</div>'; return; }
+  box.innerHTML = `
+    <div class="fld"><label>小标题</label><input type="text" id="abH" value="${esc(b.h||'')}"
+      placeholder="自我介绍 / 实践经历 / 数据能力 / 荣誉奖项"></div>
+    <div class="fld"><label>段落<span class="hint">一行一段，空行会被忽略</span></label>
+      <textarea id="abPs" rows="6">${esc((b.ps||[]).join('\n'))}</textarea></div>
+
+    <div class="fld"><label>经历条目 <span class="hint">一行一段经历，四段用半角竖线 <code>|</code> 分隔<br>
+      时间 | 单位 | 角色 | 要点（多个要点用 ;; 分隔）</span></label>
+      <textarea id="abRows" rows="7" placeholder="2025.07 – 2025.09 | 某某文化传媒 | 内容编辑 | 产出短片 12 条;;累计播放 30 万+">${esc((b.rows||[]).map(r =>
+        [r.t||'', r.org||'', r.role||'', (r.notes||[]).join(';;')].join(' | ')).join('\n'))}</textarea></div>
+
+    <div class="fld"><label>数据能力摘要 <span class="hint">一行一条，用半角竖线 <code>|</code> 分隔：名称 | 说明。<br>
+      说明里可以用 &lt;b&gt;加粗&lt;/b&gt; 标项目名</span></label>
+      <textarea id="abDsum" rows="5" placeholder="采集到可视化 | <b>B 站科普视频标题与传播效果分析</b>：400 条视频…">${esc((b.dsum||[]).map(r =>
+        (r||[]).join(' | ')).join('\n'))}</textarea></div>
+
+    <div class="fld"><label>条目<span class="hint">一行一条，三段用 ｜ 分隔：编号 ｜ 小标题 ｜ 说明。这一块没有条目就留空</span></label>
+      <textarea id="abDs" rows="4">${esc((b.ds||[]).map(r => r.join(' ｜ ')).join('\n'))}</textarea></div>
+    <div class="fld"><label>奖项<span class="hint">一行一条：等级 ｜ 全称。这一块没有奖项就留空</span></label>
+      <textarea id="abAw" rows="4">${esc((b.awards||[]).map(r => r.join(' ｜ ')).join('\n'))}</textarea></div>`;
+  $('#abH').addEventListener('input', e => { b.h = e.target.value; markDirty(); renderAbList(); });
+  $('#abPs').addEventListener('input', e => {
+    b.ps = e.target.value.split('\n').map(s => s.trim()).filter(Boolean); markDirty(); });
+  /* 经历：t | org | role | notes（;; 分隔）。
+     ⚠️ 分隔符必须用**半角** | —— 真实数据里 role 本身就含全角｜
+     （如「新媒体运营 · 云南区域主播账号内容运营｜选题 · 拍摄 · 剪辑全流程」），
+     用全角切会把角色拦腰截断、后半段被当成要点。
+     段数超了不截断，多出来的并回最后一格（内容里含分隔符时保命）。 */
+  $('#abRows').addEventListener('input', e => {
+    b.rows = e.target.value.split('\n').map(s => s.trim()).filter(Boolean).map(s => {
+      const p = splitRow(s, 4);
+      return { t: p[0], org: p[1], role: p[2],
+               notes: p[3] ? p[3].split(';;').map(x => x.trim()).filter(Boolean) : [] };
+    });
+    markDirty(); renderAbList();
+  });
+  $('#abDsum').addEventListener('input', e => {
+    b.dsum = e.target.value.split('\n').map(s => s.trim()).filter(Boolean)
+               .map(s => splitRow(s, 2));
+    markDirty(); renderAbList();
+  });
+  $('#abDs').addEventListener('input', e => {
+    b.ds = e.target.value.split('\n').map(s => s.trim()).filter(Boolean)
+             .map(s => s.split('｜').map(x => x.trim())); markDirty(); });
+  $('#abAw').addEventListener('input', e => {
+    b.awards = e.target.value.split('\n').map(s => s.trim()).filter(Boolean)
+                 .map(s => s.split('｜').map(x => x.trim())); markDirty(); });
+}
+$('#aSub').addEventListener('input', e => { D.about.sub = e.target.value; markDirty(); });
+$('#abList').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  curAB = +li.dataset.ab; renderAbout();
+});
+$('#addAf').onclick = () => { (D.about.facts = D.about.facts || []).push(['', '']); markDirty(); renderAbout(); };
+$('#addAc').onclick = () => { (D.about.contact = D.about.contact || []).push(['', '']); markDirty(); renderAbout(); };
+$('#addAb').onclick = () => {
+  (D.about.blocks = D.about.blocks || []).push({ h: '新内容块', ps: [], ds: [], awards: [] });
+  curAB = D.about.blocks.length - 1; markDirty(); renderAbout();
+};
+/* 形象照：固定写死 portrait.jpg。pickImage 第三参 fixedName + overwrite
+   让后台原地覆盖同名文件 —— 否则会存成 portrait-1.jpg，网页上永远换不掉。 */
+$('#abUp').onclick = () => pickImage('about', () => {
+  const el = $('#abPhoto');
+  if (el) el.src = '/pf/assets/about/portrait.jpg?t=' + Date.now();   // 破缓存，立刻看到新图
+  markDirty();
+}, 'portrait.jpg');
+document.querySelectorAll('[data-abact]').forEach(bt => bt.onclick = () => {
+  const bs = D.about.blocks, a = bt.dataset.abact;
+  if (a === 'up' && curAB > 0){ [bs[curAB-1], bs[curAB]] = [bs[curAB], bs[curAB-1]]; curAB--; }
+  else if (a === 'dn' && curAB < bs.length - 1){ [bs[curAB+1], bs[curAB]] = [bs[curAB], bs[curAB+1]]; curAB++; }
+  else if (a === 'del'){
+    if (!confirm('删除内容块「' + (bs[curAB].h || '') + '」？')) return;
+    bs.splice(curAB, 1); curAB = Math.max(0, curAB - 1);
+  } else return;
+  markDirty(); renderAbout();
+});
+
+/* ---------- 数码内容 ----------
+   数据键 D.digital 可能整个不存在（板块可整体下线，网页上跟着消失）。
+   铁律：渲染函数必须纯读 —— dgGet() 只读返回，绝不在渲染路径里建键，
+   否则用户删掉的板块一进后台就被悄悄建回来。只有「从零开始」「新建分组」
+   这类明确动作才走 dgEnsure() 建键。 */
+function dgGet(){ return D.digital || null; }
+function dgEnsure(){
+  /* 字段清单对齐 build/gen_site.py 的 digital 段 + hcard()：硬取字段缺一个就 KeyError */
+  if (!D.digital) D.digital = { sub: '',
+    acct: { name: '', en: '', avatar: '', sub: '', chips: [], link: '' },
+    groups: [], more: { t: '', s: '', href: '', btn: '' } };
+  return D.digital;
+}
+/* g.n 是「19 条」这类文字，生成器 E(g['n']) 硬取 —— 不让用户手填，
+   每次渲染按实际条数重算（界面只读展示）。 */
+function dgSyncN(g){ g.n = (g.items || []).length + ' 条'; return g.n; }
+
+let curDG = 0, curDI = 0;
+function renderDgGList(){
+  const dg = dgGet(), gs = dg ? (dg.groups || []) : [];
+  $('#dgGList').innerHTML = gs.map((g, i) => `
+    <div class="li ${i === curDG ? 'on' : ''}" data-dg="${i}">
+      <div class="tx"><div class="t1">${esc(g.name || '(未命名)')}</div>
+        <div class="t2">${esc(dgSyncN(g))}</div></div></div>`).join('')
+    || '<div class="empty">还没有分组</div>';
+}
+function renderDgIList(){
+  const dg = dgGet(), g = dg ? (dg.groups || [])[curDG] : null, its = g ? (g.items || []) : [];
+  $('#dgIList').innerHTML = its.map((it, i) => `
+    <div class="li ${i === curDI ? 'on' : ''}" data-di="${i}">
+      <div class="tx"><div class="t1">${esc(it.title || '(未命名)')}</div>
+        <div class="t2">${esc(it.play || '')}</div></div></div>`).join('')
+    || '<div class="empty">这个分组还没有视频</div>';
+}
+function renderDigital(){
+  const dg = dgGet();
+  $('#dgWrap').hidden = !dg;
+  $('#dgEmpty').hidden = !!dg;
+  if (!dg) return;
+  $('#dgSub').value = dg.sub || '';
+  const ac = dg.acct || {};
+  $('#dgAva').value = ac.avatar || '';
+  $('#dgAcName').value = ac.name || '';
+  $('#dgAcEn').value = ac.en || '';
+  $('#dgAcSub').value = ac.sub || '';
+  $('#dgAcChips').value = (ac.chips || []).join(' / ');
+  $('#dgAcLink').value = ac.link || '';
+  const m = dg.more || {};
+  $('#dgMrT').value = m.t || ''; $('#dgMrS').value = m.s || '';
+  $('#dgMrHref').value = m.href || ''; $('#dgMrBtn').value = m.btn || '';
+  const gs = dg.groups || [];
+  if (curDG >= gs.length) curDG = Math.max(0, gs.length - 1);
+  renderDgGList();
+  const g = gs[curDG], gb = $('#dgGBody');
+  if (!g){
+    gb.innerHTML = '<div class="empty">← 先选一个分组</div>';
+    curDI = 0; renderDgIList();
+    $('#dgIBody').innerHTML = '<div class="empty">← 先选一个视频</div>';
+    return;
+  }
+  gb.innerHTML = `
+    <div class="fld"><label>分组名</label><input type="text" id="dgGName" value="${esc(g.name||'')}"></div>
+    <div class="fld"><label>分组简介<span class="hint">显示在分组标题下方，留空就不占位</span></label>
+      <textarea id="dgGSub" rows="2">${esc(g.sub||'')}</textarea></div>
+    <div class="fld"><label>条数<span class="hint">不用填，永远等于这个分组里视频的实际条数</span></label>
+      <input type="text" value="${esc(dgSyncN(g))}" disabled></div>`;
+  $('#dgGName').addEventListener('input', e => { g.name = e.target.value; markDirty(); renderDgGList(); });
+  $('#dgGSub').addEventListener('input', e => { g.sub = e.target.value; markDirty(); });
+
+  const its = g.items || [];
+  if (curDI >= its.length) curDI = Math.max(0, its.length - 1);
+  renderDgIList();
+  const it = its[curDI], ib = $('#dgIBody');
+  if (!it){ ib.innerHTML = '<div class="empty">← 先选一个视频</div>'; return; }
+  ib.innerHTML = `
+    <div class="fld"><label>标题<span class="hint">卡面上不显示，hover 才浮出；也是封面图的 alt</span></label>
+      <input type="text" id="diTitle" value="${esc(it.title||'')}"></div>
+    <div class="fld"><label>封面<span class="hint">留空显示灰色占位块</span></label>
+      <div class="row2"><input type="text" id="diCover" value="${esc(it.cover||'')}" placeholder="assets/digital/xxx.jpg">
+        <button class="btn sm" id="diCoverUp">上传封面</button></div></div>
+    <div class="row2">
+      <div class="fld"><label>视频链接<span class="hint">点卡片打开的 B 站稿件页</span></label>
+        <input type="text" id="diHref" value="${esc(it.href||'')}" placeholder="https://www.bilibili.com/video/…"></div>
+      <div class="fld"><label>播放量<span class="hint">卡片左上角，如「23.4万」</span></label>
+        <input type="text" id="diPlay" value="${esc(it.play||'')}"></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>时长<span class="hint">卡片右下角，如「12:36」</span></label>
+        <input type="text" id="diDur" value="${esc(it.dur||'')}"></div>
+      <div class="fld"><label>年份<span class="hint">可选，老视频才值得标</span></label>
+        <input type="text" id="diYear" value="${esc(it.year||'')}"></div>
+    </div>`;
+  const flat = (sel, fn) => $(sel).addEventListener('input', e => { fn(e.target.value); markDirty(); });
+  flat('#diTitle', v => { it.title = v; renderDgIList(); });
+  flat('#diCover', v => it.cover = v);
+  flat('#diHref',  v => it.href = v);
+  flat('#diPlay',  v => { it.play = v; renderDgIList(); });
+  flat('#diDur',   v => it.dur = v);
+  flat('#diYear',  v => it.year = v);
+  $('#diCoverUp').onclick = () => pickImage('digital', p => {
+    it.cover = p; markDirty(); renderDigital();
+  });
+}
+/* 固定字段的监听只挂一次；处理函数里都要先确认板块存在。
+   acct / more 缺键时补一个空壳 —— 这是用户正在打字的明确动作，不算渲染副作用。 */
+const dgOn = (sel, fn) => $(sel).addEventListener('input', e => {
+  const dg = dgGet(); if (!dg) return;
+  if (!dg.acct) dg.acct = {};
+  if (!dg.more) dg.more = {};
+  fn(dg, e.target.value); markDirty();
+});
+dgOn('#dgSub',     (d, v) => d.sub = v);
+dgOn('#dgAva',     (d, v) => d.acct.avatar = v);
+dgOn('#dgAcName',  (d, v) => d.acct.name = v);
+dgOn('#dgAcEn',    (d, v) => d.acct.en = v);
+dgOn('#dgAcSub',   (d, v) => d.acct.sub = v);
+dgOn('#dgAcChips', (d, v) => d.acct.chips = v.split(/[\/,，]/).map(s => s.trim()).filter(Boolean));
+dgOn('#dgAcLink',  (d, v) => d.acct.link = v);
+dgOn('#dgMrT',     (d, v) => d.more.t = v);
+dgOn('#dgMrS',     (d, v) => d.more.s = v);
+dgOn('#dgMrHref',  (d, v) => d.more.href = v);
+dgOn('#dgMrBtn',   (d, v) => d.more.btn = v);
+/* 头像固定写死 avatar.jpg（fixedName → overwrite），和形象照 portrait.jpg 同一个道理：
+   不写死的话会存成 avatar-1.jpg，网页上永远换不掉图。 */
+$('#dgAvaUp').onclick = () => {
+  if (!dgGet()) return toast('先点「从零开始建数码板块」', 'err');
+  pickImage('digital', p => { dgGet().acct.avatar = p; markDirty(); renderDigital(); }, 'avatar.jpg');
+};
+$('#dgBoot').onclick = () => { dgEnsure(); markDirty(); renderDigital(); };
+$('#dgGList').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  curDG = +li.dataset.dg; curDI = 0; renderDigital();
+});
+$('#dgIList').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  curDI = +li.dataset.di; renderDigital();
+});
+$('#addDg').onclick = () => {
+  const dg = dgEnsure();
+  (dg.groups = dg.groups || []).push({ name: '新分组', sub: '', n: '0 条', items: [] });
+  curDG = dg.groups.length - 1; curDI = 0; markDirty(); renderDigital();
+};
+$('#addDi').onclick = () => {
+  const dg = dgGet(), g = dg ? (dg.groups || [])[curDG] : null;
+  if (!g) return toast('先选一个分组', 'err');
+  /* 字段给全：href / play 是生成器硬取，缺键比空值更糟 */
+  (g.items = g.items || []).push({ href: '', play: '', title: '新视频', cover: '', dur: '', year: '' });
+  curDI = g.items.length - 1; markDirty(); renderDigital();
+};
+document.querySelectorAll('[data-dgact]').forEach(bt => bt.onclick = () => {
+  const dg = dgGet(); if (!dg) return;
+  const gs = dg.groups || [], a = bt.dataset.dgact;
+  if (a === 'up' && curDG > 0){ [gs[curDG-1], gs[curDG]] = [gs[curDG], gs[curDG-1]]; curDG--; }
+  else if (a === 'dn' && curDG < gs.length - 1){ [gs[curDG+1], gs[curDG]] = [gs[curDG], gs[curDG+1]]; curDG++; }
+  else if (a === 'del'){
+    if (!confirm('删除分组「' + (gs[curDG].name || '') + '」及其 ' + (gs[curDG].items || []).length + ' 个视频？')) return;
+    gs.splice(curDG, 1); curDG = Math.max(0, curDG - 1); curDI = 0;
+  } else return;
+  markDirty(); renderDigital();
+});
+document.querySelectorAll('[data-diact]').forEach(bt => bt.onclick = () => {
+  const dg = dgGet(), g = dg ? (dg.groups || [])[curDG] : null; if (!g) return;
+  const its = g.items || [], a = bt.dataset.diact;
+  if (a === 'up' && curDI > 0){ [its[curDI-1], its[curDI]] = [its[curDI], its[curDI-1]]; curDI--; }
+  else if (a === 'dn' && curDI < its.length - 1){ [its[curDI+1], its[curDI]] = [its[curDI], its[curDI+1]]; curDI++; }
+  else if (a === 'del'){
+    if (!confirm('删除视频「' + (its[curDI].title || '') + '」？')) return;
+    its.splice(curDI, 1); curDI = Math.max(0, curDI - 1);
+  } else return;
+  markDirty(); renderDigital();
+});
+
+/* ---------- 技术内容 ---------- */
+let curTG = 0, curTI = 0;
+function renderTgList(){
+  $('#tgList').innerHTML = (D.projects.groups || []).map((g, i) => `
+    <div class="li ${i === curTG ? 'on' : ''}" data-tg="${i}">
+      <div class="tx"><div class="t1">${esc(g.name || '(未命名)')}</div>
+        <div class="t2">${(g.items||[]).length} 个项目</div></div></div>`).join('')
+    || '<div class="empty">还没有</div>';
+}
+function renderTiList(){
+  const g = (D.projects.groups || [])[curTG], its = g ? (g.items || []) : [];
+  $('#tiList').innerHTML = its.map((it, i) => `
+    <div class="li ${i === curTI ? 'on' : ''}" data-ti="${i}">
+      <div class="tx"><div class="t1">${esc(it.title || '(未命名)')}</div>
+        <div class="t2">${esc(it.no || '')} ｜ ${esc(it.kind || '')}</div></div></div>`).join('')
+    || '<div class="empty">这个分组还没有项目</div>';
+}
+function renderTech(){
+  $('#tSub').value = D.projects.sub || '';
+  const gs = D.projects.groups || [];
+  if (curTG >= gs.length) curTG = Math.max(0, gs.length - 1);
+  renderTgList();
+  const g = gs[curTG], gb = $('#tgBody');
+  if (!g){
+    gb.innerHTML = '<div class="empty">← 先选一个分组</div>';
+    curTI = 0; renderTiList();
+    $('#tiBody').innerHTML = '<div class="empty">← 先选一个项目</div>';
+    return;
+  }
+  gb.innerHTML = `
+    <div class="row2">
+      <div class="fld"><label>分组名</label><input type="text" id="tgName" value="${esc(g.name||'')}"></div>
+      <div class="fld"><label>英文</label><input type="text" id="tgEn" value="${esc(g.en||'')}"></div>
+    </div>
+    <div class="fld"><label>分组简介<span class="hint">显示在分组标题下方，留空就不占位</span></label>
+      <textarea id="tgSub" rows="2">${esc(g.sub||'')}</textarea></div>`;
+  $('#tgName').addEventListener('input', e => { g.name = e.target.value; markDirty(); renderTgList(); });
+  $('#tgEn').addEventListener('input', e => { g.en = e.target.value; markDirty(); });
+  $('#tgSub').addEventListener('input', e => { g.sub = e.target.value; markDirty(); });
+
+  const its = g.items || [];
+  if (curTI >= its.length) curTI = Math.max(0, its.length - 1);
+  renderTiList();
+  const it = its[curTI], ib = $('#tiBody');
+  if (!it){ ib.innerHTML = '<div class="empty">← 先选一个项目</div>'; return; }
+  ib.innerHTML = `
+    <div class="row2">
+      <div class="fld"><label>序号</label><input type="text" id="tiNo" value="${esc(it.no||'')}" placeholder="01"></div>
+      <div class="fld"><label>行尾标签<span class="hint">可留空，如「开源项目优化改进」</span></label>
+        <input type="text" id="tiTag" value="${esc(it.tag||'')}"></div>
+    </div>
+    <div class="fld"><label>类型<span class="hint">卡片左上角那行小字</span></label>
+      <input type="text" id="tiKind" value="${esc(it.kind||'')}" placeholder="单文件网站 · 可离线分发"></div>
+    <div class="fld"><label>标题</label><input type="text" id="tiTitle" value="${esc(it.title||'')}"></div>
+    <div class="fld"><label>一句话</label><input type="text" id="tiOne" value="${esc(it.oneline||'')}"></div>
+    <div class="fld"><label>正文</label><textarea id="tiDesc" rows="5">${esc(it.desc||'')}</textarea></div>
+    <div class="fld"><label>技术栈<span class="hint">用 / 或 , 分隔</span></label>
+      <input type="text" id="tiStack" value="${esc((it.stack||[]).join(' / '))}"></div>
+    <div class="fld"><label>数据指标<span class="hint">一行一条：数字 ｜ 说明</span></label>
+      <textarea id="tiMet" rows="3">${esc((it.metrics||[]).map(r => r.join(' ｜ ')).join('\n'))}</textarea></div>
+    <div class="row2">
+      <div class="fld"><label>补充说明标题<span class="hint">留空用「搭建与迭代」</span></label>
+        <input type="text" id="tiNL" value="${esc(it.notes_label||'')}" placeholder="搭建与迭代"></div>
+      <div class="fld"><label>补充说明<span class="hint">一行一条，留空就不显示</span></label>
+        <textarea id="tiNotes" rows="3">${esc((it.notes||[]).join('\n'))}</textarea></div>
+    </div>
+    <div class="fld"><label>图集<span class="hint">一行一张：资源路径 ｜ 图注</span></label>
+      <textarea id="tiShots" rows="4">${esc((it.shots||[]).map(r => r.join(' ｜ ')).join('\n'))}</textarea></div>
+    <div style="margin-top:8px"><button class="btn sm" id="tiUpImg">＋ 传一张图并追加到图集</button></div>`;
+  const lines = (sel, fn) => $(sel).addEventListener('input', e => {
+    fn(e.target.value.split('\n').map(s => s.trim()).filter(Boolean)); markDirty(); });
+  const flat = (sel, fn) => $(sel).addEventListener('input', e => { fn(e.target.value); markDirty(); });
+  flat('#tiNo',    v => it.no = v);
+  flat('#tiTag',   v => it.tag = v);
+  flat('#tiKind',  v => it.kind = v);
+  flat('#tiTitle', v => { it.title = v; renderTiList(); });
+  flat('#tiOne',   v => it.oneline = v);
+  flat('#tiDesc',  v => it.desc = v);
+  flat('#tiNL',    v => it.notes_label = v);
+  flat('#tiStack', v => it.stack = v.split(/[\/,，]/).map(s => s.trim()).filter(Boolean));
+  lines('#tiNotes', v => it.notes = v);
+  lines('#tiMet',   v => it.metrics = v.map(s => s.split('｜').map(x => x.trim())));
+  lines('#tiShots', v => it.shots = v.map(s => s.split('｜').map(x => x.trim())));
+  $('#tiUpImg').onclick = () => pickImage('projects', p => {
+    (it.shots = it.shots || []).push([p, '']);
+    markDirty(); renderTech();
+  });
+}
+$('#tSub').addEventListener('input', e => { D.projects.sub = e.target.value; markDirty(); });
+$('#tgList').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  curTG = +li.dataset.tg; curTI = 0; renderTech();
+});
+$('#tiList').addEventListener('click', e => {
+  const li = e.target.closest('.li'); if (!li) return;
+  curTI = +li.dataset.ti; renderTech();
+});
+$('#addTg').onclick = () => {
+  (D.projects.groups = D.projects.groups || []).push({ name: '新分组', en: 'NEW', sub: '', items: [] });
+  curTG = D.projects.groups.length - 1; curTI = 0; markDirty(); renderTech();
+};
+$('#addTi').onclick = () => {
+  const g = (D.projects.groups || [])[curTG]; if (!g) return toast('先选一个分组', 'err');
+  (g.items = g.items || []).push({ no: String((g.items || []).length + 1).padStart(2, '0'),
+    kind: '', tag: '', title: '新项目', oneline: '', desc: '',
+    stack: [], metrics: [], notes: [], shots: [] });
+  curTI = g.items.length - 1; markDirty(); renderTech();
+};
+document.querySelectorAll('[data-tgact]').forEach(bt => bt.onclick = () => {
+  const gs = D.projects.groups, a = bt.dataset.tgact;
+  if (a === 'up' && curTG > 0){ [gs[curTG-1], gs[curTG]] = [gs[curTG], gs[curTG-1]]; curTG--; }
+  else if (a === 'dn' && curTG < gs.length - 1){ [gs[curTG+1], gs[curTG]] = [gs[curTG], gs[curTG+1]]; curTG++; }
+  else if (a === 'del'){
+    if (!confirm('删除分组「' + (gs[curTG].name || '') + '」及其 ' + (gs[curTG].items || []).length + ' 个项目？')) return;
+    gs.splice(curTG, 1); curTG = Math.max(0, curTG - 1); curTI = 0;
+  } else return;
+  markDirty(); renderTech();
+});
+document.querySelectorAll('[data-tiact]').forEach(bt => bt.onclick = () => {
+  const g = (D.projects.groups || [])[curTG]; if (!g) return;
+  const its = g.items || [], a = bt.dataset.tiact;
+  if (a === 'up' && curTI > 0){ [its[curTI-1], its[curTI]] = [its[curTI], its[curTI-1]]; curTI--; }
+  else if (a === 'dn' && curTI < its.length - 1){ [its[curTI+1], its[curTI]] = [its[curTI], its[curTI+1]]; curTI++; }
+  else if (a === 'del'){
+    if (!confirm('删除项目「' + (its[curTI].title || '') + '」？')) return;
+    its.splice(curTI, 1); curTI = Math.max(0, curTI - 1);
+  } else return;
+  markDirty(); renderTech();
+});
+
+/* ---------- 顶栏动作 ---------- */
+$('#bSave').onclick = async () => {
+  $('#bSave').disabled = true; $('#bSave').textContent = '保存中…';
+  try{
+    const r = await api('/api/save', D);
+    if (r.ok){ saved(); toast('已保存到 data.json', 'ok'); loadBackups(); }
+    else toast('保存失败：' + r.err, 'err');
+    return r.ok;
+  } finally {
+    $('#bSave').disabled = false; $('#bSave').textContent = '保存';
+  }
+};
+/* ---------- 生成结果弹窗 ---------- */
+const MASK = $('#mk');
+let lastBuild = null;
+
+function closeModal(){ MASK.classList.remove('on'); }
+$('#mkX').onclick = closeModal;
+MASK.onclick = e => { if (e.target === MASK) closeModal(); };
+
+const kb = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.round(n / 1024) + ' KB';
+const secs = ms => ms >= 1000 ? (ms / 1000).toFixed(1) + ' 秒' : ms + ' 毫秒';
+
+function openModal(r){
+  lastBuild = r;
+  const bad = !r.ok;
+  $('#mkIco').textContent = bad ? '!' : '✓';
+  $('#mkIco').classList.toggle('bad', bad);
+  $('#mkTitle').textContent = bad ? '生成失败' : '网页已生成';
+  $('#mkSub').textContent = bad ? '下面这条通常是原因'
+    : [r.label || '', r.at || ''].filter(Boolean).join(' · ');
+  $('#mkStats').style.display = bad ? 'none' : 'grid';
+  if (!bad){
+    $('#stSize').textContent = kb(r.size || 0);
+    $('#stRefs').textContent = r.refs == null ? '—' : r.refs;
+    $('#stMs').textContent = secs(r.ms || 0);
+  }
+  const body = $('#mkBody');
+  if (bad){
+    const env = r.env || {};
+    body.innerHTML = '<div class="err-line">' + esc(r.err || ('脚本返回码 ' + r.rc)) + '</div>'
+      + '<div class="env">'
+      + '<i>解释器</i><span>' + (env.py_ok ? '✓' : '✗') + ' ' + esc(env.py || '—') + '</span>'
+      + '<i>Pillow</i><span>' + esc(env.pillow || '—') + '</span>'
+      + '<i>生成器</i><span>' + (env.gen_ok ? '✓' : '✗') + ' ' + esc(env.gen || '—') + '</span>'
+      + '<i>数据</i><span>' + (env.data_ok ? '✓' : '✗') + ' ' + esc(env.data || '—') + '</span>'
+      + '</div>';
+  } else {
+    /* 第一次生成：后台已经替你把网页打开了，并把启动文件放在站点根目录。
+       这里只说清「以后想再看怎么办」—— 不然关掉这个弹窗就找不到入口了。 */
+    const files = (r.launchers || []).map(esc).join('、');
+    let note = '';
+    if (r.first){
+      note = '<div class="mk-note">'
+        + (r.opened ? '第一次生成，已经用浏览器帮你打开了。' : '第一次生成完成。')
+        + (files ? '站点文件夹里也放好了启动文件：<b>' + files + '</b> —— '
+                 + '双击「打开网站.bat」直接看网站，双击「打开后台.bat」回来改内容。' : '')
+        + '</div>';
+    }
+    body.innerHTML = note;
+  }
+  $('#mkAct').style.display = bad ? 'none' : 'grid';
+  const log = (r.out || '').trim();
+  $('#mkLog').textContent = log || '（无输出）';
+  $('#mkMore').style.display = log ? 'block' : 'none';
+  $('#mkMore').open = bad && !!log;
+  MASK.classList.add('on');
+}
+
+/* 保存产物：优先弹系统「另存为」，不支持就退回浏览器下载 */
+async function saveAs(fmt, btn){
+  const ext = fmt === 'html' ? 'html' : 'zip';
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const stamp = '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+  const name = ((lastBuild && lastBuild.label) || '作品集') + '-' + stamp + '.' + ext;
+  const url = '/api/export?fmt=' + fmt;
+  const orig = btn.textContent;
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>打包中';
+  try{
+    /* showSaveFilePicker 必须落在用户手势里，所以先要句柄再 fetch；
+       反过来（先 fetch 再弹窗）会丢掉 transient activation，Chrome 直接抛
+       NotAllowedError —— 表现就是点了没反应。 */
+    if (window.showSaveFilePicker){
+      const types = fmt === 'html'
+        ? [{description: '网页', accept: {'text/html': ['.html']}}]
+        : [{description: '压缩包', accept: {'application/zip': ['.zip']}}];
+      const handle = await window.showSaveFilePicker({suggestedName: name, types});
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('打包失败（HTTP ' + r.status + '）');
+      const w = await handle.createWritable();
+      await w.write(await r.blob());
+      await w.close();
+      return '已保存';
+    }
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    return '已开始下载';
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+$('#mkOpen').onclick = () => {
+  const url = previewURL();
+  if (win && !win.closed){ try{ win.location.href = url; win.focus(); return; }catch(e){} }
+  win = window.open(url, '_blank');
+};
+[['mkHtml', 'html'], ['mkZip', 'zip']].forEach(([id, fmt]) => {
+  $('#' + id).onclick = async e => {
+    const btn = e.currentTarget;
+    try{ toast(await saveAs(fmt, btn), 'ok'); }
+    catch(err){
+      if (err.name === 'AbortError') return;              // 用户自己取消，别弹错
+      toast('保存失败：' + (err.message || err), 'err');
+    }
+  };
+});
+
+$('#bBuild').onclick = async () => {
+  const b = $('#bBuild');
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>生成中';
+  try{
+    if (dirty){                                  // 有改动就先存，不再弹窗问
+      const ok = await $('#bSave').onclick();
+      if (!ok){ openModal({ok: false, err: '保存 data.json 没成功，已停止生成'}); return; }
+    }
+    const r = await api('/api/build');
+    openModal(r);
+    // 预览窗若还开着，用带时间戳的地址重新载入，保证看到的是刚生成的那版
+    if (r.ok && win && !win.closed) try{ win.location.href = previewURL(); }catch(e){}
+  } catch(e){
+    openModal({ok: false, err: '请求失败：' + (e.message || e)});
+  } finally {
+    b.disabled = false; b.textContent = '生成网页';
+  }
+};
+let win = null;
+/* 预览必须每次都是最新的：URL 加时间戳破缓存，否则新标签页可能命中
+   浏览器的 bfcache / 内存缓存，看到的还是上一次的页面。 */
+function previewURL(){ return PF + 'index.html?t=' + Date.now(); }
+$('#bPreview').onclick = () => {
+  const url = previewURL();
+  if (win && !win.closed){
+    // 已经开着就换 URL，比 reload 更稳（reload 会复用旧地址）
+    try{ win.location.href = url; win.focus(); return; }catch(e){ /* 跨源/被拦，退回新开 */ }
+  }
+  win = window.open(url, '_blank');
+};
+
+/* 给存量图片补缩略图：新上传的图会自动生成，老图得手动补一次。
+   不补的话后台列表里那些图会走 onerror 回退到原图，每开一次列表就下几十 MB。 */
+$('#bThumbs').onclick = async () => {
+  $('#bThumbs').disabled = true; $('#bThumbs').textContent = '补齐中…';
+  setOut('正在给已有图片生成缩略图，图多的话要等一会儿…', '');
+  try{
+    const r = await api('/api/thumbs');
+    if (r.ok){
+      setOut('缩略图补齐完成：新生成 ' + r.made + ' 张，已存在跳过 ' + r.skipped + ' 张。\n'
+             + '现在刷新页面（F5）后台列表就会快很多。', 'ok');
+      toast('缩略图补齐：+' + r.made, 'ok');
+      renderAll();          // 重画列表，让 onerror 回退的图换成缩略图
+    } else {
+      setOut('补齐失败：' + (r.err || '未知错误'), 'err');
+      toast('补齐失败', 'err');
+    }
+  } finally {
+    $('#bThumbs').disabled = false; $('#bThumbs').textContent = '补缩略图';
+  }
+};
+
+function setOut(txt, kind){
+  const b = $('#outbox');
+  b.style.display = 'block';
+  b.className = 'outbox ' + (kind || '');
+  b.textContent = txt;
+}
+/* ---------- 论文 / 评论 / 设计 / 方案 ----------
+   四块结构不同，但都是「一组卡片」，差别只在字段。用一张 schema 描述字段，
+   一个渲染函数兜住 —— 不写四份长得差不多的表单，改字段只改这张表。
+   字段类型：text | area | lines（一行一条）| pairs（每行 值 | 说明）| json */
+const TX_SCHEMA = [
+  { key:'papers', name:'论文与研究', listKey:'items', newText:'+ 新建一篇',
+    // docimp：一份 PDF 里首页就是封面、后面几页是内页，所以导入只做一次、两栏一起填。
+    // k = 内页落到哪个字段，cover = 第 1 页顺带写进哪个字段。
+    docimp:{ k:'pages', cover:'cover' },
+    head:[['h2','分区标题','text'],['h2en','英文小标','text'],['sub','一句话说明','area']],
+    fields:[['no','编号','text'],['kind','类型','text'],['title','标题','text'],
+            ['cover_note','封面角标','text'],['cover','封面图','img'],
+            ['oneline','一句话','area'],['points','要点（每行一条）','lines'],
+            ['metrics','指标（每行：值 | 说明）','pairs'],
+            ['pages','内页（每行：图片路径 | 说明，路径留空＝待补）','pairs'],
+            ['pages_note','内页说明','area']],
+    dflt:()=>({no:'',kind:'',title:'新论文',oneline:'',cover:'',cover_note:'A4 · 封面',
+               points:[],metrics:[],pages:[],pages_note:''}) },
+
+  { key:'opeds', name:'评论与随笔', listKey:'items', newText:'+ 新建一篇',
+    head:[['h2','分区标题','text'],['h2en','英文小标','text'],
+          ['counts','小字统计','text'],['sub','一句话说明','area']],
+    fields:[['no','编号 / 年份','text'],['kind','类型','text'],['title','标题','text'],
+            ['cover','缩略图','img'],['oneline','一句话','area'],['quote','引文','area']],
+    dflt:()=>({no:'',kind:'新闻评论',title:'新评论',oneline:'',quote:'',cover:''}) },
+
+  { key:'design', name:'设计与物料', listKey:'projects', newText:'+ 新建一套',
+    head:[['h2','分区标题','text'],['h2en','英文小标','text'],['sub','一句话说明','area']],
+    fields:[['title','项目标题','text'],['badge','角标','text'],
+            ['desc','说明','area'],['foot','脚注','text'],
+            ['specs','规格（每行：值 | 说明）','pairs'],
+            ['groups','分组（一组一套网格）','dzg']],
+    dflt:()=>({title:'新项目',badge:'',desc:'',foot:'',specs:[],groups:[]}) },
+
+  { key:'proposals', name:'问题与方案', listKey:'items', newText:'+ 新提案',
+    head:[['h2','分区标题','text'],['h2en','英文小标','text'],['sub','一句话说明','area']],
+    fields:[['title','标题','text'],['kind','类型','text'],
+            ['left_label','左栏标题','text'],['right_label','右栏标题','text'],
+            ['oneline','一句话','area'],
+            ['left','左边（每行：标题 | 说明）','pairs'],
+            ['right','右边（每行：标题 | 说明）','pairs'],
+            ['foot','脚注','area']],
+    dflt:()=>({title:'新提案',kind:'',oneline:'',left_label:'问题',right_label:'方案',
+               left:[],right:[],foot:''}) },
+];
+const TX_MAP = {};
+TX_SCHEMA.forEach(s => TX_MAP[s.key] = s);
+
+/* 值 → 输入框里的文字。数组都摊成多行，作者看得懂就不用教语法。 */
+function txVal(o, k, t){
+  const v = o[k];
+  if (t === 'lines') return (v || []).join('\n');
+  if (t === 'pairs') return (v || []).map(r => Array.isArray(r) ? r.join(' | ') : String(r)).join('\n');
+  if (t === 'json') return v == null ? '' : JSON.stringify(v, null, 2);
+  return v == null ? '' : v;
+}
+/* 输入框文字 → 值。JSON 写坏了返回 undefined，由调用方保留旧值 —— 
+   绝不能把坏 JSON 写进 data.json，下次生成整站都会崩。 */
+function txParse(t, s){
+  if (t === 'lines') return s.split('\n').map(x => x.trim()).filter(Boolean);
+  if (t === 'pairs') return s.split('\n').map(l => l.split('|').map(x => x.trim()))
+    .filter(r => r.some(x => x !== ''))
+    .map(r => [r[0] || '', r[1] || '']);
+  if (t === 'json'){
+    try { return JSON.parse(s || '[]'); } catch (e) { return undefined; }
+  }
+  return s;
+}
+function txFld(o, sp, k, label, t, idx){
+  const raw = txVal(o, k, t);
+  const v = esc(raw);
+  const at = `data-sp="${sp}" data-k="${k}"` + (idx == null ? '' : ` data-i="${idx}"`);
+  const big = t === 'area' || t === 'lines' || t === 'pairs' || t === 'json';
+  let body;
+  if (t === 'dzg'){
+    // 分组是「一层套一层」的结构，塞不进一个 input，单独画（见 dzGroups）
+    return `<div class="fld full"><label>${label}</label>${dzGroups(o, idx == null ? 0 : idx)}</div>`;
+  } else if (t === 'img'){
+    // 图片字段给个「选图」，省得作者自己去文件夹里翻路径
+    body = `<div style="display:flex;gap:6px">
+      <input type="text" ${at} data-t="text" value="${v}" style="flex:1">
+      <button class="btn sm" data-txpic="1" ${at}>选图</button></div>`;
+  } else if (big){
+    // 行数跟着内容走：要点写了 5 条就给 5 行，别让人在里面滚
+    const n = t === 'json' ? 7 : Math.min(12, Math.max(3, String(raw).split('\n').length + (t === 'area' ? 0 : 1)));
+    // 导入条不在字段里了 —— 它挪到卡片最前面（见 docBar），一份文件同时填封面和内页
+    body = `<textarea rows="${n}" ${at} data-t="${t}">${v}</textarea>`;
+  } else {
+    body = `<input type="text" ${at} data-t="text" value="${v}">`;
+  }
+  return `<div class="fld${big ? ' full' : ''}"><label>${label}</label>${body}</div>`;
+}
+
+/* 导入条放在卡片最前面，而不是「内页」那个多行框上面。
+   原因是一份 PDF 天然包含两样东西：第 1 页是封面、后面几页是内页。拆成两处去点，
+   结果就是「内页导完了，还得回去点选图挑封面」—— 这一步纯属多余。
+   现在一次导完：前 N 页进内页，第 1 页顺带写进封面（勾选框可关掉）。 */
+function docBar(sp, it, i){
+  if (!sp.docimp) return '';
+  const cur = String(it[sp.docimp.cover] || '').trim();
+  const name = cur ? cur.split('/').pop() : '';
+  return `<div class="docimp">
+    <button class="btn sm" data-docimp="1" data-sp="${sp.key}" data-k="${sp.docimp.k}" data-i="${i}">从 PDF / Word 导入</button>
+    <span class="rec">推荐 PDF</span>
+    <label class="chk"><input type="checkbox" data-doccover="1" checked> 第 1 页当封面</label>
+    <span class="sub">前 ${DOC_MAX_PAGES} 页做内页</span>
+    ${name ? `<span class="sub">（会换掉现在的 ${esc(name)}）</span>` : ''}
+  </div>`;
+}
+
+/* 四个文字模块各自一个容器（txPapers / txOpeds / txDesign / txProposals）。
+   容器由 renderPgTabs 搬进对应页面的页签，这里只负责往容器里填内容。 */
+function renderTexts(){
+  TX_SCHEMA.forEach(sp => {
+    const box = $('#tx' + sp.key[0].toUpperCase() + sp.key.slice(1));
+    if (!box) return;
+    if (!(sp.key in D)){
+      box.innerHTML = '<div class="empty">data.json 里还没有 ' + esc(sp.key) + ' 这个模块</div>';
+      return;
+    }
+    const sec = D[sp.key];
+    const arr = sec[sp.listKey] || (sec[sp.listKey] = []);
+    const items = arr.map((it, i) => `
+      <div class="txi">
+        <div class="txih"><b>${String(i + 1).padStart(2, '0')}</b>
+          <span>${esc(it.title || '')}</span><span class="sp"></span>
+          <button class="btn sm" data-txact="up" data-sp="${sp.key}" data-i="${i}" title="上移">↑</button>
+          <button class="btn sm" data-txact="dn" data-sp="${sp.key}" data-i="${i}" title="下移">↓</button>
+          <button class="btn sm warn" data-txact="del" data-sp="${sp.key}" data-i="${i}">删除</button></div>
+        ${docBar(sp, it, i)}
+        <div class="row2">${sp.fields.map(([k, l, t]) => txFld(it, sp.key, k, l, t, i)).join('')}</div>
+      </div>`).join('');
+    box.innerHTML = `<div class="card">
+      <h3>${sp.name}<span class="sp"></span>
+        <button class="btn sm" data-txadd="${sp.key}">${sp.newText}</button></h3>
+      <div class="bd">
+        <div class="row2">${sp.head.map(([k, l, t]) => txFld(sec, sp.key, k, l, t, null)).join('')}</div>
+        ${items || `<div class="empty">还没有内容，点右上「${sp.newText}」</div>`}
+      </div></div>`;
+  });
+}
+
+/* ---------- 设计物料：分组编辑器 ----------
+   groups 的原始形态是 [{"name":"主视觉","note":"…","cols":4,
+   "items":[["assets/design/a.jpg","主海报","tall"],…],"wide":["…","…"]}]，
+   以前直接摊成一个 JSON 文本框。一两个分组还行，多了就是在一坨括号里找「第三张图的图注」。
+   这里按结构拆开画：组 → 图，图可以选、可以挪、版式走下拉；写回的还是同一份结构。 */
+const DZ_SHAPES = [['tall','按原图比例'],['s16','16:9 横版'],['stall','A 系列竖版'],['ssq','方形 1:1']];
+
+function dzThumb(src){
+  if (!src) return '<span class="dzg-th no">无图</span>';
+  return `<img class="dzg-th" src="${thumbOf(src)}" data-full="${fullOf(src)}" alt=""
+    onerror="if(this.dataset.full&&this.src!==this.dataset.full){this.src=this.dataset.full}else{this.removeAttribute('src');this.className='dzg-th no';this.alt='缺图'}">`;
+}
+
+function dzGroups(it, i){
+  if (!Array.isArray(it.groups)) it.groups = [];
+  const bar = `<div class="dzg-bar">
+    <span class="sub">一组 = 一套网格；「版式」决定格子比例，通栏图独占一整行。</span>
+    <button class="btn sm" data-dz="add" data-i="${i}">+ 加一组</button></div>`;
+  if (!it.groups.length) return bar + '<div class="empty">还没有分组，点「+ 加一组」</div>';
+  return bar + it.groups.map((g, gi) => dzGroupHtml(g, i, gi)).join('');
+}
+
+function dzGroupHtml(g, i, gi){
+  const at = `data-i="${i}" data-g="${gi}"`;
+  const rows = Array.isArray(g.items) ? g.items : (g.items = []);
+  const items = rows.map((r, j) => dzItemHtml(r, i, gi, j)).join('');
+  const w = Array.isArray(g.wide) ? g.wide : null;
+  const nc = g.note_card || {};
+  const cols = +g.cols || 4;
+  return `<div class="dzg-g">
+    <div class="dzg-h"><b>组 ${gi + 1}</b><span>${esc(g.name || '未命名')}</span><span class="sp"></span>
+      <button class="btn sm" data-dz="up" ${at} title="上移">↑</button>
+      <button class="btn sm" data-dz="dn" ${at} title="下移">↓</button>
+      <button class="btn sm warn" data-dz="del" ${at}>删组</button></div>
+    <div class="dzg-meta">
+      <div class="fld"><label>名称</label><input type="text" data-dz="g.name" ${at} value="${esc(g.name || '')}"></div>
+      <div class="fld"><label>小注（可选）</label><input type="text" data-dz="g.note" ${at} value="${esc(g.note || '')}" placeholder="一行为什么这么排"></div>
+      <div class="fld"><label>网格列数</label><select data-dz="g.cols" ${at}>${[2, 3, 4].map(n =>
+        `<option value="${n}"${n === cols ? ' selected' : ''}>${n} 列</option>`).join('')}</select></div>
+    </div>
+    ${items || '<div class="empty" style="margin:2px 0 9px">这一组还没有图</div>'}
+    <button class="btn sm" data-dz="i.add" ${at}>+ 加一张图</button>
+    <div class="dzg-wide">${dzThumb(w && w[0])}
+      <input type="text" data-dz="w.src" ${at} value="${esc(w ? (w[0] || '') : '')}" placeholder="通栏图路径（可留空）">
+      <input type="text" data-dz="w.cap" ${at} value="${esc(w ? (w[1] || '') : '')}" placeholder="通栏图说明">
+      <span class="dzg-acts">
+        <button class="btn sm" data-dz="w.pick" ${at}>选图</button>
+        ${w ? `<button class="btn sm" data-dz="w.clear" ${at} title="去掉通栏图">清空</button>` : ''}
+      </span>
+    </div>
+    <details class="dzg-nc"${nc.title || nc.foot || (nc.rows || []).length ? ' open' : ''}>
+      <summary>清单卡（可选：在网格里插一格讲规格，不是图）</summary>
+      <div class="row2">
+        <div class="fld"><label>清单卡标题</label><input type="text" data-dz="n.title" ${at} value="${esc(nc.title || '')}"></div>
+        <div class="fld"><label>脚注</label><input type="text" data-dz="n.foot" ${at} value="${esc(nc.foot || '')}"></div>
+        <div class="fld full"><label>行（每行：项目 | 值）</label><textarea rows="3" data-dz="n.rows" ${at}>${esc((nc.rows || []).map(r => Array.isArray(r) ? r.join(' | ') : r).join('\n'))}</textarea></div>
+      </div>
+    </details>
+  </div>`;
+}
+
+function dzItemHtml(row, i, gi, j){
+  const at = `data-i="${i}" data-g="${gi}" data-j="${j}"`;
+  const src = (row && row[0]) || '', cap = (row && row[1]) || '', sh = (row && row[2]) || 'tall';
+  return `<div class="dzg-i">${dzThumb(src)}
+    <input type="text" data-dz="i.src" ${at} value="${esc(src)}" placeholder="图片路径">
+    <input type="text" data-dz="i.cap" ${at} value="${esc(cap)}" placeholder="图注">
+    <select data-dz="i.shape" ${at}>${DZ_SHAPES.map(([k, l]) =>
+      `<option value="${k}"${k === sh ? ' selected' : ''}>${l}</option>`).join('')}</select>
+    <span class="dzg-acts">
+      <button class="btn sm" data-dz="i.pick" ${at}>选图</button>
+      <button class="btn sm" data-dz="i.up" ${at} title="上移">↑</button>
+      <button class="btn sm" data-dz="i.dn" ${at} title="下移">↓</button>
+      <button class="btn sm warn" data-dz="i.del" ${at} title="删掉这张">✕</button>
+    </span>
+  </div>`;
+}
+
+/* 结构改动（加/删/挪/换图）→ 重画；文字和下拉就地写数据 —— 重画会丢焦点，
+   一边打字一边跳没法用。 */
+function dzAction(b){
+  const act = b.dataset.dz;
+  const p = (D.design && D.design.projects || [])[+b.dataset.i];
+  if (!p) return toast('找不到这一套，刷新页面试试', 'err');
+  const gs = Array.isArray(p.groups) ? p.groups : (p.groups = []);
+  const gi = +b.dataset.g, j = +b.dataset.j, g = gs[gi];
+  if (!g && act !== 'add') return;
+
+  if (act === 'add'){
+    gs.push({ name: '新分组', note: '', cols: 4, items: [] });
+  } else if (act === 'del'){
+    if (!confirm('删掉「' + (g.name || '这一组') + '」？\n组里的图会一起从页面上消失（图片文件还在）')) return;
+    gs.splice(gi, 1);
+  } else if (act === 'up' && gi > 0){
+    [gs[gi - 1], gs[gi]] = [gs[gi], gs[gi - 1]];
+  } else if (act === 'dn' && gi < gs.length - 1){
+    [gs[gi + 1], gs[gi]] = [gs[gi], gs[gi + 1]];
+  } else if (act === 'i.add'){
+    (Array.isArray(g.items) ? g.items : (g.items = [])).push(['', '', 'tall']);
+  } else if (act === 'i.del'){
+    g.items.splice(j, 1);
+  } else if (act === 'i.up' && j > 0){
+    [g.items[j - 1], g.items[j]] = [g.items[j], g.items[j - 1]];
+  } else if (act === 'i.dn' && j < g.items.length - 1){
+    [g.items[j + 1], g.items[j]] = [g.items[j], g.items[j + 1]];
+  } else if (act === 'i.pick' || act === 'w.pick'){
+    // 选图是异步的：回调里再重画，这里直接 return，别提前 render
+    pickImage('design', rel => {
+      if (act === 'w.pick'){
+        g.wide = [rel, (Array.isArray(g.wide) && g.wide[1]) || ''];
+      } else {
+        const row = g.items[j] || (g.items[j] = ['', '', 'tall']);
+        row[0] = rel;
+      }
+      markDirty(); renderTexts();
+    });
+    return;
+  } else if (act === 'w.clear'){
+    delete g.wide;
+  } else {
+    return;
+  }
+  markDirty(); renderTexts();
+}
+
+function dzEdit(e){
+  const el = e.target, path = el.dataset && el.dataset.dz;
+  if (!path || el.tagName === 'BUTTON') return;
+  const kind = path.split('.')[0], key = path.split('.')[1];
+  const p = (D.design && D.design.projects || [])[+el.dataset.i];
+  const g = p && (p.groups || [])[+el.dataset.g];
+  if (!g) return;
+
+  if (kind === 'g'){
+    g[key] = key === 'cols' ? +el.value : el.value;
+    if (key === 'name'){                        // 组头跟着改，不然对不上是哪组
+      const h = el.closest('.dzg-g')?.querySelector('.dzg-h > span');
+      if (h) h.textContent = el.value || '未命名';
+    }
+  } else if (kind === 'i'){
+    const j = +el.dataset.j;
+    const row = g.items[j] || (g.items[j] = ['', '', 'tall']);
+    while (row.length < 3) row.push('');
+    row[key === 'src' ? 0 : key === 'cap' ? 1 : 2] = el.value;
+    if (key === 'src') dzSwapThumb(el.closest('.dzg-i'), el.value);
+  } else if (kind === 'w'){
+    const w = Array.isArray(g.wide) ? g.wide : (g.wide = ['', '']);
+    w[key === 'src' ? 0 : 1] = el.value;
+    if (!w[0] && !w[1]) delete g.wide;           // 两栏都空＝没有通栏图，别留一对空字符串
+    if (key === 'src') dzSwapThumb(el.closest('.dzg-wide'), el.value);
+  } else if (kind === 'n'){
+    const nc = g.note_card || (g.note_card = { title: '', rows: [], foot: '' });
+    if (key === 'rows'){
+      nc.rows = el.value.split('\n').map(l => l.split('|').map(x => x.trim()))
+        .filter(r => r.some(Boolean)).map(r => [r[0] || '', r[1] || '']);
+    } else {
+      nc[key] = el.value;
+    }
+    if (!nc.title && !nc.foot && !(nc.rows || []).length) delete g.note_card;
+  }
+  markDirty();
+}
+
+/* 改了路径只换缩略图，不重画整块 —— 重画会把光标从输入框里踢出去 */
+function dzSwapThumb(scope, rel){
+  const img = scope && scope.querySelector('.dzg-th');
+  if (!img || img.tagName !== 'IMG') return;
+  img.dataset.full = fullOf(rel);
+  img.src = thumbOf(rel);
+}
+
+/* ---------- 论文内页：从 PDF / Word 导入前几页 ----------
+   手填「assets/papers/xxx_p2.jpg | P2 编表」这套路径本来就很别扭：作者得先把 PDF
+   逐页截图、命名、放进文件夹，再回来抄路径。这里把前半段接过去。
+   前端只负责选文件 → base64 → POST；渲染那步在后端（PDF 用 PyMuPDF 保真）。 */
+
+function fileToB64(f){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(',', 2)[1] || '');
+    r.onerror = () => rej(new Error('文件读不出来'));
+    r.readAsDataURL(f);
+  });
+}
+
+let docPick = null;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-docimp]');
+  if (!b) return;
+  e.preventDefault();
+  // 一个隐藏 input 反复用：每点在页面上塞一个 input 会越积越多
+  if (!docPick){
+    docPick = document.createElement('input');
+    docPick.type = 'file';
+    docPick.accept = '.pdf,.docx,application/pdf,'
+      + 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    docPick.style.display = 'none';
+    document.body.appendChild(docPick);
+  }
+  docPick.onchange = () => {
+    const f = docPick.files && docPick.files[0];
+    docPick.value = '';                 // 清空，同一个文件改完还能再选一次
+    if (f) importDoc(f, b);
+  };
+  docPick.click();
+});
+
+async function importDoc(file, btn){
+  const sp = btn.dataset.sp, k = btn.dataset.k, idx = +btn.dataset.i;
+  const item = ((D[sp] || {})[TX_MAP[sp].listKey] || [])[idx];
+  if (!item) return toast('找不到这一条，刷新页面试试', 'err');
+
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (ext === 'doc' || ext === 'wps'){
+    return toast('这个格式读不了，请在 Word/WPS 里「另存为 PDF」再传（PDF 也更保真）', 'err');
+  }
+  if (ext !== 'pdf' && ext !== 'docx'){
+    return toast('只认 .pdf 和 .docx', 'err');
+  }
+
+  const cur = cleanRows(item[k]);
+  // 勾选框在导入条上：默认勾着（一份 PDF 的首页本来就是这页纸的封面）。
+  // 必须在 await 之前读 —— 导完会 renderTexts() 重画，这个 DOM 节点就没了。
+  const pickCover = btn.closest('.docimp')?.querySelector('[data-doccover]');
+  const wantCover = !!(pickCover && pickCover.checked);
+  // 已有内容时问一次：替换 / 追加。默认问「替换」，因为「内页 = 这份文档的页面」是常态。
+  let replace = true;
+  if (cur.length){
+    replace = confirm('这一篇已经有 ' + cur.length + ' 行内页。\n\n'
+      + '确定：用这份文件的前 ' + DOC_MAX_PAGES + ' 页替换掉\n'
+      + '取消：接在现有内页后面'
+      + (wantCover ? '\n\n（封面会用这份文件的第 1 页）' : ''));
+  }
+
+  const bar = btn.closest('.docimp');
+  if (bar) bar.classList.add('busy');
+  const old = btn.textContent;
+  btn.textContent = '转换中…';
+  try {
+    const b64 = await fileToB64(file);
+    const r = await fetch('/api/import_doc', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: file.name, b64, pages: DOC_MAX_PAGES})
+    }).then(x => x.json());
+    if (!r.ok) throw new Error(r.err || '转换失败');
+
+    const rows = r.files.map((p, n) => [p, (r.notes && r.notes[n]) || ('P' + (n + 1))]);
+    item[k] = replace ? rows : cur.concat(rows);
+    // 封面一起放好：第 1 页就是这页纸的封面，不用再回「选图」里翻一遍
+    const setCover = wantCover && rows.length && TX_MAP[sp].docimp;
+    if (setCover){
+      item[TX_MAP[sp].docimp.cover] = rows[0][0];
+      if (!item.cover_note) item.cover_note = 'A4 · 封面';
+    }
+    // 内页说明原本空着就顺手填成文档名 —— 空着那一栏在网页上是空白小字，不如给个来源
+    if (!item.pages_note){
+      item.pages_note = file.name.replace(/\.(pdf|docx)$/i, '') + ' · 内页';
+    }
+    // 直接把多行框重画：内容和行数都变了，光改 value 行数不会跟着长
+    renderTexts();
+    markDirty();
+    toast('已导入 ' + rows.length + ' 页' + (setCover ? '，封面也放好了' : '')
+          + (r.hint ? '（' + r.hint + '）' : ''));
+  } catch (err){
+    toast(err.message || '导入失败', 'err');
+  } finally {
+    if (bar) bar.classList.remove('busy');
+    btn.textContent = old;
+  }
+}
+function cleanRows(v){
+  return (v || []).filter(r => Array.isArray(r) && (r[0] || r[1]));
+}
+
+/* 分组的文字/下拉：input 覆盖打字，change 兜住 <select>（有的浏览器只发 change） */
+$('.wrap').addEventListener('input', dzEdit);
+$('.wrap').addEventListener('change', dzEdit);
+
+$('.wrap').addEventListener('input', e => {
+  const el = e.target, k = el.dataset.k;
+  if (!k) return;
+  const sp = el.dataset.sp, t = el.dataset.t, i = el.dataset.i;
+  const sec = D[sp];
+  if (!sec) return;
+  const target = i == null ? sec : (sec[TX_MAP[sp].listKey] || [])[+i];
+  if (!target) return;
+  const v = txParse(t, el.value);
+  if (v === undefined){ el.style.borderColor = '#e5484d'; return; }   // JSON 语法错：红框，不落盘
+  el.style.borderColor = '';
+  target[k] = v;
+  markDirty();
+  if (k === 'title'){                       // 卡片头上的名字跟着改，不然对不上号
+    const h = el.closest('.txi')?.querySelector('.txih > span');
+    if (h) h.textContent = el.value;
+  }
+  if (sp === 'papers' || sp === 'opeds' || sp === 'proposals'){ /* 计数在页签上，下次刷新再算 */ }
+  refreshCounts();
+});
+
+$('.wrap').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.dz){ dzAction(b); return; }
+  const addKey = b.dataset.txadd, sp = b.dataset.sp, act = b.dataset.txact;
+  if (b.dataset.txpic){
+    const s0 = TX_MAP[b.dataset.sp], i0 = b.dataset.i;
+    pickImage('projects', rel => {
+      const t0 = i0 == null ? D[b.dataset.sp] : (D[b.dataset.sp][s0.listKey] || [])[+i0];
+      if (!t0) return;
+      t0[b.dataset.k] = rel;
+      markDirty(); renderTexts();
+    });
+    return;
+  }
+  if (addKey){
+    const s = TX_MAP[addKey];
+    const arr = D[addKey][s.listKey] || (D[addKey][s.listKey] = []);
+    arr.push(s.dflt());
+    markDirty(); renderTexts(); return;
+  }
+  if (!act) return;
+  const s = TX_MAP[sp], arr = D[sp][s.listKey] || [], i = +b.dataset.i;
+  if (act === 'del'){
+    if (!confirm(`删掉「${arr[i].title || arr[i].name || '这一项'}」？`)) return;
+    arr.splice(i, 1);
+  }
+  if (act === 'up' && i > 0) [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+  if (act === 'dn' && i < arr.length - 1) [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]];
+  markDirty(); renderTexts();
+});
+
+/* 页签切换：页签是按页面动态生成的，用委托绑定，静态页签和页面页签都走这里 */
+$('.tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if (!t || !t.dataset.p) return;
+  closeMv();
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+  const pg = $('#p-' + t.dataset.p);
+  if (pg) pg.classList.add('on');
+});
+
+/* 页签容器顶栏的大标题：点它回「页面设置」，并把那一页的卡片展开、滚到可见 */
+$('#pgPages').addEventListener('click', e => {
+  const b = e.target.closest('[data-pgjump]');
+  if (!b) return;
+  openPages.add(b.dataset.pgjump);
+  renderSecs();
+  document.querySelector('.tab[data-p="pages"]').click();
+  requestAnimationFrame(() => {
+    const c = $('#sSecs .pgcard[data-pgid="' + b.dataset.pgjump + '"]');
+    if (c) c.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  });
+});
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (MASK.classList.contains('on')) return closeModal();
+  if ($('#mdMask').classList.contains('on')) return mdClose();
+  closeMv();
+});
+// 滚动 / 缩放时浮层跟着按钮走会错位，直接收掉最省事
+addEventListener('resize', closeMv);
+
+/* 侧栏找页：输入即过滤页签（含固定页），清空恢复。
+   过滤时把分组小标题一并藏掉，结果更像一份搜索结果列表。 */
+const navFilter = $('#navFilter');
+if (navFilter) navFilter.addEventListener('input', () => {
+  const q = navFilter.value.trim().toLowerCase();
+  document.querySelectorAll('.tabs .tab').forEach(t => {
+    // 显示值显式写死，不留 ''（pitfalls 33）
+    t.style.display = (!q || t.textContent.toLowerCase().includes(q)) ? 'flex' : 'none';
+  });
+  document.querySelectorAll('.navgrp').forEach(g => { g.style.display = q ? 'none' : 'block'; });
+});
+
+/* Ctrl+S / Cmd+S 就是保存，和「右上角保存」同一条路 */
+addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 's'){
+    e.preventDefault();
+    $('#bSave').click();
+  }
+});
+
+window.addEventListener('beforeunload', e => { if (dirty){ e.preventDefault(); e.returnValue = ''; } });
+</script>
+</body>
+</html>

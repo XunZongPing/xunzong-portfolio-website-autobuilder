@@ -1,0 +1,271 @@
+{
+ "site": {
+  "brand": "",
+  "brand_en": "",
+  "owner": "",
+  "title": "",
+  "desc": "",
+  "logo": "",
+  "avatar": "",
+  "theme": {
+   "mode": "time",
+   "darkAt": "19:00",
+   "lightAt": "07:00",
+   "accent": "#2f6bff"
+  },
+  "sections": [
+   {
+    "key": "work",
+    "show": true
+   },
+   {
+    "key": "photo",
+    "show": true
+   },
+   {
+    "key": "projects",
+    "show": true
+   },
+   {
+    "key": "about",
+    "show": true
+   },
+   {
+    "key": "contact",
+    "show": true
+   }
+  ],
+  "pages": [
+   {
+    "id": "pg_work",
+    "show": true,
+    "nav": "影像",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "work",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_photo",
+    "show": true,
+    "nav": "摄影",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "photo",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_projects",
+    "show": true,
+    "nav": "图文",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "projects",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_about",
+    "show": true,
+    "nav": "关于",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "about",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   },
+   {
+    "id": "pg_contact",
+    "show": true,
+    "nav": "联系",
+    "title": "",
+    "titleEn": "",
+    "intro": "",
+    "blocks": [
+     {
+      "type": "contact",
+      "title": "",
+      "intro": ""
+     }
+    ]
+   }
+  ]
+ },
+ "hero": {
+  "kick": "Portfolio — 2026",
+  "name": "",
+  "en": "",
+  "tagline": "一句话说清你是谁、会什么、做过什么。别写形容词，写事实和数字。",
+  "stats": [
+   [
+    "0",
+    "占位指标"
+   ],
+   [
+    "0",
+    "占位指标"
+   ],
+   [
+    "0",
+    "占位指标"
+   ],
+   [
+    "0",
+    "占位指标"
+   ]
+  ],
+  "hm": [
+   [
+    "坐标",
+    "城市"
+   ],
+   [
+    "方向",
+    "方向一 / 方向二"
+   ],
+   [
+    "身份",
+    "身份标签"
+   ]
+  ],
+  "vert": "VERTICAL — TAGLINE — HERE"
+ },
+ "navcta": "联系合作",
+ "work": {
+  "sub": "这一栏放片子。每组一张卡，写清片子的来龙去脉，以及你在其中实际负责的那一部分。",
+  "groups": [
+   {
+    "name": "作品分组",
+    "en": "GROUP",
+    "type": "special",
+    "sub": "",
+    "items": []
+   }
+  ]
+ },
+ "photo": {
+  "sub": "这一栏放摄影。分类按位置数组写：[key, 中文名, 英文名, 张数, 简介]。",
+  "cats": []
+ },
+ "projects": {
+  "sub": "这一栏放不能拍成片的东西：工具、代码、数据、实验。写清技术栈和你动手做的部分。",
+  "groups": []
+ },
+ "papers": {
+  "h2": "论文与研究",
+  "h2en": "Research",
+  "sub": "投稿中、已发表、课程论文都放这里。封面用第一页截图，点开看内页。",
+  "items": []
+ },
+ "opeds": {
+  "h2": "评论与随笔",
+  "h2en": "Op-eds",
+  "counts": "",
+  "sub": "发过的评论、专栏、随笔，一行一篇。",
+  "items": []
+ },
+ "design": {
+  "h2": "设计与物料",
+  "h2en": "Design",
+  "sub": "平面设计、海报、物料。一套一个项目，按分组排网格。",
+  "projects": []
+ },
+ "proposals": {
+  "h2": "问题与方案",
+  "h2en": "Proposals",
+  "sub": "策划案与提案：左边写问题，右边写方案。",
+  "items": []
+ },
+ "about": {
+  "sub": "简历那一栏的副标题。",
+  "facts": [
+   [
+    "姓名",
+    ""
+   ],
+   [
+    "坐标",
+    "城市"
+   ],
+   [
+    "学校",
+    ""
+   ],
+   [
+    "专业",
+    ""
+   ]
+  ],
+  "blocks": [
+   {
+    "h": "自我介绍",
+    "ps": [
+     "第一段写你实际交付过什么。第二段写你用什么方法判断。"
+    ],
+    "ds": [],
+    "awards": []
+   },
+   {
+    "h": "实践经历",
+    "ps": [],
+    "rows": [],
+    "ds": [],
+    "awards": []
+   },
+   {
+    "h": "数据能力",
+    "ps": [],
+    "dsum": [],
+    "ds": [],
+    "awards": []
+   }
+  ],
+  "contact": []
+ },
+ "awards": {},
+ "stars": [],
+ "contact": {
+  "kick": "Contact",
+  "h2": "谢谢观看",
+  "sub": "合作、约拍、写稿，微信最快。",
+  "big": [
+   [
+    "13000000000",
+    "tel:13000000000"
+   ],
+   [
+    "you@example.com ↗",
+    "mailto:you@example.com"
+   ]
+  ],
+  "plinks": [
+   [
+    "作品主页",
+    "https://example.com"
+   ]
+  ]
+ },
+ "footer": "© 2026 你的名字 · 城市 · 方向"
+}

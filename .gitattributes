@@ -1,0 +1,14 @@
+# 统一换行符：源码 LF，Windows 批处理 CRLF
+* text=auto eol=lf
+*.bat text eol=crlf
+*.command text eol=lf
+
+# 二进制，别做换行转换
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.woff2 binary

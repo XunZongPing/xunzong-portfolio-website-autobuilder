@@ -1,0 +1,16 @@
+# 运行残留
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 本地后台状态
+.admin.json
+_bak/
+_publish_tmp/
+
+# 分发包
+dist/
+*.zip

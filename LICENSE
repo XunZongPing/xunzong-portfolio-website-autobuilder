@@ -1,24 +1,103 @@
-This is free and unencumbered software released into the public domain.
+寻踪作品集网站自动搭建 · 使用许可
+Xunzong Portfolio Website Autobuilder — License
 
-Anyone is free to copy, modify, publish, use, compile, sell, or
-distribute this software, either in source code form or as a compiled
-binary, for any purpose, commercial or non-commercial, and by any
-means.
+版本 1.0 ｜ 2026-11-08
+版权所有 (c) 2026 寻踪踏迹（以下简称「作者」）
 
-In jurisdictions that recognize copyright laws, the author or authors
-of this software dedicate any and all copyright interest in the
-software to the public domain. We make this dedication for the benefit
-of the public at large and to the detriment of our heirs and
-successors. We intend this dedication to be an overt act of
-relinquishment in perpetuity of all present and future rights to this
-software under copyright law.
+本许可适用于本目录下的全部内容：程序代码、站点模板、样式表、后台界面、
+文档与示例素材（以下统称「本作品」）。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+────────────────────────────────────────────
+一、你可以免费做的事（无需申请、无需付费）
+────────────────────────────────────────────
 
-For more information, please refer to <https://unlicense.org>
+1. 个人使用：用本作品为自己搭建个人作品集、简历站、展示页。
+2. 修改：改代码、改样式、改模板，改成任何你需要的样子。
+3. 分享：把**未修改的**原版副本免费转给他人，须连同本许可文件一并提供。
+4. 学习与研究：阅读源码、用于课程作业、教学演示、技术分享。
+5. 免费帮忙：不收取任何费用地帮朋友、同学搭建站点。
+
+以上行为不构成商业使用，不需要取得授权。
+
+────────────────────────────────────────────
+二、未经作者书面许可，不得做的事
+────────────────────────────────────────────
+
+「商业使用」指**以获取经济利益为目的**的使用，包括但不限于：
+
+(a) 出售、出租、转卖本作品或其任何修改版；
+(b) 将本作品（含修改版）打包进付费产品、付费课程、付费社群、付费素材包；
+(c) 以本作品为主要工具对外提供收费服务，例如代客建站、模板定制、建站培训；
+(d) 将本作品部署为对外经营的在线服务（含以订阅、广告、抽成等方式获利）；
+(e) 在商业机构内部作为生产工具使用（员工为自己搭建个人作品集除外）。
+
+同时，无论是否收费，均不得：
+
+(f) 删除、隐藏或篡改本作品中的版权声明与作者署名；
+(g) 将本作品或其修改版冒充为自己原创；
+(h) 以作者名义为你的产品、服务或站点做背书、担保或宣传。
+
+第 (e) 项的例外：个人在任何机构任职期间，**为自己**搭建个人作品集，视为个人使用。
+
+────────────────────────────────────────────
+三、商业授权
+────────────────────────────────────────────
+
+需要商业使用的，须事先取得作者书面授权。授权按场景单独商议，
+未取得书面授权前，第二条所列行为均属违约。
+
+────────────────────────────────────────────
+四、你搭建出来的站点归你
+────────────────────────────────────────────
+
+用本作品生成的**网站内容与成品文件**（HTML、CSS、图片、文字等）归你所有，
+你可以自由使用、发布、商用、出售你自己的站点，本许可不主张任何权利。
+
+本许可限制的是**本作品本身**（工具与模板）的商用与转卖，不是你的作品。
+
+────────────────────────────────────────────
+五、免责
+────────────────────────────────────────────
+
+本作品按「现状」提供，不附带任何明示或默示的担保，包括但不限于适销性、
+特定用途适用性与不侵权担保。因使用本作品产生的任何直接或间接损失，
+作者不承担责任。
+
+────────────────────────────────────────────
+六、终止
+────────────────────────────────────────────
+
+违反本许可任一条款，你依据本许可获得的全部权利立即终止。
+你须停止使用并删除本作品的全部副本。已生成的站点不受影响（见第四条）。
+
+────────────────────────────────────────────
+七、其他
+────────────────────────────────────────────
+
+本许可不授权你使用「寻踪踏迹」「寻踪作品集网站自动搭建」等名称与标识
+从事任何可能引起混淆的活动。
+
+本许可自 2026-11-08 起生效。
+
+────────────────────────────────────────────
+English summary (non-binding; the Chinese text above prevails)
+────────────────────────────────────────────
+
+Free for personal, non-commercial use, modification, study and teaching.
+You may share unmodified copies with this license attached.
+
+Commercial use requires prior written permission from the author. Prohibited
+without permission: selling or reselling this work or modified versions;
+bundling it into paid products, courses or template packs; charging clients
+for website-building services powered by it; running it as a paid online
+service; using it as a production tool inside a commercial organization
+(except an individual building their own portfolio).
+
+Attribution must be preserved. You may not claim authorship or use the
+author's name to endorse your product.
+
+Websites you generate with this work belong to you and may be used
+commercially without restriction.
+
+Provided "as is", without warranty of any kind. Violation terminates your
+rights under this license immediately.
